@@ -1,0 +1,5258 @@
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\.gitignore ====
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\components.json ====
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "src/index.css",
+    "baseColor": "zinc",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  }
+}
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\eslint.config.js ====
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import tseslint from 'typescript-eslint'
+
+export default tseslint.config(
+  { ignores: ['dist'] },
+  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+    },
+  },
+)
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\index.html ====
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      type="image"
+      href="https://cdn3d.iconscout.com/3d/premium/thumb/maths-3d-icon-download-in-png-blend-fbx-gltf-file-formats--calculate-accounting-calculation-calculator-education-pack-school-icons-6000543.png?f=webp"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LimitApp</title>
+    <style>
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\postcss.config.js ====
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\tailwind.config.js ====
+const defaultTheme = require("tailwindcss/defaultTheme");
+
+const svgToDataUri = require("mini-svg-data-uri");
+
+const colors = require("tailwindcss/colors");
+const {
+	default: flattenColorPalette,
+} = require("tailwindcss/lib/util/flattenColorPalette");
+
+export default {
+    darkMode: ["class"],
+    content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+  	extend: {
+  		borderRadius: {
+  			lg: 'var(--radius)',
+  			md: 'calc(var(--radius) - 2px)',
+  			sm: 'calc(var(--radius) - 4px)'
+  		},
+  		colors: {
+  			background: 'hsl(var(--background))',
+  			foreground: 'hsl(var(--foreground))',
+  			card: {
+  				DEFAULT: 'hsl(var(--card))',
+  				foreground: 'hsl(var(--card-foreground))'
+  			},
+  			popover: {
+  				DEFAULT: 'hsl(var(--popover))',
+  				foreground: 'hsl(var(--popover-foreground))'
+  			},
+  			primary: {
+  				DEFAULT: 'hsl(var(--primary))',
+  				foreground: 'hsl(var(--primary-foreground))'
+  			},
+  			secondary: {
+  				DEFAULT: 'hsl(var(--secondary))',
+  				foreground: 'hsl(var(--secondary-foreground))'
+  			},
+  			muted: {
+  				DEFAULT: 'hsl(var(--muted))',
+  				foreground: 'hsl(var(--muted-foreground))'
+  			},
+  			accent: {
+  				DEFAULT: 'hsl(var(--accent))',
+  				foreground: 'hsl(var(--accent-foreground))'
+  			},
+  			destructive: {
+  				DEFAULT: 'hsl(var(--destructive))',
+  				foreground: 'hsl(var(--destructive-foreground))'
+  			},
+  			border: 'hsl(var(--border))',
+  			input: 'hsl(var(--input))',
+  			ring: 'hsl(var(--ring))',
+  			chart: {
+  				'1': 'hsl(var(--chart-1))',
+  				'2': 'hsl(var(--chart-2))',
+  				'3': 'hsl(var(--chart-3))',
+  				'4': 'hsl(var(--chart-4))',
+  				'5': 'hsl(var(--chart-5))'
+  			}
+  		}
+  	}
+  },
+	plugins: [
+		addVariablesForColors,
+		function ({ matchUtilities, theme }: any) {
+			matchUtilities(
+				{
+					"bg-grid": (value: any) => ({
+						backgroundImage: `url("${svgToDataUri(
+							`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="${value}"><path d="M0 .5H31.5V32"/></svg>`
+						)}")`,
+					}),
+					"bg-grid-small": (value: any) => ({
+						backgroundImage: `url("${svgToDataUri(
+							`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="8" height="8" fill="none" stroke="${value}"><path d="M0 .5H31.5V32"/></svg>`
+						)}")`,
+					}),
+					"bg-dot": (value: any) => ({
+						backgroundImage: `url("${svgToDataUri(
+							`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none"><circle fill="${value}" id="pattern-circle" cx="10" cy="10" r="1.6257413380501518"></circle></svg>`
+						)}")`,
+					}),
+				},
+				{ values: flattenColorPalette(theme("backgroundColor")), type: "color" }
+			);
+		},
+	],
+}
+
+function addVariablesForColors({ addBase, theme }: any) {
+	let allColors = flattenColorPalette(theme("colors"));
+	let newVars = Object.fromEntries(
+		Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+	);
+
+	addBase({
+		":root": newVars,
+	});
+}
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\tsconfig.app.json ====
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"]
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\tsconfig.app.tsbuildinfo ====
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/chat/chat.tsx","./src/components/comingsoon/coming-soon.tsx","./src/components/features/features.tsx","./src/components/footer/footer.tsx","./src/components/graph/graphplotter.tsx","./src/components/hero/hero.tsx","./src/components/mobilesidebar/mobilesidebar.tsx","./src/components/navbar/navbar.tsx","./src/components/profile/profile.tsx","./src/components/sidebar/sidebar.tsx","./src/components/theme/mode-toggle.tsx","./src/components/theme/theme-provider.tsx","./src/components/video/video.tsx","./src/components/hooks/use-outside-click.ts","./src/components/ui/accordion.tsx","./src/components/ui/alert-dialog.tsx","./src/components/ui/badge.tsx","./src/components/ui/button.tsx","./src/components/ui/card-hover-effect.tsx","./src/components/ui/card.tsx","./src/components/ui/dropdown-menu.tsx","./src/components/ui/form.tsx","./src/components/ui/input.tsx","./src/components/ui/label.tsx","./src/components/ui/navbar-menu.tsx","./src/components/ui/scroll-area.tsx","./src/components/ui/select.tsx","./src/components/ui/sheet.tsx","./src/components/ui/skeleton.tsx","./src/components/ui/sonner.tsx","./src/components/ui/textarea.tsx","./src/components/ui/toast.tsx","./src/components/ui/toaster.tsx","./src/components/ui/tooltip.tsx","./src/components/ui/typewriter-effect.tsx","./src/hooks/use-toast.ts","./src/lib/githuboauth.ts","./src/lib/utils.ts","./src/pages/docs.tsx","./src/pages/home.tsx","./src/pages/landing.tsx","./src/pages/plot.tsx","./src/pages/privacypolicy.tsx","./src/pages/settings.tsx","./src/pages/signin.tsx","./src/pages/signup.tsx","./src/pages/termsandconditions.tsx","./src/pages/worldchat.tsx"],"version":"5.6.3"}
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\tsconfig.json ====
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\tsconfig.node.json ====
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["vite.config.ts"]
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\tsconfig.node.tsbuildinfo ====
+{"root":["./vite.config.ts"],"version":"5.6.3"}
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\vercel.json ====
+{
+  "rewrites": [{ "source": "/:a*", "destination": "/" }]
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\vite.config.ts ====
+import path from "path"
+import react from "@vitejs/plugin-react"
+import { defineConfig } from "vite"
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\api.js ====
+import axios from "axios";
+
+const API_URL = "http://127.0.0.1:5000";
+
+export const getTasks = async () => {
+    return axios.get(`${API_URL}/tasks`);
+};
+
+export const startSolution = async (taskId) => {
+    return axios.post(`${API_URL}/tasks/${taskId}/start`);
+};
+
+export const checkStep = async (solutionId, stepNumber, prevExpr, currExpr) => {
+    return axios.post(`${API_URL}/solutions/${solutionId}/check_step`, {
+        step_number: stepNumber, prev_expr: prevExpr, curr_expr: currExpr
+    });
+};
+
+export const finishSolution = async (solutionId) => {
+    return axios.post(`${API_URL}/solutions/${solutionId}/finish`);
+};
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\App.css ====
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\App.tsx ====
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/components/Theme/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
+import { Navbar } from "@/components/Navbar/Navbar";
+import Home from "./pages/Home";
+import Landing from "./pages/Landing";
+import Plot from "./pages/Plot";
+import Settings from "./pages/Settings";
+import Signin from "./pages/Signin";
+import Signup from "./pages/Signup";
+import Tasks from "./pages/Tasks";
+import SolutionChecker from "./pages/SolutionChecker";
+import Reports from "./pages/Reports";
+import Docs from "./pages/Docs";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import WorldChat from "./pages/WorldChat";
+import Profile from "@/components/Profile/Profile";
+
+const App = () => {
+  return (
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/plot" element={<Plot />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/signin" element={<Signin />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/tasks" element={<Tasks />} />
+        <Route path="/solution/:taskId" element={<SolutionChecker />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/docs" element={<Docs />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/worldchat" element={<WorldChat />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/admin" element={<div>Admin Panel (to be implemented)</div>} />
+        <Route path="*" element={<div>404 Not Found</div>} />
+      </Routes>
+      <Toaster />
+    </ThemeProvider>
+  );
+};
+
+export default App;
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\index.css ====
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem
+  }
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%
+  }
+}
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Poppins", sans-serif;
+      font-weight: 400;
+      font-style: normal;
+  }
+}
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\main.tsx ====
+import { createRoot } from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
+import { BrowserRouter as Router } from "react-router-dom";
+
+createRoot(document.getElementById('root')!).render(
+    <Router>
+      <App />
+    </Router>
+ ,
+)
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\vite-env.d.ts ====
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_BACKEND_URL: string;
+  readonly VITE_GITHUB_CLIENTID: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\assets\react.svg ====
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Chat\Chat.tsx ====
+import React, { useState, useEffect, useRef } from 'react';
+import { CornerDownLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import Sidebar from "../Sidebar/Sidebar";
+import MobileSidebar from "../MobileSidebar/MobileSidebar";
+import Typewriter from 'typewriter-effect';
+import ReactMarkdown from 'react-markdown';
+
+interface ChatMessage {
+    role: 'user' | 'model';
+    message: string;
+}
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+export default function Chat() {
+    const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+    const [message, setMessage] = useState<string>('');
+    const [username, setUsername] = useState<string>('');
+    const [isNewMessage, setIsNewMessage] = useState<boolean>(false);
+    const [isTypingFinished, setIsTypingFinished] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const storedUsername = localStorage.getItem('username');
+        if (storedUsername) {
+            setUsername(storedUsername);
+        } else {
+            console.error('Username not found in localStorage');
+        }
+
+        const fetchChatHistory = async () => {
+            if (!storedUsername) return;
+            try {
+                const response = await fetch(`${BACKEND_URL}/chat_history?username=${storedUsername}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setChatHistory(data.chat_history);
+                    setIsNewMessage(false); // No typewriter effect for previously loaded messages
+                } else {
+                    console.error('Failed to fetch chat history');
+                }
+            } catch (error) {
+                console.error('Error fetching chat history:', error);
+            }
+        };
+
+        fetchChatHistory();
+    }, []);
+
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [chatHistory]);
+
+    const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!message || !username || loading) return; // Prevent sending new message when loading
+
+        setLoading(true); // Set loading state to true when the request starts
+
+        const response = await fetch(`${BACKEND_URL}/query`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ question: message, username }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            const newChat: ChatMessage[] = [...chatHistory, { role: 'user', message }, { role: 'model', message: data.solution }];
+            setChatHistory(newChat);
+            setMessage('');
+            setIsNewMessage(true);
+        } else {
+            console.error(data.error);
+        }
+        setLoading(false); // Set loading state to false once the request completes
+    };
+
+    return (
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+            <Sidebar />
+            <div className="flex flex-col h-screen">
+                <header className="sticky top-0 z-10 bg-background border-b">
+                    <MobileSidebar />
+                </header>
+                <main className="flex flex-col flex-grow p-4 overflow-hidden">
+                    <Card className="flex flex-col flex-grow overflow-hidden">
+                        <CardContent className="flex-grow overflow-y-auto p-4" ref={chatContainerRef}>
+                            <div className="space-y-4">
+                                {chatHistory.map((chat, index) => (
+                                    <div key={index} className={`flex gap-3 ${chat.role === 'user' ? 'justify-end' : ''}`}>
+                                        <div className="grid gap-1.5">
+                                            <div className="text-sm font-medium">{chat.role === 'user' ? '' : 'LimitApp'}</div>
+                                            <div className="text-sm text-muted-foreground">
+                                                {chat.role === 'model' && isNewMessage && index === chatHistory.length - 1 ? (
+                                                    !isTypingFinished ? (
+                                                        <Typewriter
+                                                            onInit={(typewriter) => {
+                                                                typewriter.typeString(chat.message)
+                                                                    .callFunction(() => {
+                                                                        setIsTypingFinished(true);
+                                                                    })
+                                                                    .pauseFor(500)
+                                                                    .start();
+                                                            }}
+                                                            options={{
+                                                                delay: 2,
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <ReactMarkdown>{chat.message}</ReactMarkdown>
+                                                    )
+                                                ) : (
+                                                    <ReactMarkdown>{chat.message}</ReactMarkdown>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </main>
+                <div className="p-4">
+                    <form
+                        className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
+                        onSubmit={handleSendMessage}
+                    >
+                        <Label htmlFor="message" className="sr-only">Message</Label>
+                        <Textarea
+                            id="message"
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder={loading ? "Loading..." : "Type your message here..."}
+                            className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
+                            disabled={loading} // Disable text area while loading
+                        />
+                        <div className="flex items-center p-3 pt-0">
+                            {/* <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" disabled={loading}>
+                                            <Paperclip className="size-4" />
+                                            <span className="sr-only">Attach file</span>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">Attach File</TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" disabled={loading}>
+                                            <Mic className="size-4" />
+                                            <span className="sr-only">Use Microphone</span>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">Use Microphone</TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider> */}
+                            <Button type="submit" size="sm" className="ml-auto gap-1.5" disabled={loading}>
+                                {loading ? "Sending..." : "Send Message"}
+                                {!loading && <CornerDownLeft className="size-3.5" />}
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ComingSoon\Coming-soon.tsx ====
+'use client'
+
+import { useState } from 'react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
+import { Toaster } from "@/components/ui/toaster"
+import Footer from '@/components/Footer/Footer';
+
+export default function ComingSoon() {
+    const [email, setEmail] = useState('')
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        console.log('Submitted email:', email)
+        toast.success("Success !", {
+            description: "You've been added to our waitlist.",
+        })
+        setEmail('')
+    }
+
+    return (
+        <>
+            <div className="min-h-screen bg-gradient-to-b from-primary/20 to-background flex flex-col items-center justify-center p-4">
+                <div className="max-w-md w-full space-y-8 text-center">
+                    <h1 
+                        className="text-4xl font-bold text-primary cursor-pointer" 
+                        onClick={() => window.location.href = '/'}
+                    >
+                        LimitApp
+                    </h1>
+                    <h2 className="text-2xl font-semibold">Coming Soon</h2>
+                    <p className="text-muted-foreground">
+                        We're working hard to bring you something amazing. Sign up to be notified when we launch!
+                    </p>
+                    <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+                        <Input
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="w-full"
+                        />
+                        <Button type="submit" className="w-full">
+                            Notify Me
+                        </Button>
+                    </form>
+                    <div className="mt-8">
+                        <h3 className="text-lg font-medium mb-4">What to expect:</h3>
+                        <ul className="space-y-2 text-left">
+                            <li className="flex items-center">
+                                <svg className="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Cutting-edge quantum computing solutions
+                            </li>
+                            <li className="flex items-center">
+                                <svg className="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Something amazing is coming 💫
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <Toaster />
+            </div>
+            <Footer />
+
+        </>
+    )
+}
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Features\Features.tsx ====
+import { HoverEffect } from "@/components/ui/card-hover-effect";
+
+
+export function Features() {
+    return (
+        <div className="max-w-5xl mx-auto px-8 mt-12">
+            <h1 className="text-3xl font-bold text-center">Features</h1>
+            <HoverEffect items={projects} />
+        </div>
+    );
+}
+export const projects = [
+    {
+        title: "Chat with AI",
+        description:
+            "A mathematics expert chatbot providing step-by-step solutions to math problems with detailed explanations and interactive chat features.",
+        link: "home",
+    },
+    {
+        title: "Function Plotter",
+        description:
+            "An interactive tool for plotting mathematical functions, allowing users to visualize and analyze graphs with ease.",
+        link: "plot",
+    },
+    {
+        title: "User Profile Management",
+        description:
+            "User Profile Management allows users to create, view, edit, and delete their profiles. It includes functionalities like updating personal information, profile pictures, and managing privacy settings.",
+    },
+    {
+        title: "Meta",
+        description:
+            "A technology company that focuses on building products that advance Facebook's mission of bringing the world closer together.",
+    },
+    {
+        title: "Amazon",
+        description:
+            "A multinational technology company focusing on e-commerce, cloud computing, digital streaming, and artificial intelligence.",
+    },
+    {
+        title: "Microsoft",
+        description:
+            "A multinational technology company that develops, manufactures, licenses, supports, and sells computer software, consumer electronics, personal computers, and related services.",
+    },
+].map(project => ({
+    ...project,
+    link: project.link || "https://LimitApp-v1.vercel.app" 
+}));
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Footer\Footer.tsx ====
+const Footer = () => {
+  return (
+    <div>
+          <footer className="bg-white dark:bg-zinc-950">
+              <div className="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
+                  <div className="md:flex md:justify-between">
+                      <div className="mb-6 md:mb-0">
+                          <a href="/" className="flex items-center">
+                              {/* <img
+                                  src="https://flowbite.com/docs/images/logo.svg"
+                                  className="h-8 me-3"
+                                  alt="FlowBite Logo"
+                              /> */}
+                              <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
+                                  LimitApp
+                              </span>
+                          </a>
+                      </div>
+                      <div className="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
+                          <div>
+                              <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
+                                  Follow us
+                              </h2>
+                              <ul className="text-gray-500 dark:text-gray-400 font-medium">
+                                  <li className="mb-4">
+                                      <a
+                                          href="https://github.com/krishnaKanta2008"
+                                          className="hover:underline "
+                                      >
+                                          Github
+                                      </a>
+                                  </li>
+                                  <li>
+                                      <a
+                                          href="/"
+                                          className="hover:underline"
+                                      >
+                                          Discord
+                                      </a>
+                                  </li>
+                              </ul>
+                          </div>
+                          <div>
+                              <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
+                                  Legal
+                              </h2>
+                              <ul className="text-gray-500 dark:text-gray-400 font-medium">
+                                  <li className="mb-4">
+                                      <a href="/privacy-policy" className="hover:underline">
+                                          Privacy Policy
+                                      </a>
+                                  </li>
+                                  <li>
+                                      <a href="/terms-and-conditions" className="hover:underline">
+                                          Terms &amp; Conditions
+                                      </a>
+                                  </li>
+                              </ul>
+                          </div>
+                      </div>
+                  </div>
+                  <hr className="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+                  <div className="sm:flex sm:items-center sm:justify-between">
+                      <span className="text-sm text-gray-500 sm:text-center dark:text-gray-400">
+                          © 2024{" "}
+                          <a href="/" className="hover:underline">
+                              LimitApp
+                          </a>
+                          . All Rights Reserved.
+                      </span>
+                      <div className="flex mt-4 sm:justify-center sm:mt-0">
+                          
+                          <a
+                              href="#"
+                              className="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5"
+                          >
+                              <svg
+                                  className="w-4 h-4"
+                                  aria-hidden="true"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="currentColor"
+                                  viewBox="0 0 21 16"
+                              >
+                                  <path d="M16.942 1.556a16.3 16.3 0 0 0-4.126-1.3 12.04 12.04 0 0 0-.529 1.1 15.175 15.175 0 0 0-4.573 0 11.585 11.585 0 0 0-.535-1.1 16.274 16.274 0 0 0-4.129 1.3A17.392 17.392 0 0 0 .182 13.218a15.785 15.785 0 0 0 4.963 2.521c.41-.564.773-1.16 1.084-1.785a10.63 10.63 0 0 1-1.706-.83c.143-.106.283-.217.418-.33a11.664 11.664 0 0 0 10.118 0c.137.113.277.224.418.33-.544.328-1.116.606-1.71.832a12.52 12.52 0 0 0 1.084 1.785 16.46 16.46 0 0 0 5.064-2.595 17.286 17.286 0 0 0-2.973-11.59ZM6.678 10.813a1.941 1.941 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.919 1.919 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Zm6.644 0a1.94 1.94 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.918 1.918 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Z" />
+                              </svg>
+                              <span className="sr-only">Discord community</span>
+                          </a>
+                         
+                          <a
+                              href="https://github.com/krishnaKanta2008/LimitApp"
+                              className="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5"
+                          >
+                              <svg
+                                  className="w-4 h-4"
+                                  aria-hidden="true"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                              >
+                                  <path
+                                      fillRule="evenodd"
+                                      d="M10 .333A9.911 9.911 0 0 0 6.866 19.65c.5.092.678-.215.678-.477 0-.237-.01-1.017-.014-1.845-2.757.6-3.338-1.169-3.338-1.169a2.627 2.627 0 0 0-1.1-1.451c-.9-.615.07-.6.07-.6a2.084 2.084 0 0 1 1.518 1.021 2.11 2.11 0 0 0 2.884.823c.044-.503.268-.973.63-1.325-2.2-.25-4.516-1.1-4.516-4.9A3.832 3.832 0 0 1 4.7 7.068a3.56 3.56 0 0 1 .095-2.623s.832-.266 2.726 1.016a9.409 9.409 0 0 1 4.962 0c1.89-1.282 2.717-1.016 2.717-1.016.366.83.402 1.768.1 2.623a3.827 3.827 0 0 1 1.02 2.659c0 3.807-2.319 4.644-4.525 4.889a2.366 2.366 0 0 1 .673 1.834c0 1.326-.012 2.394-.012 2.72 0 .263.18.572.681.475A9.911 9.911 0 0 0 10 .333Z"
+                                      clipRule="evenodd"
+                                  />
+                              </svg>
+                              <span className="sr-only">GitHub account</span>
+                          </a>
+                         
+                      </div>
+                  </div>
+              </div>
+          </footer>
+
+    </div>
+  )
+}
+
+export default Footer
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Graph\GraphPlotter.tsx ====
+"use client"
+
+import { useState, useEffect, useRef } from "react"
+import MobileSidebar from "../MobileSidebar/MobileSidebar"
+import Sidebar from "../Sidebar/Sidebar"
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import functionPlot from "function-plot"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet"
+import { Settings } from "lucide-react"
+
+export default function GraphPlotter() {
+    const [functionInput, setFunctionInput] = useState("x^2")
+    const [functions, setFunctions] = useState([{ fn: "x^2", color: "blue" }])
+    const [error, setError] = useState("")
+    const plotRef = useRef<HTMLDivElement>(null) // Updated
+
+    const getRandomColor = () => {
+        const letters = "0123456789ABCDEF"
+        let color = "#"
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)]
+        }
+        return color
+    }
+
+    const updatePlot = () => {
+        if (plotRef.current) {
+            const width = plotRef.current.clientWidth;
+            const height = plotRef.current.clientHeight;
+
+            try {
+                functionPlot({
+                    target: "#plot",
+                    yAxis: { domain: [-10, 10] },
+                    xAxis: { domain: [-10, 10] },
+                    width,
+                    height,
+                    grid: true,
+                    data: functions,
+                })
+                setError("")
+            } catch (e) {
+                setError("")
+                toast.error("Invalid function input. Please enter a valid mathematical expression. " + e)
+            }
+        }
+    }
+
+    useEffect(() => {
+        updatePlot()
+        window.addEventListener("resize", updatePlot)
+        return () => window.removeEventListener("resize", updatePlot)
+    }, [functions])
+
+    const addFunction = () => {
+        if (functionInput.trim() === "") {
+            setError("")
+            toast.error("Function cannot be empty.")
+            return
+        }
+
+        try {
+            functionPlot({
+                target: "#test-plot",
+                data: [{ fn: functionInput }],
+            })
+
+            setFunctions([...functions, { fn: functionInput, color: getRandomColor() }])
+            setFunctionInput("")
+            setError("")
+            toast.success(`Function ${functionInput} added successfully.`)
+        } catch (e) {
+            setError("")
+            toast.error("Invalid function input. Please enter a valid mathematical expression. " + e)
+        }
+    }
+
+    const removeFunction = (index: number) => {
+        const updatedFunctions = functions.filter((_, i) => i !== index)
+        setFunctions(updatedFunctions)
+        toast.success("Function removed successfully.")
+    }
+
+    return (
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+            <Sidebar />
+            <div className="flex flex-col">
+                <MobileSidebar />
+                <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="col-span-2 grid gap-4 lg:col-span-1">
+                            <Card className="hidden md:block">
+                                <CardHeader>
+                                    <CardTitle>Configuration</CardTitle>
+                                </CardHeader>
+                                <CardContent className="grid gap-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="function-input">Function</Label>
+                                        <Input
+                                            id="function-input"
+                                            placeholder="Enter Function"
+                                            type="text"
+                                            value={functionInput}
+                                            onChange={(e) => setFunctionInput(e.target.value)}
+                                        />
+                                        <Button onClick={addFunction}>Add Function</Button>
+                                        {error && <p className="text-red-500" role="alert">{error}</p>}
+                                    </div>
+                                    <h3 className="text-lg font-semibold">Added Functions</h3>
+                                    <div className="grid gap-2 h-60 overflow-y-auto"> {/* Added fixed height and overflow */}
+
+                                        {functions.length > 0 ? (
+                                            functions.map((func, index) => (
+                                                <div key={index} className="flex justify-between items-center">
+                                                    <span style={{ color: func.color }}>{func.fn}</span>
+                                                    <Button
+                                                        className="ml-2"
+                                                        variant="outline"
+                                                        onClick={() => removeFunction(index)}
+                                                    >
+                                                        Remove
+                                                    </Button>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p>No functions added yet.</p>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                        <div className="col-span-2 grid gap-4 h-[80vh]">
+                            <Card className="flex flex-col h-full">
+                                <CardHeader>
+                                    <div className="flex justify-between items-center">
+                                        <CardTitle>Function Plot</CardTitle>
+                                        <Sheet>
+                                            <SheetTrigger asChild>
+                                                <Settings className="shrink-0 md:hidden" />
+                                            </SheetTrigger>
+                                            <SheetContent>
+                                                <SheetHeader>
+                                                    <SheetTitle>Configuration</SheetTitle>
+                                                    <SheetDescription>
+                                                        Add Functions to plot them.
+                                                    </SheetDescription>
+                                                </SheetHeader>
+                                                <div className="grid gap-2 mt-4">
+                                                    <Label htmlFor="function-input">Function</Label>
+                                                    <Input
+                                                        id="function-input"
+                                                        placeholder="Enter Function"
+                                                        type="text"
+                                                        value={functionInput}
+                                                        onChange={(e) => setFunctionInput(e.target.value)}
+                                                    />
+                                                    <Button onClick={addFunction}>Add Function</Button>
+                                                    {error && <p className="text-red-500" role="alert">{error}</p>}
+                                                </div>
+                                                <h3 className="text-lg font-semibold mt-4">Added Functions</h3>
+                                                <div className="grid gap-2 ">
+
+                                                    {functions.length > 0 ? (
+                                                        functions.map((func, index) => (
+                                                            <div key={index} className="flex justify-between items-center">
+                                                                <span style={{ color: func.color }}>{func.fn}</span>
+                                                                <Button
+                                                                    className="ml-2"
+                                                                    variant="outline"
+                                                                    onClick={() => removeFunction(index)}
+                                                                >
+                                                                    Remove
+                                                                </Button>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <p>No functions added yet.</p>
+                                                    )}
+                                                </div>
+
+                                            </SheetContent>
+                                        </Sheet>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="flex-grow relative">
+                                    <div id="plot" ref={plotRef} className="absolute inset-0"></div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+                </main>
+            </div>
+            <div id="test-plot" className="hidden"></div>
+        </div>
+    )
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Hero\Hero.tsx ====
+"use client";
+import { TypewriterEffectSmooth } from "../ui/typewriter-effect";
+
+interface HeroProps {
+    onSignupClick: () => void; // Define the prop type
+}
+
+export const Hero: React.FC<HeroProps> = ({ onSignupClick }) => {
+    
+    const words = [
+        {
+            text: "it",
+        },
+        {
+            text: "is",
+        },
+        {
+            text: "about",
+        },
+        
+        {
+            text: "understanding.",
+            className: "text-blue-500 dark:text-blue-500",
+        },
+    ];
+    return (
+        <div className="flex flex-col items-center justify-center mt-40 ">
+            <p className="text-neutral-600 dark:text-neutral-200 text-xs sm:text-base text-center w-4/5">
+                Mathematics is not about numbers, equations, computations, or algorithms:
+            </p>
+            <TypewriterEffectSmooth words={words} />
+            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 space-x-0 md:space-x-4">
+                
+                <button className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50" onClick={onSignupClick}>
+                    <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+                    <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">Check limit Continue</span></button>
+            </div>
+        </div>
+    );
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\hooks\use-outside-click.ts ====
+import React, { useEffect } from "react";
+
+export const useOutsideClick = (
+  ref: React.RefObject<HTMLDivElement>,
+  callback: Function
+) => {
+  useEffect(() => {
+    const listener = (event: any) => {
+      if (!ref.current || ref.current.contains(event.target)) {
+        return;
+      }
+      callback(event);
+    };
+
+    document.addEventListener("mousedown", listener);
+    document.addEventListener("touchstart", listener);
+
+    return () => {
+      document.removeEventListener("mousedown", listener);
+      document.removeEventListener("touchstart", listener);
+    };
+  }, [ref, callback]);
+};
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\MathKeyboard\MathKeyboard.tsx ====
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const symbols = [
+  "π", "√", "^", "±", "∞", "≤", "≥", "×", "÷", "(", ")"
+];
+
+interface MathKeyboardProps {
+  onSymbolClick: (symbol: string) => void;
+}
+
+export const MathKeyboard: React.FC<MathKeyboardProps> = ({ onSymbolClick }) => {
+  return (
+    <div className={cn("flex flex-wrap gap-2 p-2 border rounded-md bg-gray-100")}>
+      {symbols.map((sym, index) => (
+        <Button key={index} variant="outline" size="sm" onClick={() => onSymbolClick(sym)}>
+          {sym}
+        </Button>
+      ))}
+    </div>
+  );
+};
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\MobileSidebar\MobileSidebar.tsx ====
+import {
+    CircleUser,
+    Home,
+    LineChart,
+    Menu,
+    Fullscreen,
+    Shrink
+} from "lucide-react"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { logout } from "@/lib/githubOAuth"
+import { Button } from "@/components/ui/button"
+import { ModeToggle } from "@/components/Theme/mode-toggle"
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react"
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+const MobileSidebar = () => {
+    const [userImage, setUserImage] = useState<string | null>(null);
+    const [isFullscreen, setIsFullscreen] = useState(() => {
+        // Parse the value from localStorage as a boolean
+        return localStorage.getItem('isFullscreen') === 'true';
+    });
+    const navigate = useNavigate();
+
+    const handleFullscreenToggle = () => {
+        if (!isFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+        setIsFullscreen(!isFullscreen);
+        // Store the fullscreen state as a string ("true"/"false")
+        localStorage.setItem('isFullscreen', String(!isFullscreen));
+    };
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            const fullscreen = document.fullscreenElement !== null;
+            setIsFullscreen(fullscreen);
+            localStorage.setItem('isFullscreen', String(fullscreen));
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        };
+    }, []);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const username = localStorage.getItem('username');
+                if (!username) {
+                    throw new Error('Username not found in localStorage');
+                }
+
+                const response = await fetch(`${BACKEND_URL}/profile/${username}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const responseData = await response.json();
+                setUserImage(responseData.user.image || null);
+            } catch (error) {
+                console.error('Error fetching user data', error);
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
+    return (
+        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+            <Sheet>
+                <SheetTrigger asChild>
+                    <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+                        <Menu className="h-5 w-5" />
+                        <span className="sr-only">Toggle navigation menu</span>
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="flex flex-col">
+                    <nav className="grid gap-2 text-lg font-medium">
+                        <a href="#" className="flex items-center gap-2 text-lg font-semibold">
+                            <span>LimitApp</span>
+                        </a>
+                        <a
+                            href="/home"
+                            className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                        >
+                            <Home className="h-5 w-5" />
+                            Home
+                        </a>
+                        <a
+                            href="/plot"
+                            className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                        >
+                            <LineChart className="h-5 w-5" />
+                            f(x) Plotter
+                        </a>
+                    </nav>
+                </SheetContent>
+            </Sheet>
+            <div className="w-full flex-1"></div>
+            <DropdownMenu>
+                {isFullscreen ? (
+                    <Shrink onClick={handleFullscreenToggle} />
+                ) : (
+                    <Fullscreen onClick={handleFullscreenToggle} />
+                )}
+                <ModeToggle />
+                <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" size="icon" className="rounded-full">
+                        {userImage ? (
+                            <img src={userImage} alt="User Profile" className="h-5 w-5 rounded-full" />
+                        ) : (
+                            <CircleUser className="h-5 w-5" />
+                        )}
+                        <span className="sr-only">Toggle user menu</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        onClick={() => {
+                            const username = localStorage.getItem('username');
+                            if (username) {
+                                navigate(`/profile/${username}`);
+                            } else {
+                                console.error('Username not found in localStorage');
+                            }
+                        }}
+                    >
+                        Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </header>
+    );
+};
+
+export default MobileSidebar;
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Navbar\Navbar.tsx ====
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
+
+export function Navbar() {
+  const [role, setRole] = useState("");
+
+  useEffect(() => {
+    // Получаем роль пользователя из localStorage
+    const storedRole = localStorage.getItem("role");
+    if (storedRole) {
+      setRole(storedRole);
+    }
+  }, []);
+
+  return (
+    <nav className={cn("navbar bg-white dark:bg-black p-4 flex justify-between items-center")}>
+      <div>
+        <Link to="/" className="text-xl font-bold">LimitApp</Link>
+      </div>
+      <div className="flex space-x-4">
+        <Link to="/home" className="hover:underline">Главная</Link>
+        <Link to="/tasks" className="hover:underline">Задачи</Link>
+        {role === "admin" && (
+          <Link to="/admin" className="hover:underline">Админ-панель</Link>
+        )}
+        <Link to="/profile" className="hover:underline">Личный кабинет</Link>
+        <Link to="/reports" className="hover:underline">Отчёты</Link>
+      </div>
+    </nav>
+  );
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Profile\Profile.tsx ====
+import { useEffect, useState } from "react";
+import Sidebar from "@/components/Sidebar/Sidebar";
+import MobileSidebar from "@/components/MobileSidebar/MobileSidebar";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+interface User {
+  image: string;
+  firstname: string;
+  lastname: string;
+  username: string;
+  email: string;
+  bio: string;
+}
+
+export default function Component() {
+  const [userData, setUserData] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const username = localStorage.getItem("username");
+        if (!username) {
+          throw new Error("Username not found in localStorage");
+        }
+
+        const response = await fetch(`${BACKEND_URL}/profile/${username}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const responseData = await response.json();
+        setUserData(responseData.user);
+      } catch (error) {
+        console.error("Error fetching user data", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  return (
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+      <Sidebar />
+      <div className="flex flex-col h-screen">
+        <MobileSidebar />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader className="flex flex-col items-center space-y-4">
+              {userData?.image ? (
+                <img
+                  src={userData.image}
+                  alt={`${userData.firstname} ${userData.lastname}`}
+                  width={128}
+                  height={128}
+                  className="rounded-full"
+                />
+              ) : (
+                <Skeleton className="w-32 h-32 rounded-full" />
+              )}
+              <div className="flex flex-col items-center space-y-1 text-center">
+                <div className="font-semibold">
+                  {userData?.firstname} {userData?.lastname}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  @{userData?.username}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {userData?.email}
+                </div>
+              </div>
+            </CardHeader>
+            <div className="px-6">
+              <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent h-[2px] w-full mb-6" />
+              <CardContent>
+                <div className="text-center">
+                  {userData?.bio ? (
+                    <p className="text-sm text-muted-foreground border border-neutral-200 dark:border-neutral-700 rounded-md p-4 bg-neutral-50 dark:bg-neutral-900">
+                      {userData.bio}
+                    </p>
+                  ) : (
+                    <Skeleton className="w-full h-20 mx-auto" />
+                  )}
+                </div>
+              </CardContent>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Sidebar\Sidebar.tsx ====
+import {
+    Home,
+    LineChart,
+} from "lucide-react"
+
+const Sidebar = () => {
+  return (
+      <div className="hidden border-r bg-muted/40 md:block">
+          <div className="flex h-full max-h-screen flex-col gap-2">
+              <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+                  <a href="/" className="flex items-center gap-2 font-semibold">
+                      <span className="">LimitApp</span>
+                  </a>
+
+              </div>
+              <div className="flex-1">
+                  <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+                      <a
+                          href="/home"
+                          className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                      >
+                          <Home className="h-4 w-4" />
+                          Home
+                      </a>
+                      <a
+                          href="/plot"
+                          className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                      >
+                          <LineChart className="h-4 w-4" />
+                          f(x) Plotter
+                      </a>
+                  </nav>
+              </div>
+          </div>
+      </div>
+  )
+}
+
+export default Sidebar
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Theme\mode-toggle.tsx ====
+import { Moon, Sun } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useTheme } from "@/components/Theme/theme-provider"
+
+export function ModeToggle() {
+    const { setTheme } = useTheme()
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    <span className="sr-only">Toggle theme</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setTheme("light")}>
+                    Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    Dark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("system")}>
+                    System
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Theme\theme-provider.tsx ====
+import { createContext, useContext, useEffect, useState } from "react"
+
+type Theme = "dark" | "light" | "system"
+
+type ThemeProviderProps = {
+    children: React.ReactNode
+    defaultTheme?: Theme
+    storageKey?: string
+}
+
+type ThemeProviderState = {
+    theme: Theme
+    setTheme: (theme: Theme) => void
+}
+
+const initialState: ThemeProviderState = {
+    theme: "system",
+    setTheme: () => null,
+}
+
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
+
+export function ThemeProvider({
+    children,
+    defaultTheme = "system",
+    storageKey = "vite-ui-theme",
+    ...props
+}: ThemeProviderProps) {
+    const [theme, setTheme] = useState<Theme>(
+        () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    )
+
+    useEffect(() => {
+        const root = window.document.documentElement
+
+        root.classList.remove("light", "dark")
+
+        if (theme === "system") {
+            const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+                .matches
+                ? "dark"
+                : "light"
+
+            root.classList.add(systemTheme)
+            return
+        }
+
+        root.classList.add(theme)
+    }, [theme])
+
+    const value = {
+        theme,
+        setTheme: (theme: Theme) => {
+            localStorage.setItem(storageKey, theme)
+            setTheme(theme)
+        },
+    }
+
+    return (
+        <ThemeProviderContext.Provider {...props} value={value}>
+            {children}
+        </ThemeProviderContext.Provider>
+    )
+}
+
+export const useTheme = () => {
+    const context = useContext(ThemeProviderContext)
+
+    if (context === undefined)
+        throw new Error("useTheme must be used within a ThemeProvider")
+
+    return context
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\accordion.tsx ====
+"use client"
+
+import * as React from "react"
+import * as AccordionPrimitive from "@radix-ui/react-accordion"
+import { ChevronDown } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+
+const Accordion = AccordionPrimitive.Root
+
+const AccordionItem = React.forwardRef<
+    React.ElementRef<typeof AccordionPrimitive.Item>,
+    React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
+>(({ className, ...props }, ref) => (
+    <AccordionPrimitive.Item
+        ref={ref}
+        className={cn("border-b", className)}
+        {...props}
+    />
+))
+AccordionItem.displayName = "AccordionItem"
+
+const AccordionTrigger = React.forwardRef<
+    React.ElementRef<typeof AccordionPrimitive.Trigger>,
+    React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
+>(({ className, children, ...props }, ref) => (
+    <AccordionPrimitive.Header className="flex">
+        <AccordionPrimitive.Trigger
+            ref={ref}
+            className={cn(
+                "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
+                className
+            )}
+            {...props}
+        >
+            {children}
+            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+        </AccordionPrimitive.Trigger>
+    </AccordionPrimitive.Header>
+))
+AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName
+
+const AccordionContent = React.forwardRef<
+    React.ElementRef<typeof AccordionPrimitive.Content>,
+    React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+    <AccordionPrimitive.Content
+        ref={ref}
+        className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+        {...props}
+    >
+        <div className={cn("pb-4 pt-0", className)}>{children}</div>
+    </AccordionPrimitive.Content>
+))
+
+AccordionContent.displayName = AccordionPrimitive.Content.displayName
+
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\alert-dialog.tsx ====
+import * as React from "react"
+import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
+
+import { cn } from "@/lib/utils"
+import { buttonVariants } from "@/components/ui/button"
+
+const AlertDialog = AlertDialogPrimitive.Root
+
+const AlertDialogTrigger = AlertDialogPrimitive.Trigger
+
+const AlertDialogPortal = AlertDialogPrimitive.Portal
+
+const AlertDialogOverlay = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Overlay
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+    ref={ref}
+  />
+))
+AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
+
+const AlertDialogContent = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPortal>
+    <AlertDialogOverlay />
+    <AlertDialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      )}
+      {...props}
+    />
+  </AlertDialogPortal>
+))
+AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
+
+const AlertDialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-2 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+)
+AlertDialogHeader.displayName = "AlertDialogHeader"
+
+const AlertDialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+)
+AlertDialogFooter.displayName = "AlertDialogFooter"
+
+const AlertDialogTitle = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Title
+    ref={ref}
+    className={cn("text-lg font-semibold", className)}
+    {...props}
+  />
+))
+AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName
+
+const AlertDialogDescription = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+AlertDialogDescription.displayName =
+  AlertDialogPrimitive.Description.displayName
+
+const AlertDialogAction = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Action>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Action
+    ref={ref}
+    className={cn(buttonVariants(), className)}
+    {...props}
+  />
+))
+AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName
+
+const AlertDialogCancel = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Cancel
+    ref={ref}
+    className={cn(
+      buttonVariants({ variant: "outline" }),
+      "mt-2 sm:mt-0",
+      className
+    )}
+    {...props}
+  />
+))
+AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName
+
+export {
+  AlertDialog,
+  AlertDialogPortal,
+  AlertDialogOverlay,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\badge.tsx ====
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+
+const badgeVariants = cva(
+  "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default:
+          "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+        secondary:
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive:
+          "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
+        outline: "text-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  )
+}
+
+export { Badge, badgeVariants }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\button.tsx ====
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default:
+          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-10 rounded-md px-8",
+        icon: "h-9 w-9",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Button.displayName = "Button"
+
+export { Button, buttonVariants }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\card-hover-effect.tsx ====
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import  {Link} from "react-router-dom";
+import { useState } from "react";
+
+export const HoverEffect = ({
+    items,
+    className,
+}: {
+    items: {
+        title: string;
+        description: string;
+        link: string;
+    }[];
+    className?: string;
+}) => {
+    let [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+    return (
+        <div
+            className={cn(
+                "grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3  py-10",
+                className
+            )}
+        >
+            {items.map((item, idx) => (
+                <Link
+                    to={item?.link}
+                    key={item?.link}
+                    className="relative group  block p-2 h-full w-full"
+                    onMouseEnter={() => setHoveredIndex(idx)}
+                    onMouseLeave={() => setHoveredIndex(null)}
+                >
+                    <AnimatePresence>
+                        {hoveredIndex === idx && (
+                            <motion.span
+                                className="absolute inset-0 h-full w-full bg-neutral-200 dark:bg-slate-800/[0.8] block  rounded-3xl"
+                                layoutId="hoverBackground"
+                                initial={{ opacity: 0 }}
+                                animate={{
+                                    opacity: 1,
+                                    transition: { duration: 0.15 },
+                                }}
+                                exit={{
+                                    opacity: 0,
+                                    transition: { duration: 0.15, delay: 0.2 },
+                                }}
+                            />
+                        )}
+                    </AnimatePresence>
+                    <Card>
+                        <CardTitle>{item.title}</CardTitle>
+                        <CardDescription>{item.description}</CardDescription>
+                    </Card>
+                </Link>
+            ))}
+        </div>
+    );
+};
+
+export const Card = ({
+    className,
+    children,
+}: {
+    className?: string;
+    children: React.ReactNode;
+}) => {
+    return (
+        <div
+            className={cn(
+                "rounded-2xl h-full w-full p-4 overflow-hidden bg-black border border-transparent dark:border-white/[0.2] group-hover:border-slate-700 relative z-20",
+                className
+            )}
+        >
+            <div className="relative z-50">
+                <div className="p-4">{children}</div>
+            </div>
+        </div>
+    );
+};
+export const CardTitle = ({
+    className,
+    children,
+}: {
+    className?: string;
+    children: React.ReactNode;
+}) => {
+    return (
+        <h4 className={cn("text-zinc-100 font-bold tracking-wide mt-4", className)}>
+            {children}
+        </h4>
+    );
+};
+export const CardDescription = ({
+    className,
+    children,
+}: {
+    className?: string;
+    children: React.ReactNode;
+}) => {
+    return (
+        <p
+            className={cn(
+                "mt-8 text-zinc-400 tracking-wide leading-relaxed text-sm",
+                className
+            )}
+        >
+            {children}
+        </p>
+    );
+};
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\card.tsx ====
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-xl border bg-card text-card-foreground shadow",
+      className
+    )}
+    {...props}
+  />
+))
+Card.displayName = "Card"
+
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    {...props}
+  />
+))
+CardHeader.displayName = "CardHeader"
+
+const CardTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h3
+    ref={ref}
+    className={cn("font-semibold leading-none tracking-tight", className)}
+    {...props}
+  />
+))
+CardTitle.displayName = "CardTitle"
+
+const CardDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+CardDescription.displayName = "CardDescription"
+
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+))
+CardContent.displayName = "CardContent"
+
+const CardFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center p-6 pt-0", className)}
+    {...props}
+  />
+))
+CardFooter.displayName = "CardFooter"
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\dropdown-menu.tsx ====
+import * as React from "react"
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
+import {
+  CheckIcon,
+  ChevronRightIcon,
+  DotFilledIcon,
+} from "@radix-ui/react-icons"
+
+import { cn } from "@/lib/utils"
+
+const DropdownMenu = DropdownMenuPrimitive.Root
+
+const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+
+const DropdownMenuGroup = DropdownMenuPrimitive.Group
+
+const DropdownMenuPortal = DropdownMenuPrimitive.Portal
+
+const DropdownMenuSub = DropdownMenuPrimitive.Sub
+
+const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
+
+const DropdownMenuSubTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
+    inset?: boolean
+  }
+>(({ className, inset, children, ...props }, ref) => (
+  <DropdownMenuPrimitive.SubTrigger
+    ref={ref}
+    className={cn(
+      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <ChevronRightIcon className="ml-auto h-4 w-4" />
+  </DropdownMenuPrimitive.SubTrigger>
+))
+DropdownMenuSubTrigger.displayName =
+  DropdownMenuPrimitive.SubTrigger.displayName
+
+const DropdownMenuSubContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.SubContent
+    ref={ref}
+    className={cn(
+      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+      className
+    )}
+    {...props}
+  />
+))
+DropdownMenuSubContent.displayName =
+  DropdownMenuPrimitive.SubContent.displayName
+
+const DropdownMenuContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
+>(({ className, sideOffset = 4, ...props }, ref) => (
+  <DropdownMenuPrimitive.Portal>
+    <DropdownMenuPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      className={cn(
+        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        className
+      )}
+      {...props}
+    />
+  </DropdownMenuPrimitive.Portal>
+))
+DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
+
+const DropdownMenuItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
+    inset?: boolean
+  }
+>(({ className, inset, ...props }, ref) => (
+  <DropdownMenuPrimitive.Item
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  />
+))
+DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName
+
+const DropdownMenuCheckboxItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>
+>(({ className, children, checked, ...props }, ref) => (
+  <DropdownMenuPrimitive.CheckboxItem
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      className
+    )}
+    checked={checked}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <DropdownMenuPrimitive.ItemIndicator>
+        <CheckIcon className="h-4 w-4" />
+      </DropdownMenuPrimitive.ItemIndicator>
+    </span>
+    {children}
+  </DropdownMenuPrimitive.CheckboxItem>
+))
+DropdownMenuCheckboxItem.displayName =
+  DropdownMenuPrimitive.CheckboxItem.displayName
+
+const DropdownMenuRadioItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>
+>(({ className, children, ...props }, ref) => (
+  <DropdownMenuPrimitive.RadioItem
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      className
+    )}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <DropdownMenuPrimitive.ItemIndicator>
+        <DotFilledIcon className="h-4 w-4 fill-current" />
+      </DropdownMenuPrimitive.ItemIndicator>
+    </span>
+    {children}
+  </DropdownMenuPrimitive.RadioItem>
+))
+DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName
+
+const DropdownMenuLabel = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> & {
+    inset?: boolean
+  }
+>(({ className, inset, ...props }, ref) => (
+  <DropdownMenuPrimitive.Label
+    ref={ref}
+    className={cn(
+      "px-2 py-1.5 text-sm font-semibold",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  />
+))
+DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName
+
+const DropdownMenuSeparator = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-muted", className)}
+    {...props}
+  />
+))
+DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName
+
+const DropdownMenuShortcut = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement>) => {
+  return (
+    <span
+      className={cn("ml-auto text-xs tracking-widest opacity-60", className)}
+      {...props}
+    />
+  )
+}
+DropdownMenuShortcut.displayName = "DropdownMenuShortcut"
+
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuGroup,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuRadioGroup,
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\form.tsx ====
+import * as React from "react"
+import * as LabelPrimitive from "@radix-ui/react-label"
+import { Slot } from "@radix-ui/react-slot"
+import {
+  Controller,
+  ControllerProps,
+  FieldPath,
+  FieldValues,
+  FormProvider,
+  useFormContext,
+} from "react-hook-form"
+
+import { cn } from "@/lib/utils"
+import { Label } from "@/components/ui/label"
+
+const Form = FormProvider
+
+type FormFieldContextValue<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+> = {
+  name: TName
+}
+
+const FormFieldContext = React.createContext<FormFieldContextValue>(
+  {} as FormFieldContextValue
+)
+
+const FormField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+>({
+  ...props
+}: ControllerProps<TFieldValues, TName>) => {
+  return (
+    <FormFieldContext.Provider value={{ name: props.name }}>
+      <Controller {...props} />
+    </FormFieldContext.Provider>
+  )
+}
+
+const useFormField = () => {
+  const fieldContext = React.useContext(FormFieldContext)
+  const itemContext = React.useContext(FormItemContext)
+  const { getFieldState, formState } = useFormContext()
+
+  const fieldState = getFieldState(fieldContext.name, formState)
+
+  if (!fieldContext) {
+    throw new Error("useFormField should be used within <FormField>")
+  }
+
+  const { id } = itemContext
+
+  return {
+    id,
+    name: fieldContext.name,
+    formItemId: `${id}-form-item`,
+    formDescriptionId: `${id}-form-item-description`,
+    formMessageId: `${id}-form-item-message`,
+    ...fieldState,
+  }
+}
+
+type FormItemContextValue = {
+  id: string
+}
+
+const FormItemContext = React.createContext<FormItemContextValue>(
+  {} as FormItemContextValue
+)
+
+const FormItem = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+  const id = React.useId()
+
+  return (
+    <FormItemContext.Provider value={{ id }}>
+      <div ref={ref} className={cn("space-y-2", className)} {...props} />
+    </FormItemContext.Provider>
+  )
+})
+FormItem.displayName = "FormItem"
+
+const FormLabel = React.forwardRef<
+  React.ElementRef<typeof LabelPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
+>(({ className, ...props }, ref) => {
+  const { error, formItemId } = useFormField()
+
+  return (
+    <Label
+      ref={ref}
+      className={cn(error && "text-destructive", className)}
+      htmlFor={formItemId}
+      {...props}
+    />
+  )
+})
+FormLabel.displayName = "FormLabel"
+
+const FormControl = React.forwardRef<
+  React.ElementRef<typeof Slot>,
+  React.ComponentPropsWithoutRef<typeof Slot>
+>(({ ...props }, ref) => {
+  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+
+  return (
+    <Slot
+      ref={ref}
+      id={formItemId}
+      aria-describedby={
+        !error
+          ? `${formDescriptionId}`
+          : `${formDescriptionId} ${formMessageId}`
+      }
+      aria-invalid={!!error}
+      {...props}
+    />
+  )
+})
+FormControl.displayName = "FormControl"
+
+const FormDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => {
+  const { formDescriptionId } = useFormField()
+
+  return (
+    <p
+      ref={ref}
+      id={formDescriptionId}
+      className={cn("text-[0.8rem] text-muted-foreground", className)}
+      {...props}
+    />
+  )
+})
+FormDescription.displayName = "FormDescription"
+
+const FormMessage = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => {
+  const { error, formMessageId } = useFormField()
+  const body = error ? String(error?.message) : children
+
+  if (!body) {
+    return null
+  }
+
+  return (
+    <p
+      ref={ref}
+      id={formMessageId}
+      className={cn("text-[0.8rem] font-medium text-destructive", className)}
+      {...props}
+    >
+      {body}
+    </p>
+  )
+})
+FormMessage.displayName = "FormMessage"
+
+export {
+  useFormField,
+  Form,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+  FormField,
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\input.tsx ====
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {}
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={cn(
+          "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Input.displayName = "Input"
+
+export { Input }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\label.tsx ====
+import * as React from "react"
+import * as LabelPrimitive from "@radix-ui/react-label"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+
+const labelVariants = cva(
+  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+)
+
+const Label = React.forwardRef<
+  React.ElementRef<typeof LabelPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
+    VariantProps<typeof labelVariants>
+>(({ className, ...props }, ref) => (
+  <LabelPrimitive.Root
+    ref={ref}
+    className={cn(labelVariants(), className)}
+    {...props}
+  />
+))
+Label.displayName = LabelPrimitive.Root.displayName
+
+export { Label }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\navbar-menu.tsx ====
+"use client";
+import React from "react";
+import { motion } from "framer-motion";
+import  { Link } from "react-router-dom"
+
+const transition = {
+    type: "spring",
+    mass: 0.5,
+    damping: 11.5,
+    stiffness: 100,
+    restDelta: 0.001,
+    restSpeed: 0.001,
+};
+
+export const MenuItem = ({
+    setActive,
+    active,
+    item,
+    children,
+}: {
+    setActive: (item: string) => void;
+    active: string | null;
+    item: string;
+    children?: React.ReactNode;
+}) => {
+    return (
+        <div onMouseEnter={() => setActive(item)} className="relative ">
+            <motion.p
+                transition={{ duration: 0.3 }}
+                className="cursor-pointer text-black hover:opacity-[0.9] dark:text-white"
+            >
+                {item}
+            </motion.p>
+            {active !== null && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={transition}
+                >
+                    {active === item && (
+                        <div className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 pt-4">
+                            <motion.div
+                                transition={transition}
+                                layoutId="active" // layoutId ensures smooth animation
+                                className="bg-white dark:bg-black backdrop-blur-sm rounded-2xl overflow-hidden border border-black/[0.2] dark:border-white/[0.2] shadow-xl"
+                            >
+                                <motion.div
+                                    layout // layout ensures smooth animation
+                                    className="w-max h-full p-4"
+                                >
+                                    {children}
+                                </motion.div>
+                            </motion.div>
+                        </div>
+                    )}
+                </motion.div>
+            )}
+        </div>
+    );
+};
+
+export const Menu = ({
+    setActive,
+    children,
+}: {
+    setActive: (item: string | null) => void;
+    children: React.ReactNode;
+}) => {
+    return (
+        <nav
+            onMouseLeave={() => setActive(null)} // resets the state
+            className="relative rounded-full border border-transparent dark:bg-black dark:border-white/[0.2] bg-white shadow-input flex justify-center space-x-4 px-8 py-6 "
+        >
+            {children}
+        </nav>
+    );
+};
+
+export const ProductItem = ({
+    title,
+    description,
+    href,
+    src,
+}: {
+    title: string;
+    description: string;
+    href: string;
+    src: string;
+}) => {
+    return (
+        <Link to={href} className="flex space-x-2">
+            <img
+                src={src}
+                width={140}
+                height={70}
+                alt={title}
+                className="flex-shrink-0 rounded-md shadow-2xl"
+            />
+            <div>
+                <h4 className="text-xl font-bold mb-1 text-black dark:text-white">
+                    {title}
+                </h4>
+                <p className="text-neutral-700 text-sm max-w-[10rem] dark:text-neutral-300">
+                    {description}
+                </p>
+            </div>
+        </Link>
+    );
+};
+
+export const HoveredLink = ({ children, ...rest }: any) => {
+    return (
+        <Link
+            {...rest}
+            className="text-neutral-700 dark:text-neutral-200 hover:text-black "
+        >
+            {children}
+        </Link>
+    );
+};
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\scroll-area.tsx ====
+"use client"
+
+import * as React from "react"
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
+
+import { cn } from "@/lib/utils"
+
+const ScrollArea = React.forwardRef<
+    React.ElementRef<typeof ScrollAreaPrimitive.Root>,
+    React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
+>(({ className, children, ...props }, ref) => (
+    <ScrollAreaPrimitive.Root
+        ref={ref}
+        className={cn("relative overflow-hidden", className)}
+        {...props}
+    >
+        <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+            {children}
+        </ScrollAreaPrimitive.Viewport>
+        <ScrollBar />
+        <ScrollAreaPrimitive.Corner />
+    </ScrollAreaPrimitive.Root>
+))
+ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
+
+const ScrollBar = React.forwardRef<
+    React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
+    React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
+>(({ className, orientation = "vertical", ...props }, ref) => (
+    <ScrollAreaPrimitive.ScrollAreaScrollbar
+        ref={ref}
+        orientation={orientation}
+        className={cn(
+            "flex touch-none select-none transition-colors",
+            orientation === "vertical" &&
+            "h-full w-2.5 border-l border-l-transparent p-[1px]",
+            orientation === "horizontal" &&
+            "h-2.5 flex-col border-t border-t-transparent p-[1px]",
+            className
+        )}
+        {...props}
+    >
+        <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-border" />
+    </ScrollAreaPrimitive.ScrollAreaScrollbar>
+))
+ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName
+
+export { ScrollArea, ScrollBar }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\select.tsx ====
+import * as React from "react"
+import {
+  CaretSortIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from "@radix-ui/react-icons"
+import * as SelectPrimitive from "@radix-ui/react-select"
+
+import { cn } from "@/lib/utils"
+
+const Select = SelectPrimitive.Root
+
+const SelectGroup = SelectPrimitive.Group
+
+const SelectValue = SelectPrimitive.Value
+
+const SelectTrigger = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <SelectPrimitive.Icon asChild>
+      <CaretSortIcon className="h-4 w-4 opacity-50" />
+    </SelectPrimitive.Icon>
+  </SelectPrimitive.Trigger>
+))
+SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
+
+const SelectScrollUpButton = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.ScrollUpButton>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.ScrollUpButton
+    ref={ref}
+    className={cn(
+      "flex cursor-default items-center justify-center py-1",
+      className
+    )}
+    {...props}
+  >
+    <ChevronUpIcon />
+  </SelectPrimitive.ScrollUpButton>
+))
+SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
+
+const SelectScrollDownButton = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.ScrollDownButton>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.ScrollDownButton
+    ref={ref}
+    className={cn(
+      "flex cursor-default items-center justify-center py-1",
+      className
+    )}
+    {...props}
+  >
+    <ChevronDownIcon />
+  </SelectPrimitive.ScrollDownButton>
+))
+SelectScrollDownButton.displayName =
+  SelectPrimitive.ScrollDownButton.displayName
+
+const SelectContent = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+>(({ className, children, position = "popper", ...props }, ref) => (
+  <SelectPrimitive.Portal>
+    <SelectPrimitive.Content
+      ref={ref}
+      className={cn(
+        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        position === "popper" &&
+          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+        className
+      )}
+      position={position}
+      {...props}
+    >
+      <SelectScrollUpButton />
+      <SelectPrimitive.Viewport
+        className={cn(
+          "p-1",
+          position === "popper" &&
+            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+        )}
+      >
+        {children}
+      </SelectPrimitive.Viewport>
+      <SelectScrollDownButton />
+    </SelectPrimitive.Content>
+  </SelectPrimitive.Portal>
+))
+SelectContent.displayName = SelectPrimitive.Content.displayName
+
+const SelectLabel = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Label
+    ref={ref}
+    className={cn("px-2 py-1.5 text-sm font-semibold", className)}
+    {...props}
+  />
+))
+SelectLabel.displayName = SelectPrimitive.Label.displayName
+
+const SelectItem = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.Item
+    ref={ref}
+    className={cn(
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      className
+    )}
+    {...props}
+  >
+    <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
+      <SelectPrimitive.ItemIndicator>
+        <CheckIcon className="h-4 w-4" />
+      </SelectPrimitive.ItemIndicator>
+    </span>
+    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+  </SelectPrimitive.Item>
+))
+SelectItem.displayName = SelectPrimitive.Item.displayName
+
+const SelectSeparator = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-muted", className)}
+    {...props}
+  />
+))
+SelectSeparator.displayName = SelectPrimitive.Separator.displayName
+
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\sheet.tsx ====
+import * as React from "react"
+import * as SheetPrimitive from "@radix-ui/react-dialog"
+import { Cross2Icon } from "@radix-ui/react-icons"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+
+const Sheet = SheetPrimitive.Root
+
+const SheetTrigger = SheetPrimitive.Trigger
+
+const SheetClose = SheetPrimitive.Close
+
+const SheetPortal = SheetPrimitive.Portal
+
+const SheetOverlay = React.forwardRef<
+  React.ElementRef<typeof SheetPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <SheetPrimitive.Overlay
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+    ref={ref}
+  />
+))
+SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
+
+const sheetVariants = cva(
+  "fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:animate-in data-[state=closed]:animate-out",
+  {
+    variants: {
+      side: {
+        top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
+        bottom:
+          "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+        left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
+        right:
+          "inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
+      },
+    },
+    defaultVariants: {
+      side: "right",
+    },
+  }
+)
+
+interface SheetContentProps
+  extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
+    VariantProps<typeof sheetVariants> {}
+
+const SheetContent = React.forwardRef<
+  React.ElementRef<typeof SheetPrimitive.Content>,
+  SheetContentProps
+>(({ side = "right", className, children, ...props }, ref) => (
+  <SheetPortal>
+    <SheetOverlay />
+    <SheetPrimitive.Content
+      ref={ref}
+      className={cn(sheetVariants({ side }), className)}
+      {...props}
+    >
+      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+        <Cross2Icon className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </SheetPrimitive.Close>
+      {children}
+    </SheetPrimitive.Content>
+  </SheetPortal>
+))
+SheetContent.displayName = SheetPrimitive.Content.displayName
+
+const SheetHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-2 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+)
+SheetHeader.displayName = "SheetHeader"
+
+const SheetFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+)
+SheetFooter.displayName = "SheetFooter"
+
+const SheetTitle = React.forwardRef<
+  React.ElementRef<typeof SheetPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <SheetPrimitive.Title
+    ref={ref}
+    className={cn("text-lg font-semibold text-foreground", className)}
+    {...props}
+  />
+))
+SheetTitle.displayName = SheetPrimitive.Title.displayName
+
+const SheetDescription = React.forwardRef<
+  React.ElementRef<typeof SheetPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <SheetPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+SheetDescription.displayName = SheetPrimitive.Description.displayName
+
+export {
+  Sheet,
+  SheetPortal,
+  SheetOverlay,
+  SheetTrigger,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription,
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\skeleton.tsx ====
+import { cn } from "@/lib/utils"
+
+function Skeleton({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn("animate-pulse rounded-md bg-primary/10", className)}
+      {...props}
+    />
+  )
+}
+
+export { Skeleton }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\sonner.tsx ====
+import { useTheme } from "next-themes"
+import { Toaster as Sonner } from "sonner"
+
+type ToasterProps = React.ComponentProps<typeof Sonner>
+
+const Toaster = ({ ...props }: ToasterProps) => {
+  const { theme = "system" } = useTheme()
+
+  return (
+    <Sonner
+      theme={theme as ToasterProps["theme"]}
+      className="toaster group"
+      toastOptions={{
+        classNames: {
+          toast:
+            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
+          description: "group-[.toast]:text-muted-foreground",
+          actionButton:
+            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+          cancelButton:
+            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+        },
+      }}
+      {...props}
+    />
+  )
+}
+
+export { Toaster }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\textarea.tsx ====
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+export interface TextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <textarea
+        className={cn(
+          "flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Textarea.displayName = "Textarea"
+
+export { Textarea }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\toast.tsx ====
+import * as React from "react"
+import { Cross2Icon } from "@radix-ui/react-icons"
+import * as ToastPrimitives from "@radix-ui/react-toast"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+
+const ToastProvider = ToastPrimitives.Provider
+
+const ToastViewport = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Viewport>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Viewport
+    ref={ref}
+    className={cn(
+      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+      className
+    )}
+    {...props}
+  />
+))
+ToastViewport.displayName = ToastPrimitives.Viewport.displayName
+
+const toastVariants = cva(
+  "group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-md border p-4 pr-6 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
+  {
+    variants: {
+      variant: {
+        default: "border bg-background text-foreground",
+        destructive:
+          "destructive group border-destructive bg-destructive text-destructive-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+const Toast = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Root>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
+    VariantProps<typeof toastVariants>
+>(({ className, variant, ...props }, ref) => {
+  return (
+    <ToastPrimitives.Root
+      ref={ref}
+      className={cn(toastVariants({ variant }), className)}
+      {...props}
+    />
+  )
+})
+Toast.displayName = ToastPrimitives.Root.displayName
+
+const ToastAction = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Action>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Action
+    ref={ref}
+    className={cn(
+      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
+      className
+    )}
+    {...props}
+  />
+))
+ToastAction.displayName = ToastPrimitives.Action.displayName
+
+const ToastClose = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Close>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Close
+    ref={ref}
+    className={cn(
+      "absolute right-1 top-1 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-1 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+      className
+    )}
+    toast-close=""
+    {...props}
+  >
+    <Cross2Icon className="h-4 w-4" />
+  </ToastPrimitives.Close>
+))
+ToastClose.displayName = ToastPrimitives.Close.displayName
+
+const ToastTitle = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Title>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Title
+    ref={ref}
+    className={cn("text-sm font-semibold [&+div]:text-xs", className)}
+    {...props}
+  />
+))
+ToastTitle.displayName = ToastPrimitives.Title.displayName
+
+const ToastDescription = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Description>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Description
+    ref={ref}
+    className={cn("text-sm opacity-90", className)}
+    {...props}
+  />
+))
+ToastDescription.displayName = ToastPrimitives.Description.displayName
+
+type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
+
+type ToastActionElement = React.ReactElement<typeof ToastAction>
+
+export {
+  type ToastProps,
+  type ToastActionElement,
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+  ToastAction,
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\toaster.tsx ====
+import { useToast } from "@/hooks/use-toast"
+import {
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from "@/components/ui/toast"
+
+export function Toaster() {
+  const { toasts } = useToast()
+
+  return (
+    <ToastProvider>
+      {toasts.map(function ({ id, title, description, action, ...props }) {
+        return (
+          <Toast key={id} {...props}>
+            <div className="grid gap-1">
+              {title && <ToastTitle>{title}</ToastTitle>}
+              {description && (
+                <ToastDescription>{description}</ToastDescription>
+              )}
+            </div>
+            {action}
+            <ToastClose />
+          </Toast>
+        )
+      })}
+      <ToastViewport />
+    </ToastProvider>
+  )
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\tooltip.tsx ====
+import * as React from "react"
+import * as TooltipPrimitive from "@radix-ui/react-tooltip"
+
+import { cn } from "@/lib/utils"
+
+const TooltipProvider = TooltipPrimitive.Provider
+
+const Tooltip = TooltipPrimitive.Root
+
+const TooltipTrigger = TooltipPrimitive.Trigger
+
+const TooltipContent = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
+>(({ className, sideOffset = 4, ...props }, ref) => (
+  <TooltipPrimitive.Content
+    ref={ref}
+    sideOffset={sideOffset}
+    className={cn(
+      "z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+      className
+    )}
+    {...props}
+  />
+))
+TooltipContent.displayName = TooltipPrimitive.Content.displayName
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\ui\typewriter-effect.tsx ====
+"use client";
+
+import { cn } from "@/lib/utils";
+import { motion, stagger, useAnimate, useInView } from "framer-motion";
+import { useEffect } from "react";
+
+export const TypewriterEffect = ({
+    words,
+    className,
+    cursorClassName,
+}: {
+    words: {
+        text: string;
+        className?: string;
+    }[];
+    className?: string;
+    cursorClassName?: string;
+}) => {
+    // split text inside of words into array of characters
+    const wordsArray = words.map((word) => {
+        return {
+            ...word,
+            text: word.text.split(""),
+        };
+    });
+
+    const [scope, animate] = useAnimate();
+    const isInView = useInView(scope);
+    useEffect(() => {
+        if (isInView) {
+            animate(
+                "span",
+                {
+                    display: "inline-block",
+                    opacity: 1,
+                    width: "fit-content",
+                },
+                {
+                    duration: 0.3,
+                    delay: stagger(0.1),
+                    ease: "easeInOut",
+                }
+            );
+        }
+    }, [isInView]);
+
+    const renderWords = () => {
+        return (
+            <motion.div ref={scope} className="inline">
+                {wordsArray.map((word, idx) => {
+                    return (
+                        <div key={`word-${idx}`} className="inline-block">
+                            {word.text.map((char, index) => (
+                                <motion.span
+                                    initial={{}}
+                                    key={`char-${index}`}
+                                    className={cn(
+                                        `dark:text-white text-black opacity-0 hidden`,
+                                        word.className
+                                    )}
+                                >
+                                    {char}
+                                </motion.span>
+                            ))}
+                            &nbsp;
+                        </div>
+                    );
+                })}
+            </motion.div>
+        );
+    };
+    return (
+        <div
+            className={cn(
+                "text-base sm:text-xl md:text-3xl lg:text-5xl font-bold text-center",
+                className
+            )}
+        >
+            {renderWords()}
+            <motion.span
+                initial={{
+                    opacity: 0,
+                }}
+                animate={{
+                    opacity: 1,
+                }}
+                transition={{
+                    duration: 0.8,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                }}
+                className={cn(
+                    "inline-block rounded-sm w-[4px] h-4 md:h-6 lg:h-10 bg-blue-500",
+                    cursorClassName
+                )}
+            ></motion.span>
+        </div>
+    );
+};
+
+export const TypewriterEffectSmooth = ({
+    words,
+    className,
+    cursorClassName,
+}: {
+    words: {
+        text: string;
+        className?: string;
+    }[];
+    className?: string;
+    cursorClassName?: string;
+}) => {
+    // split text inside of words into array of characters
+    const wordsArray = words.map((word) => {
+        return {
+            ...word,
+            text: word.text.split(""),
+        };
+    });
+    const renderWords = () => {
+        return (
+            <div>
+                {wordsArray.map((word, idx) => {
+                    return (
+                        <div key={`word-${idx}`} className="inline-block">
+                            {word.text.map((char, index) => (
+                                <span
+                                    key={`char-${index}`}
+                                    className={cn(`dark:text-white text-black `, word.className)}
+                                >
+                                    {char}
+                                </span>
+                            ))}
+                            &nbsp;
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
+    return (
+        <div className={cn("flex space-x-1 my-6", className)}>
+            <motion.div
+                className="overflow-hidden pb-2"
+                initial={{
+                    width: "0%",
+                }}
+                whileInView={{
+                    width: "fit-content",
+                }}
+                transition={{
+                    duration: 2,
+                    ease: "linear",
+                    delay: 1,
+                }}
+            >
+                <div
+                    className="text-xs sm:text-base md:text-xl lg:text:3xl xl:text-5xl font-bold"
+                    style={{
+                        whiteSpace: "nowrap",
+                    }}
+                >
+                    {renderWords()}{" "}
+                </div>{" "}
+            </motion.div>
+            <motion.span
+                initial={{
+                    opacity: 0,
+                }}
+                animate={{
+                    opacity: 1,
+                }}
+                transition={{
+                    duration: 0.8,
+
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                }}
+                className={cn(
+                    "block rounded-sm w-[4px]  h-4 sm:h-6 xl:h-12 bg-blue-500",
+                    cursorClassName
+                )}
+            ></motion.span>
+        </div>
+    );
+};
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Video\Video.tsx ====
+const Video = () => {
+    const handleButtonClick = () => {
+        window.location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'; 
+    };
+
+    return (
+        <div className="relative h-[30rem] w-4/5 rounded-2xl overflow-hidden mx-auto mt-20 p-4 border-2 border-white group">
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                <button className="bg-white p-2 rounded-full shadow-lg" onClick={handleButtonClick}>
+                    <svg className="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M4.5 3.5l11 6.5-11 6.5v-13z" />
+                    </svg>
+                </button>
+            </div>
+
+            <div
+                className="h-full w-full bg-cover bg-center flex items-center justify-center transition-all duration-300 group-hover:blur-sm"
+                style={{ backgroundImage: 'url(https://miro.medium.com/v2/resize:fit:1400/0*4H5kGCGE6gIjgJQJ)' }}
+            >
+                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-50 transition-opacity z-10"></div>
+            </div>
+        </div>
+    );
+}
+
+export default Video;
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\hooks\use-toast.ts ====
+import * as React from "react"
+
+import type {
+  ToastActionElement,
+  ToastProps,
+} from "@/components/ui/toast"
+
+const TOAST_LIMIT = 1
+const TOAST_REMOVE_DELAY = 1000000
+
+type ToasterToast = ToastProps & {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+}
+
+const actionTypes = {
+  ADD_TOAST: "ADD_TOAST",
+  UPDATE_TOAST: "UPDATE_TOAST",
+  DISMISS_TOAST: "DISMISS_TOAST",
+  REMOVE_TOAST: "REMOVE_TOAST",
+} as const
+
+let count = 0
+
+function genId() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  return count.toString()
+}
+
+type ActionType = typeof actionTypes
+
+type Action =
+  | {
+      type: ActionType["ADD_TOAST"]
+      toast: ToasterToast
+    }
+  | {
+      type: ActionType["UPDATE_TOAST"]
+      toast: Partial<ToasterToast>
+    }
+  | {
+      type: ActionType["DISMISS_TOAST"]
+      toastId?: ToasterToast["id"]
+    }
+  | {
+      type: ActionType["REMOVE_TOAST"]
+      toastId?: ToasterToast["id"]
+    }
+
+interface State {
+  toasts: ToasterToast[]
+}
+
+const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+
+const addToRemoveQueue = (toastId: string) => {
+  if (toastTimeouts.has(toastId)) {
+    return
+  }
+
+  const timeout = setTimeout(() => {
+    toastTimeouts.delete(toastId)
+    dispatch({
+      type: "REMOVE_TOAST",
+      toastId: toastId,
+    })
+  }, TOAST_REMOVE_DELAY)
+
+  toastTimeouts.set(toastId, timeout)
+}
+
+export const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case "ADD_TOAST":
+      return {
+        ...state,
+        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
+      }
+
+    case "UPDATE_TOAST":
+      return {
+        ...state,
+        toasts: state.toasts.map((t) =>
+          t.id === action.toast.id ? { ...t, ...action.toast } : t
+        ),
+      }
+
+    case "DISMISS_TOAST": {
+      const { toastId } = action
+
+      // ! Side effects ! - This could be extracted into a dismissToast() action,
+      // but I'll keep it here for simplicity
+      if (toastId) {
+        addToRemoveQueue(toastId)
+      } else {
+        state.toasts.forEach((toast) => {
+          addToRemoveQueue(toast.id)
+        })
+      }
+
+      return {
+        ...state,
+        toasts: state.toasts.map((t) =>
+          t.id === toastId || toastId === undefined
+            ? {
+                ...t,
+                open: false,
+              }
+            : t
+        ),
+      }
+    }
+    case "REMOVE_TOAST":
+      if (action.toastId === undefined) {
+        return {
+          ...state,
+          toasts: [],
+        }
+      }
+      return {
+        ...state,
+        toasts: state.toasts.filter((t) => t.id !== action.toastId),
+      }
+  }
+}
+
+const listeners: Array<(state: State) => void> = []
+
+let memoryState: State = { toasts: [] }
+
+function dispatch(action: Action) {
+  memoryState = reducer(memoryState, action)
+  listeners.forEach((listener) => {
+    listener(memoryState)
+  })
+}
+
+type Toast = Omit<ToasterToast, "id">
+
+function toast({ ...props }: Toast) {
+  const id = genId()
+
+  const update = (props: ToasterToast) =>
+    dispatch({
+      type: "UPDATE_TOAST",
+      toast: { ...props, id },
+    })
+  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+
+  dispatch({
+    type: "ADD_TOAST",
+    toast: {
+      ...props,
+      id,
+      open: true,
+      onOpenChange: (open) => {
+        if (!open) dismiss()
+      },
+    },
+  })
+
+  return {
+    id: id,
+    dismiss,
+    update,
+  }
+}
+
+function useToast() {
+  const [state, setState] = React.useState<State>(memoryState)
+
+  React.useEffect(() => {
+    listeners.push(setState)
+    return () => {
+      const index = listeners.indexOf(setState)
+      if (index > -1) {
+        listeners.splice(index, 1)
+      }
+    }
+  }, [state])
+
+  return {
+    ...state,
+    toast,
+    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+  }
+}
+
+export { useToast, toast }
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\lib\githubOAuth.ts ====
+const CALLBACK_URL = "https://LimitApp-v1.vercel.app";  
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+
+export const loginWithGithub = async () => {
+    const clientId = "Iv23liaxH9BTc9CvGQFr";
+    const redirectUri = `${CALLBACK_URL}/home`; 
+
+    const githubUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user`;
+
+    window.location.href = githubUrl;
+};
+
+export const handleGitHubCallback = async () => {
+    const query = new URLSearchParams(window.location.search);
+    const code = query.get('code');
+
+    if (code) {
+        const response = await fetch(`${BACKEND_URL}/api/github/callback`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code }),
+        });
+        const data = await response.json();
+
+        // Store access_token in localStorage
+        localStorage.setItem('access_token', data.access_token);
+        window.location.href = '/'; 
+    }
+};
+
+export const checkSession = () => {
+    const token = localStorage.getItem('access_token');
+    return token;
+};
+
+export const logout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('username');
+    window.location.href = '/'; 
+};
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\lib\utils.ts ====
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Docs.tsx ====
+import ComingSoon from "@/components/ComingSoon/Coming-soon"
+
+const Docs = () => {
+  return (
+    <>
+    <ComingSoon />
+    </>
+  )
+}
+
+export default Docs
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Home.tsx ====
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import Chat from "@/components/Chat/Chat";
+
+const Home = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
+    if (!username || !token || username.trim() === "" || token.trim() === "") {
+      toast.error("Please login to continue");
+      navigate("/signin");
+    }
+  }, [navigate]);
+
+  return (
+    <div>
+      <Chat />
+    </div>
+  );
+};
+
+export default Home;
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Landing.tsx ====
+import { NavbarDemo } from '@/components/Navbar/Navbar'
+import { Hero } from '@/components/Hero/Hero'
+import { Features } from '@/components/Features/Features'
+import { useNavigate } from 'react-router-dom';
+import Video from '@/components/Video/Video';
+import Footer from '@/components/Footer/Footer';
+
+const Landing = () => {
+    const navigate = useNavigate(); 
+
+    const handleSignupClick = () => {
+        navigate('/check'); 
+    };
+
+    return (
+        <div className="w-full dark:bg-black bg-white dark:bg-dot-white/[0.2] bg-dot-black/[0.2] fixed top-0 left-0 right-0 bottom-0">
+            <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+            <div className="relative overflow-y-auto h-full">
+           
+            <Hero onSignupClick={handleSignupClick} />
+            
+            </div>
+        </div>
+    )
+}
+
+export default Landing
+
+    
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Plot.tsx ====
+import GraphPlotter from "@/components/Graph/GraphPlotter"
+
+const Plot = () => {
+  return (
+    <div>
+        <GraphPlotter />
+    </div>
+  )
+}
+
+export default Plot
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Reports.tsx ====
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+
+interface Task {
+  id: string;
+  title: string;
+}
+
+interface User {
+  id: string;
+  username: string;
+}
+
+const Reports = () => {
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedTask, setSelectedTask] = useState("");
+  const [selectedUser, setSelectedUser] = useState("");
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/tasks")
+    .then((res) => res.json())  
+    .then((data) => {
+        setTasks(data.tasks);
+      })
+      .catch((err) => {
+        console.error("Ошибка загрузки задач", err);
+        toast.error("Не удалось загрузить задачи");
+      });
+
+    // Эндпоинт для получения списка пользователей (если реализован)
+    fetch("http://localhost:5000/api/users")
+    .then((res) => res.json())  
+    .then((data) => {
+        setUsers(data.users);
+      })
+      .catch((err) => {
+        console.error("Ошибка загрузки пользователей", err);
+      });
+  }, []);
+
+  const downloadReport = async () => {
+    if (!startDate || !endDate) {
+      toast.error("Выберите период");
+      return;
+    }
+    const payload = {
+      period: `${startDate}:${endDate}`,
+      task_id: selectedTask || null,
+      student_id: selectedUser || null,
+    };
+  
+    try {
+      const response = await axios.post("http://localhost:5000/api/reports/pdf", payload, {
+        responseType: "blob",
+      });
+      // Создаем Blob и генерируем URL для него
+      const blob = new Blob([response.data as BlobPart], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "report.pdf";
+      document.body.appendChild(link);
+      link.click();
+      // После клика удаляем элемент и отзываем URL
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Ошибка генерации отчёта", err);
+      toast.error("Не удалось сгенерировать отчёт");
+    }
+  };
+  
+
+  return (
+    <div className="min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
+      <Card className="max-w-3xl mx-auto shadow-lg">
+        <CardHeader className="bg-purple-600 text-white p-4 rounded-t-lg">
+          <CardTitle>Генерация PDF-отчёта</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label>Начало периода</label>
+              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            </div>
+            <div>
+              <label>Конец периода</label>
+              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <label>Задача</label>
+            <Select value={selectedTask} onValueChange={setSelectedTask}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Все задачи" />
+              </SelectTrigger>
+              <SelectContent>
+                {tasks.map(task => (
+                  <SelectItem key={task.id} value={task.id}>{task.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label>Студент</label>
+            <Select value={selectedUser} onValueChange={setSelectedUser}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Все студенты" />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map(user => (
+                  <SelectItem key={user.id} value={user.id}>{user.username}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Button onClick={downloadReport}>Скачать PDF-отчёт</Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default Reports;
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Settings.tsx ====
+import React, { useEffect, useState } from "react"
+import Sidebar from "@/components/Sidebar/Sidebar"
+import MobileSidebar from "@/components/MobileSidebar/MobileSidebar"
+import { Button } from "@/components/ui/button"
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { toast } from "sonner"
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+const formSchema = z.object({
+    firstname: z.string().min(2, { message: "First name must be at least 2 characters." }),
+    lastname: z.string().min(2, { message: "Last name must be at least 2 characters." }),
+    email: z.string().email({ message: "Invalid email address." }),
+    bio: z.string().optional(),
+    image: z.string().optional(),
+})
+
+export default function Settings() {
+    const [imageFile, setImageFile] = useState<File | null>(null)
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            firstname: "",
+            lastname: "",
+            email: "",
+            bio: "",
+            image: "",
+        },
+    })
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const username = localStorage.getItem('username')
+                if (!username) {
+                    throw new Error('Username not found in localStorage')
+                }
+
+                const response = await fetch(`${BACKEND_URL}/profile/${username}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok')
+                }
+
+                const responseData = await response.json()
+                form.reset(responseData.user)
+            } catch (error) {
+                console.error("Error fetching user data", error)
+            }
+        }
+
+        fetchUserData()
+    }, [form])
+
+    const onSubmit = async (data: z.infer<typeof formSchema>) => {
+        try {
+            const username = localStorage.getItem('username')
+            if (!username) {
+                throw new Error('Username not found in localStorage')
+            }
+
+            let imageUrl = data.image
+            if (imageFile) {
+                const formData = new FormData()
+                formData.append('image', imageFile)
+
+                const imageResponse = await fetch(`${BACKEND_URL}/upload-image`, {
+                    method: 'POST',
+                    body: formData,
+                })
+
+                if (!imageResponse.ok) {
+                    throw new Error('Image upload failed')
+                }
+
+                const imageResponseData = await imageResponse.json()
+                imageUrl = imageResponseData.imageUrl
+            }
+
+            const response = await fetch(`${BACKEND_URL}/profile/${username}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ...data, image: imageUrl }),
+            })
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok')
+            }
+
+            const responseData = await response.json()
+            console.log("Profile updated successfully", responseData)
+            toast.success('Profile updated successfully')
+        } catch (error) {
+            console.error("Error updating profile", error)
+            toast.error('Error updating profile')
+        }
+    }
+
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files[0]) {
+            setImageFile(event.target.files[0])
+        }
+    }
+
+    return (
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+            <Sidebar />
+            <div className="flex flex-col h-screen">
+                <MobileSidebar />
+                <div className="flex-1 overflow-y-auto p-4">
+                    <div className="max-w-2xl mx-auto">
+                        <h1 className="text-2xl font-bold mb-6">Settings</h1>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                                <FormField
+                                    control={form.control}
+                                    name="firstname"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>First Name</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="First Name" {...field} />
+                                            </FormControl>
+                                            <FormDescription>
+                                                This is your public display name. It can be your real name or a pseudonym. You can only change this once every 30 days.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="lastname"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Last Name</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Last Name" {...field} />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Enter your last name.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Email</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="you@example.com" {...field} />
+                                            </FormControl>
+                                            <FormDescription>
+                                                You can manage verified email addresses in your email settings.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="bio"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Bio</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="Tell us a little bit about yourself"
+                                                    className="resize-none"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                You can <span className="font-medium">@mention</span> other users and organizations to link to them.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormItem>
+                                    <FormLabel>Profile Image</FormLabel>
+                                    <FormControl>
+                                        <Input type="file" accept="image/*" onChange={handleImageChange} />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Upload a profile image.
+                                    </FormDescription>
+                                </FormItem>
+                                <Button type="submit">Update profile</Button>
+                            </form>
+                        </Form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Signin.tsx ====
+"use client";
+import React, { useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { IconBrandGithub } from "@tabler/icons-react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { loginWithGithub } from "@/lib/githubOAuth";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+export default function Signin() {
+  const [formData, setFormData] = useState({ username: "", password: "" });
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // Сохраняем имя пользователя, токен и роль в localStorage
+        localStorage.setItem("username", data.user.username);
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.user.role);
+        toast.success("Signin Successful", {
+          description: `Welcome, ${data.user.username}`,
+        });
+        navigate("/home");
+      } else {
+        const errorData = await response.json();
+        toast.error("Signin failed", {
+          description: errorData.message || "Signin failed.",
+        });
+      }
+    } catch (error) {
+      toast.error("Signin failed", {
+        description: `Something went wrong. Please try again. ${error}`,
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
+        <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center mb-4">
+          Welcome to LimitApp | Signin
+        </h2>
+        <form className="my-8" onSubmit={handleSubmit}>
+          <LabelInputContainer className="mb-4">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              placeholder="Your username"
+              type="text"
+              value={formData.username}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
+            />
+          </LabelInputContainer>
+          <LabelInputContainer className="mb-4">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              placeholder="••••••••"
+              type="password"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
+          </LabelInputContainer>
+          <button
+            className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
+            type="submit"
+          >
+            Sign in &rarr;
+            <BottomGradient />
+          </button>
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
+            Don’t have an account?{" "}
+            <Link
+              to="/signup"
+              className="text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Sign up
+            </Link>
+          </p>
+          <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
+          <div className="flex flex-col space-y-4">
+            <button
+              className="relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
+              type="button"
+              onClick={loginWithGithub}
+            >
+              <IconBrandGithub className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
+              <span className="text-neutral-700 dark:text-neutral-300 text-sm">
+                GitHub
+              </span>
+              <BottomGradient />
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const BottomGradient = () => {
+  return (
+    <>
+      <span className="group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+      <span className="group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
+    </>
+  );
+};
+
+const LabelInputContainer = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>;
+};
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Signup.tsx ====
+"use client";
+import React, { useState,useEffect } from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { Link, useNavigate } from "react-router-dom";
+import {
+    IconBrandGithub
+} from "@tabler/icons-react";
+import { loginWithGithub } from "@/lib/githubOAuth";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+export default function Signup() {
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        firstname: "",
+        lastname: "",
+        username: "",
+        email: "",
+        password: "",
+    });
+
+    useEffect(() => {
+        const storedUsername = localStorage.getItem('username');
+        if (storedUsername && storedUsername.trim() !== '') {
+            navigate('/home');
+        }
+    }, [navigate]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setFormData({ ...formData, [id]: value });
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/auth/signup`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (response.ok) {
+                toast.success("Signup successful", {
+                    description: "You can now log in with your new account.",
+                    action: {
+                        label: "Login",
+                        onClick: () => navigate('/login'),
+                    },
+                });
+                navigate("/signin");
+            } else {
+                const errorData = await response.json();
+                toast.error("Signup failed", {
+                    description: errorData.message,
+                });
+            }
+        } catch (error) {
+            toast.error("Signup failed", {
+                description: `Something went wrong. Please try again. ${error}`,
+            });
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
+                <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center mb-4">
+                    Welcome to LimitApp | Signup
+                </h2>
+                <form className="my-8" onSubmit={handleSubmit}>
+                    <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
+                        <LabelInputContainer>
+                            <Label htmlFor="firstname">First name</Label>
+                            <Input
+                                id="firstname"
+                                value={formData.firstname}
+                                onChange={handleChange}
+                                placeholder="Tyler"
+                                type="text"
+                            />
+                        </LabelInputContainer>
+                        <LabelInputContainer>
+                            <Label htmlFor="lastname">Last name</Label>
+                            <Input
+                                id="lastname"
+                                value={formData.lastname}
+                                onChange={handleChange}
+                                placeholder="Durden"
+                                type="text"
+                            />
+                        </LabelInputContainer>
+                    </div>
+                    <LabelInputContainer className="mb-4">
+                        <Label htmlFor="username">Username</Label>
+                        <Input
+                            id="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            placeholder="username"
+                            type="text"
+                        />
+                    </LabelInputContainer>
+                    <LabelInputContainer className="mb-4">
+                        <Label htmlFor="email">Email Address</Label>
+                        <Input
+                            id="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            placeholder="projectmayhem@fc.com"
+                            type="email"
+                        />
+                    </LabelInputContainer>
+                    <LabelInputContainer className="mb-4">
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                            id="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="••••••••"
+                            type="password"
+                        />
+                    </LabelInputContainer>
+
+                    <button
+                        className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
+                        type="submit"
+                    >
+                        Sign up &rarr;
+                        <BottomGradient />
+                    </button>
+
+                    <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
+                        Have an account?{" "}
+                        <Link to="/api/auth/signin" className="text-blue-600 hover:underline dark:text-blue-400">
+                            Sign in
+                        </Link>
+                    </p>
+                    <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
+
+                    <div className="flex flex-col space-y-4">
+                        <button
+                            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
+                            type="button" onClick={loginWithGithub}
+                        >
+                            <IconBrandGithub className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
+                            <span className="text-neutral-700 dark:text-neutral-300 text-sm">
+                                GitHub
+                            </span>
+                            <BottomGradient />
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+const BottomGradient = () => {
+    return (
+        <>
+            <span className="group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+            <span className="group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
+        </>
+    );
+};
+
+const LabelInputContainer = ({
+    children,
+    className,
+}: {
+    children: React.ReactNode;
+    className?: string;
+}) => {
+    return (
+        <div className={cn("flex flex-col space-y-2 w-full", className)}>
+            {children}
+        </div>
+    );
+};
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\SolutionChecker.tsx ====
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
+import { MathKeyboard } from "@/components/MathKeyboard/MathKeyboard";
+
+// Тип задачи
+interface Problem {
+  id: string;
+  title: string;
+  description: string;
+  instruction?: string;
+  // expression?: string; // при желании
+  // limitVar?: string;   // при желании
+  // expected_limit?: string; // при желании
+}
+
+// Тип ответа сервера при запросе задачи
+interface SingleTaskResponse {
+  id: string;
+  title: string;
+  description: string;
+  expression: string;
+  limitVar: string;
+  expected_limit: string;
+}
+
+// Тип шага: "algebra" или "limit"
+type StepType = "algebra" | "limit";
+
+export default function SolutionChecker() {
+  const { taskId } = useParams<{ taskId: string }>();
+  const [task, setTask] = useState<Problem | null>(null);
+  const [stepInput, setStepInput] = useState("");
+  const [steps, setSteps] = useState<string[]>([]);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [checkResult, setCheckResult] = useState<string | null>(null);
+  const [errors, setErrors] = useState<any[]>([]);
+
+  // Загрузка задачи по ID
+  useEffect(() => {
+    if (taskId) {
+      fetch(`http://localhost:5000/api/tasks/${taskId}`)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`Сервер вернул статус: ${res.status}`);
+          }
+          return res.json() as Promise<SingleTaskResponse>;
+        })
+        .then((data) => {
+          setTask({
+            id: data.id,
+            title: data.title,
+            description: data.description,
+            instruction: "Нет инструкции", // или data.instruction, если есть
+          });
+        })
+        .catch((err) => {
+          console.error("Ошибка загрузки задачи:", err);
+          toast.error("Не удалось загрузить задачу");
+        });
+    }
+  }, [taskId]);
+
+  // Добавить / редактировать шаг
+  const addOrEditStep = () => {
+    if (!stepInput.trim()) {
+      toast.error("Введите алгебраический шаг");
+      return;
+    }
+    if (editingIndex !== null) {
+      setSteps((prev) =>
+        prev.map((s, i) => (i === editingIndex ? stepInput : s))
+      );
+      setEditingIndex(null);
+    } else {
+      setSteps((prev) => [...prev, stepInput]);
+    }
+    setStepInput("");
+  };
+
+  // Добавить "Предел"
+  const addLimitStep = () => {
+    if (steps.length === 0) {
+      toast.error("Сначала добавьте хотя бы один алгебраический шаг");
+      return;
+    }
+    if (steps.includes("LIMIT")) {
+      toast.error("Шаг 'Предел' уже добавлен");
+      return;
+    }
+    setSteps((prev) => [...prev, "LIMIT"]);
+  };
+
+  // Редактировать шаг
+  const editStep = (index: number) => {
+    setStepInput(steps[index]);
+    setEditingIndex(index);
+  };
+
+  // Удалить шаг
+  const deleteStep = (index: number) => {
+    setSteps((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Ввод символа с клавиатуры MathKeyboard
+  const handleSymbolClick = (symbol: string) => {
+    setStepInput((prev) => prev + symbol);
+  };
+
+  // Проверка решения: отправка последнего шага
+  const checkSolution = async () => {
+    if (!task) {
+      toast.error("Задача не загружена");
+      return;
+    }
+    if (steps.length === 0) {
+      toast.error("Нет шагов решения");
+      return;
+    }
+
+    // Допустим, используем task.id как solution_id
+    const solutionId = task.id;
+    const step_number = steps.length;
+    // Предыдущий шаг
+    const prev_expr =
+      steps.length > 1 && steps[steps.length - 2] !== "LIMIT"
+        ? steps[steps.length - 2]
+        : "";
+    // Текущий шаг
+    const curr_expr = steps[steps.length - 1];
+
+    const requestData = {
+      step_number,
+      prev_expr,
+      curr_expr,
+    };
+
+    console.log("📡 Отправка данных на сервер:", requestData);
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/solutions/${solutionId}/check_step`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestData),
+        }
+      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Ошибка сервера:", errorText);
+        toast.error("Ошибка сервера: " + errorText);
+        return;
+      }
+      const data = await response.json();
+      console.log("📡 Ответ сервера:", data);
+
+      if (data.is_correct) {
+        setCheckResult("Шаг правильный!");
+        setErrors([]);
+        toast.success("Шаг верный!");
+      } else {
+        setCheckResult(null);
+        // Предположим, сервер вернёт {is_correct: false, error_type, hint}
+        setErrors([
+          {
+            step: step_number,
+            error: data.error_type,
+            hint: data.hint,
+          },
+        ]);
+        toast.error("Ошибка в шаге!");
+      }
+    } catch (err) {
+      console.error("Ошибка проверки:", err);
+      toast.error("Не удалось проверить решение");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white p-8 dark:bg-gray-900 dark:to-gray-800">
+      <div className="max-w-4xl mx-auto">
+        <Card className="shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-xl">
+            <CardTitle className="text-3xl text-white font-bold">
+              {task ? task.title : "Загрузка задачи..."}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            {task && (
+              <>
+                <div>
+                  <p className="text-gray-800 dark:text-gray-200">
+                    {task.description}
+                  </p>
+                  {task.instruction && (
+                    <p className="mt-2 font-semibold text-gray-700 dark:text-gray-300">
+                      Инструкция: {task.instruction}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block mb-2 font-semibold text-gray-800 dark:text-gray-200">
+                    Алгебраический шаг
+                  </label>
+                  <Textarea
+                    value={stepInput}
+                    onChange={(e) => setStepInput(e.target.value)}
+                    placeholder="(2*x - 3)/(5*x + 7)"
+                  />
+                  <div className="mt-2">
+                    <MathKeyboard onSymbolClick={handleSymbolClick} />
+                  </div>
+                  <div className="mt-2 flex space-x-2">
+                    <Button onClick={addOrEditStep} variant="default">
+                      {editingIndex !== null ? "Сохранить" : "Добавить шаг"}
+                    </Button>
+                    <Button onClick={addLimitStep} variant="outline">
+                      Добавить предел
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2 text-lg text-gray-800 dark:text-gray-200">
+                    Ваши шаги:
+                  </h3>
+                  {steps.length === 0 ? (
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Шаги не добавлены
+                    </p>
+                  ) : (
+                    <ol className="list-decimal pl-5 space-y-2">
+                      {steps.map((step, idx) => (
+                        <li key={idx} className="flex items-center space-x-2">
+                          <span className="flex-grow">
+                            {step === "LIMIT" ? (
+                              <span className="text-blue-600 font-bold">
+                                [Предел]
+                              </span>
+                            ) : (
+                              step
+                            )}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => editStep(idx)}
+                          >
+                            ✏️ Редактировать
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => deleteStep(idx)}
+                          >
+                            ❌ Удалить
+                          </Button>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+
+                <div>
+                  <Button onClick={checkSolution} variant="default">
+                    Проверить решение
+                  </Button>
+                </div>
+
+                {checkResult && (
+                  <div className="mt-4 p-4 bg-green-100 text-green-700 rounded-md">
+                    {checkResult}
+                  </div>
+                )}
+                {errors.length > 0 && (
+                  <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md">
+                    <h4 className="font-bold mb-2">Ошибки:</h4>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {errors.map((err, idx) => (
+                        <li key={idx}>
+                          <span className="font-semibold">
+                            Шаг {err.step}:
+                          </span>{" "}
+                          {err.error}
+                          {err.hint && (
+                            <span className="ml-2 text-sm italic text-gray-700">
+                              {" "}
+                              💡 {err.hint}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Tasks.tsx ====
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import { Link } from "react-router-dom";
+
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+}
+
+const Tasks = () => {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("Все");
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/tasks")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.tasks) {
+            setTasks(data.tasks);
+          
+        }
+      })
+      .catch((err) => {
+        console.error("Ошибка загрузки задач:", err);
+        toast.error("Не удалось загрузить задачи");
+      });
+  }, []);
+
+  const categories = ["Все", "Пределы", "Алгебра", "Дифференциалдық теңдеулер"];
+
+  const filteredTasks = selectedCategory === "Все" 
+    ? tasks 
+    : tasks.filter(task => task.category === selectedCategory);
+
+  return (
+    <div className="min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-4">
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Выберите категорию" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((cat, idx) => (
+                <SelectItem key={idx} value={cat}>{cat}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid grid-cols-1 gap-4">
+          {filteredTasks.map(task => (
+            <Card key={task.id}>
+              <CardHeader>
+                <CardTitle>{task.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>{task.description}</p>
+                <Link to={`/solution/${task.id}`} className="text-blue-600">Решить задачу</Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Tasks;
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\TermsAndConditions.tsx ====
+import { useState } from 'react'
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+
+export default function TermsAndConditions() {
+    const [lastUpdated] = useState("October 17, 2024")
+
+    return (
+        <div className="min-h-screen bg-background text-foreground p-8">
+            <div className="max-w-4xl mx-auto">
+                <h1 className="text-4xl font-bold mb-6"><a href='/'>LimitApp</a> Terms and Conditions</h1>
+                <p className="text-muted-foreground mb-8">Last updated: {lastUpdated}</p>
+
+                <ScrollArea className="h-[600px] rounded-md border p-4">
+                    <div className="pr-4 space-y-6">
+                        <section>
+                            <h2 className="text-2xl font-semibold mb-4">Introduction</h2>
+                            <p>Welcome to<a href='/'> LimitApp</a>. These Terms and Conditions govern your use of our website. By accessing or using our website, you agree to comply with and be bound by these Terms. If you do not agree to these Terms, please refrain from using our website.</p>
+                        </section>
+
+                        <Accordion type="single" collapsible className="w-full">
+                            <AccordionItem value="item-1">
+                                <AccordionTrigger>1. Acceptance of Terms</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>By accessing or using LimitApp, you acknowledge that you have read, understood, and agreed to these Terms. We may modify these Terms at any time without prior notice, and it is your responsibility to check for updates periodically. Continued use of the website following changes signifies your acceptance of the revised Terms.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-2">
+                                <AccordionTrigger>2. Use of the Website</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>You agree to use LimitApp for lawful purposes only and in a manner that does not infringe on the rights of, restrict, or inhibit others' use and enjoyment of the site. Prohibited actions include but are not limited to:</p>
+                                    <ul className="list-disc pl-6 mt-2">
+                                        <li>Engaging in any illegal activities.</li>
+                                        <li>Distributing viruses or any harmful software.</li>
+                                        <li>Breaching any intellectual property rights.</li>
+                                        <li>Uploading misleading, defamatory, or abusive content.</li>
+                                    </ul>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-3">
+                                <AccordionTrigger>3. Intellectual Property Rights</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>All content, including text, graphics, logos, and software available on LimitApp, is the property of the website owner or its licensors and is protected by applicable intellectual property laws in India. You may not reproduce, distribute, or otherwise use any content without obtaining permission from the copyright owner.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-4">
+                                <AccordionTrigger>4. User-Generated Content</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>Any content you upload, post, or share on LimitApp (e.g., comments, feedback, suggestions) will remain your property, but by submitting such content, you grant us a non-exclusive, royalty-free, and worldwide license to use, distribute, and display the content. You are solely responsible for the content you share and must ensure that it does not violate any laws or third-party rights.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-5">
+                                <AccordionTrigger>5. Limitation of Liability</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>LimitApp, its owners, employees, or partners shall not be held liable for any direct, indirect, incidental, or consequential damages arising from your use of the website, including but not limited to:</p>
+                                    <ul className="list-disc pl-6 mt-2">
+                                        <li>Loss of data.</li>
+                                        <li>Technical issues or disruptions.</li>
+                                        <li>Third-party content accessed through links on the website.</li>
+                                    </ul>
+                                    <p className="mt-2">We do not guarantee that the site will be error-free, uninterrupted, or free from viruses or harmful components.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-6">
+                                <AccordionTrigger>6. Links to Third-Party Websites</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>LimitApp may contain links to third-party websites or services, which are not owned or controlled by us. We have no responsibility for the content, privacy policies, or practices of third-party websites. You access any linked website at your own risk.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-7">
+                                <AccordionTrigger>7. Privacy Policy</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>Your use of the website is also governed by our Privacy Policy, which can be found <a href="/privacy-policy" className="text-primary hover:underline">here</a>. By using LimitApp, you agree to the collection and use of your personal data as outlined in our Privacy Policy.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-8">
+                                <AccordionTrigger>8. Termination of Access</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>We reserve the right to suspend or terminate your access to LimitApp without prior notice if you violate these Terms or engage in any conduct that we consider harmful to the site or its users.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-9">
+                                <AccordionTrigger>9. Governing Law and Jurisdiction</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>These Terms and Conditions are governed by and construed in accordance with the laws of India. Any disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts of Mumbai, India.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-10">
+                                <AccordionTrigger>10. Indemnification</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>You agree to indemnify, defend, and hold harmless LimitApp, its owners, employees, and partners from and against any claims, liabilities, damages, losses, and expenses, including legal fees, arising from your use of the website or violation of these Terms.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-11">
+                                <AccordionTrigger>11. Changes to Terms</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>We may update these Terms and Conditions at any time. We encourage you to review this page periodically for any changes. Continued use of the website following any updates constitutes your acceptance of the revised Terms.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+
+                        <section>
+                            <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
+                            <p>If you have any questions or concerns about these Terms and Conditions, please contact us at:</p>
+                            <p className="mt-2">LimitApp</p>
+                            <p className='mt-1'>Email: <a href="mailto:krishnakantabera09@gmail.com" className="text-primary hover:underline" target="_blank">krishnakantabera09@gmail.com</a></p>
+                        </section>
+                    </div>
+                </ScrollArea>
+            </div>
+        </div>
+    )
+}
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\WorldChat.tsx ====
+import ComingSoon from "@/components/ComingSoon/Coming-soon"
+
+const WorldChat = () => {
+  return (
+    <>
+    <ComingSoon />
+    </>
+  )
+}
+
+export default WorldChat
+
+

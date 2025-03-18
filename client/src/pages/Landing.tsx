@@ -9,7 +9,7 @@ const Landing = () => {
     const navigate = useNavigate(); 
 
     const handleSignupClick = () => {
-        navigate('/check'); 
+        navigate('/home'); 
     };
 
     return (

@@ -106,11 +106,11 @@ const MobileSidebar = () => {
                             Home
                         </a>
                         <a
-                            href="/plot"
+                            href="/tasks"
                             className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                         >
                             <LineChart className="h-5 w-5" />
-                            f(x) Plotter
+                            Tasks
                         </a>
                     </nav>
                 </SheetContent>

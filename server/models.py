@@ -1,63 +1,50 @@
-from pymongo import MongoClient
-import os
-from dotenv import load_dotenv
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
-load_dotenv()
+db = SQLAlchemy()
 
-client = MongoClient(os.getenv('MONGODB_URI'))
-db = client['LimitApp'] 
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    firstname = db.Column(db.String(100), nullable=False)
+    lastname = db.Column(db.String(100), nullable=False)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    bio = db.Column(db.Text, default="")
+    image = db.Column(db.String(300), default="")
+    role = db.Column(db.String(50), default="student")  # или "admin"
+    chat_history = db.Column(db.Text)  # можно хранить JSON как строку
 
-class User:
-    @staticmethod
-    def create_user(data):
-        user_data = {
-            "firstname": data['firstname'],
-            "lastname": data['lastname'],
-            "username": data['username'],
-            "email": data['email'],
-            "password": data['password'],
-            "bio": data.get('bio', ''),
-            "image": data.get('image', '')
-        }
-        db.users.insert_one(user_data)
-        return user_data
+    solutions = db.relationship('Solution', backref='user', lazy=True)
 
-    @staticmethod
-    def validate_user(username, password):
-        user = db.users.find_one({"username": username, "password": password}) 
-        return user
-    
-    @staticmethod
-    def find_by_username(username):
-        return db.users.find_one({"username": username})
-    
-    @staticmethod
-    def find_username_profile(username):
-        return db.users.find_one({"username": username})
-    
-    @staticmethod
-    def save_chat_history(username, chat_history):
-        db.users.update_one(
-            {"username": username},
-            {"$set": {"chat_history": chat_history}}
-        )
+class Task(db.Model):
+    __tablename__ = 'tasks'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    expression = db.Column(db.String(500), nullable=False)  # исходное математическое выражение
+    limitVar = db.Column(db.String(50), nullable=False)      # например "x->∞"
+    expected_limit = db.Column(db.String(100), nullable=False)
 
-    @staticmethod
-    def get_chat_history(username):
-        user = db.users.find_one({"username": username})
-        return user.get("chat_history", []) if user else []
-    
-    @staticmethod
-    def update_user_settings(username, data):
-        update_data = {
-            "firstname": data.get('firstname'),
-            "lastname": data.get('lastname'),
-            "email": data.get('email'),
-            "bio": data.get('bio', ''),
-            "image": data.get('image', '')
-        }
-        db.users.update_one(
-            {"username": username},
-            {"$set": update_data}
-        )
-        return db.users.find_one({"username": username})
+    solutions = db.relationship('Solution', backref='task', lazy=True)
+
+class Solution(db.Model):
+    __tablename__ = 'solutions'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=False)
+    status = db.Column(db.String(50), default="in_progress")  # in_progress, completed, error
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    steps = db.relationship('Step', backref='solution', lazy=True)
+
+class Step(db.Model):
+    __tablename__ = 'steps'
+    id = db.Column(db.Integer, primary_key=True)
+    solution_id = db.Column(db.Integer, db.ForeignKey('solutions.id'), nullable=False)
+    step_number = db.Column(db.Integer, nullable=False)
+    input_expr = db.Column(db.String(500), nullable=False)
+    is_correct = db.Column(db.Boolean, default=True)
+    error_type = db.Column(db.String(100))
+    hint = db.Column(db.String(300))

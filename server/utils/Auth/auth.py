@@ -1,74 +1,61 @@
-from flask import request, jsonify
-from models import User  
-from werkzeug.security import generate_password_hash, check_password_hash 
-from bson import ObjectId 
-import os
-from dotenv import load_dotenv
-import requests
+from flask import Blueprint, request, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
+from models import db, User
+import jwt
+import datetime
+from config import Config
 
-load_dotenv()
+auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
-GITHUB_CLIENT_ID = os.getenv('GITHUB_CLIENT_ID')
-GITHUB_CLIENT_SECRET = os.getenv('GITHUB_CLIENT_SECRET')
-
-def github_callback():
-    data = request.get_json()
-    code = data.get('code')
-
-    # Exchange code for an access token
-    token_url = 'https://github.com/login/oauth/access_token'
-    payload = {
-        'client_id': GITHUB_CLIENT_ID,
-        'client_secret': GITHUB_CLIENT_SECRET,
-        'code': code
-    }
-    headers = {'Accept': 'application/json'}
-    response = requests.post(token_url, json=payload, headers=headers)
-    token_data = response.json()
-
-    access_token = token_data.get('access_token')
-    if access_token:
-        return jsonify({'access_token': access_token}), 200
-    else:
-        return jsonify({'error': 'Failed to obtain access token'}), 400
-
-def signup_handler():
+@auth_bp.route('/signup', methods=['POST'])
+def register():
+    
     data = request.json
-
     required_fields = ['firstname', 'lastname', 'username', 'email', 'password']
     for field in required_fields:
         if field not in data:
             return jsonify({"message": f"{field} is required"}), 400
 
-    hashed_password = generate_password_hash(data['password']) 
-
-    user_data = {
-        "firstname": data['firstname'],
-        "lastname": data['lastname'],
-        "username": data['username'],
-        "email": data['email'],
-        "password": hashed_password
-    }
-    
-    if User.find_by_username(data['username']):
+    if User.query.filter_by(username=data['username']).first():
         return jsonify({"message": "Username already exists"}), 400
 
-    user = User.create_user(user_data)
+    hashed_password = generate_password_hash(data['password'])
+    new_user = User(
+        firstname=data['firstname'],
+        lastname=data['lastname'],
+        username=data['username'],
+        email=data['email'],
+        password=hashed_password,
+        bio=data.get('bio', ''),
+        image=data.get('image', ''),
+        role=data.get('role', 'student')
+    )
+    db.session.add(new_user)
+    db.session.commit()
 
-    user['_id'] = str(user['_id']) 
+    return jsonify({"message": "User registered successfully"}), 201
 
-    return jsonify({"message": "User created", "user": user}), 201
-
-def signin_handler():
+@auth_bp.route('/login', methods=['POST'])
+def login():
     data = request.json
-
     if 'username' not in data or 'password' not in data:
         return jsonify({"message": "Username and password are required"}), 400
 
-    user = User.find_by_username(data['username'])
-    if user and check_password_hash(user['password'], data['password']):
-        user['_id'] = str(user['_id']) 
-        user['chat_history'] = User.get_chat_history(data['username']) 
-        return jsonify({"message": "Signin successful", "user": user}), 200
-
+    user = User.query.filter_by(username=data['username']).first()
+    if user and check_password_hash(user.password, data['password']):
+        token = jwt.encode({
+            'user_id': user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+        }, Config.SECRET_KEY, algorithm="HS256")
+        return jsonify({
+            "message": "Login successful",
+            "token": token,
+            "user": {
+                "username": user.username,
+                "firstname": user.firstname,
+                "lastname": user.lastname,
+                "email": user.email,
+                "role": user.role
+            }
+        }), 200
     return jsonify({"message": "Invalid credentials"}), 401

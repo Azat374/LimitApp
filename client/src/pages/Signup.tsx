@@ -38,7 +38,7 @@ export default function Signup() {
         e.preventDefault();
 
         try {
-            const response = await fetch(`${BACKEND_URL}/signup`, {
+            const response = await fetch(`${BACKEND_URL}/api/auth/signup`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -138,7 +138,7 @@ export default function Signup() {
 
                     <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
                         Have an account?{" "}
-                        <Link to="/signin" className="text-blue-600 hover:underline dark:text-blue-400">
+                        <Link to="/api/auth/signin" className="text-blue-600 hover:underline dark:text-blue-400">
                             Sign in
                         </Link>
                     </p>

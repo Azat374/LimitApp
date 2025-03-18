@@ -1,20 +1,17 @@
-import Chat from "@/components/Chat/Chat"
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { toast } from "sonner";
+import Chat from "@/components/Chat/Chat";
 
 const Home = () => {
-
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername && storedUsername.trim() !== '') {
-      console.log('Username found in localStorage:', storedUsername);
-    }
-    else {
-      navigate('/signin');
-      toast.error('Please login to continue');
+    const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
+    if (!username || !token || username.trim() === "" || token.trim() === "") {
+      toast.error("Please login to continue");
+      navigate("/signin");
     }
   }, [navigate]);
 
@@ -22,7 +19,7 @@ const Home = () => {
     <div>
       <Chat />
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
