@@ -1,6 +1,7 @@
 import {
     Home,
     LineChart,
+    FileUp
 } from "lucide-react"
 
 const Sidebar = () => {
@@ -28,6 +29,14 @@ const Sidebar = () => {
                       >
                           <LineChart className="h-4 w-4" />
                           Tasks
+                      </a>
+
+                      <a
+                          href="/report"
+                          className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                      >
+                          <FileUp className="h-4 w-4" />
+                          Report
                       </a>
                   </nav>
               </div>

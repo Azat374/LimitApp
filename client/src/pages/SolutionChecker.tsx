@@ -5,6 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { MathKeyboard } from "@/components/MathKeyboard/MathKeyboard";
+import MobileSidebar from "../components/MobileSidebar/MobileSidebar"
+import Sidebar from "../components/Sidebar/Sidebar"
 
 // Тип задачи
 interface Problem {
@@ -153,7 +155,11 @@ export default function SolutionChecker() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white p-8 dark:bg-gray-900 dark:to-gray-800">
+<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+      <Sidebar />
+        <div className="flex flex-col">
+            <MobileSidebar />
+            <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white p-8 dark:bg-gray-900 dark:to-gray-800">
       <div className="max-w-4xl mx-auto">
         <Card className="shadow-2xl">
           <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-xl">
@@ -279,6 +285,10 @@ export default function SolutionChecker() {
           </CardContent>
         </Card>
       </div>
+    </div>
+
+        </div>
+        <div id="test-plot" className="hidden"></div>
     </div>
   );
 }
