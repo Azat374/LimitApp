@@ -1,0 +1,4 @@
+[build]
+  dir = "server"                   # Указываем, что бэкенд находится в папке server
+  command = "gunicorn app:app"     # Команда для запуска приложения
+  builder = "python"               # Указываем билд-руководитель
