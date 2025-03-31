@@ -8,7 +8,7 @@ import { MathKeyboard } from "@/components/MathKeyboard/MathKeyboard";
 import MobileSidebar from "../components/MobileSidebar/MobileSidebar";
 import Sidebar from "../components/Sidebar/Sidebar";
 
-// Встроенные функции для API-вызовов
+// Встроенные функции API (без импорта из отдельного модуля)
 const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 async function getTask(taskId: number) {
@@ -30,23 +30,6 @@ async function startSolution(taskId: number) {
   return res.json();
 }
 
-{/*async function checkStep(solutionId: number, stepNumber: number, prevExpr: string, currExpr: string) {
-  const res = await fetch(`${API_URL}/api/solutions/${solutionId}/check_step`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      step_number: stepNumber,
-      prev_expr: prevExpr,
-      curr_expr: currExpr,
-    }),
-  });
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(errorText);
-  }
-  return res.json();
-}*/}
-
 async function finishSolution(solutionId: number) {
   const res = await fetch(`${API_URL}/api/solutions/${solutionId}/finish`, {
     method: "POST",
@@ -64,8 +47,7 @@ interface Problem {
   id: string;
   title: string;
   description: string;
-  limitVar?: string; // Переменная, к которой стремится предел
-  // Убираем отображение ожидаемого предела, студент сам решает задачу
+  limitVar?: string; // Направление предельного перехода, например "x→∞" или "x→0"
 }
 
 // Тип ответа задачи с сервера
@@ -91,7 +73,7 @@ export default function SolutionChecker() {
   const [timeElapsed, setTimeElapsed] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout>();
 
-  // Запуск таймера при монтировании компонента
+  // Запуск таймера
   useEffect(() => {
     timerRef.current = setInterval(() => {
       setTimeElapsed((prev) => prev + 1);
@@ -101,7 +83,7 @@ export default function SolutionChecker() {
     };
   }, []);
 
-  // Форматирование времени в MM:SS
+  // Форматирование времени в формате MM:SS
   const formatTime = (seconds: number): string => {
     const mm = Math.floor(seconds / 60).toString().padStart(2, "0");
     const ss = (seconds % 60).toString().padStart(2, "0");
@@ -113,6 +95,7 @@ export default function SolutionChecker() {
     if (taskId) {
       getTask(Number(taskId))
         .then((data: SingleTaskResponse) => {
+          // Не выводим expected_limit студенту – он должен решить задачу самостоятельно
           setTask({
             id: data.id,
             title: data.title,
@@ -187,7 +170,7 @@ export default function SolutionChecker() {
       toast.error("У вас только 1 шанс!");
       return;
     }
-    // Преобразование символов: например, "×" заменяем на "*", "÷" на "/"
+    // Заменяем символы: "×" -> "*", "÷" -> "/"
     const symbolMap: Record<string, string> = {
       "×": "*",
       "÷": "/",
@@ -195,7 +178,7 @@ export default function SolutionChecker() {
     setStepInput((prev) => prev + (symbolMap[symbol] || symbol));
   };
 
-  // Отправка решения для проверки (один шанс)
+  // Отправка решения для проверки (одна попытка)
   const checkSolution = async () => {
     if (attempted) {
       toast.error("У вас только 1 шанс!");
@@ -219,7 +202,7 @@ export default function SolutionChecker() {
     };
 
     try {
-      const response = await fetch("https://server-1-cxbf.onrender.com/api/solutions/check", {
+      const response = await fetch(`${API_URL}/api/solutions/check`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
@@ -258,11 +241,13 @@ export default function SolutionChecker() {
     setAttempted(true);
     try {
       const res = await finishSolution(solutionId);
-      // Красивое оформление лимита: если результат содержит "infinity", заменяем на символ "∞"
+      // Красивое оформление предела:
+      // Если результат содержит "infinity" (или его вариации), заменяем на символ "∞"
       let message: string = res.message;
       if (message.toLowerCase().includes("infinity") || message.toLowerCase().includes("infty")) {
         message = message.replace(/infinity/gi, "∞");
       }
+      // Здесь можно добавить дополнительное оформление для нуля или других чисел при необходимости
       toast.success(message);
       setCheckResult(message);
     } catch (error) {
@@ -279,17 +264,14 @@ export default function SolutionChecker() {
           <div className="max-w-4xl mx-auto">
             <Card className="shadow-2xl">
               <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-xl">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-xl">
-                  <CardTitle className="text-3xl text-white font-bold">
-                    {task ? task.title : "Загрузка задачи..."}
-                  </CardTitle>
-                  {task && task.limitVar && (
-                    <p className="mt-2 text-white text-lg">
-                      {`Куда устремлен: ${task.limitVar}`}
-                    </p>
-                  )}
-                </CardHeader>
-
+                <CardTitle className="text-3xl text-white font-bold">
+                  {task ? task.title : "Загрузка задачи..."}
+                </CardTitle>
+                {task && task.limitVar && (
+                  <p className="mt-2 text-white text-lg">
+                    {`Куда устремлен: ${task.limitVar}`}
+                  </p>
+                )}
                 <div className="mt-2 text-white">
                   Таймер: <span>{formatTime(timeElapsed)}</span>
                 </div>
@@ -368,7 +350,9 @@ export default function SolutionChecker() {
                             <li key={idx}>
                               <span className="font-semibold">Шаг {err.step}:</span> {err.error}
                               {err.hint && (
-                                <span className="ml-2 text-sm italic text-gray-700">💡 {err.hint}</span>
+                                <span className="ml-2 text-sm italic text-gray-700">
+                                  💡 {err.hint}
+                                </span>
                               )}
                             </li>
                           ))}
