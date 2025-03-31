@@ -30,7 +30,7 @@ async function startSolution(taskId: number) {
   return res.json();
 }
 
-async function checkStep(solutionId: number, stepNumber: number, prevExpr: string, currExpr: string) {
+{/*async function checkStep(solutionId: number, stepNumber: number, prevExpr: string, currExpr: string) {
   const res = await fetch(`${API_URL}/api/solutions/${solutionId}/check_step`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -45,7 +45,7 @@ async function checkStep(solutionId: number, stepNumber: number, prevExpr: strin
     throw new Error(errorText);
   }
   return res.json();
-}
+}*/}
 
 async function finishSolution(solutionId: number) {
   const res = await fetch(`${API_URL}/api/solutions/${solutionId}/finish`, {
