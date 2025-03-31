@@ -7,14 +7,14 @@ const AdminPanel = () => {
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/tasks")
+    fetch("https://server-1-cxbf.onrender.com/api/tasks")
       .then((res) => res.json())
       .then((data) => setTasks(data.tasks))
       .catch(() => toast.error("Ошибка загрузки задач"));
   }, []);
 
   const deleteTask = (taskId: any) => {
-    fetch(`http://localhost:5000/api/tasks/${taskId}`, { method: "DELETE" })
+    fetch(`https://server-1-cxbf.onrender.com/api/tasks/${taskId}`, { method: "DELETE" })
       .then(() => {
         toast.success("Задача удалена");
         setTasks(tasks.filter((task) => task.id !== taskId));

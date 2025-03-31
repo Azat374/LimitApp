@@ -21,7 +21,7 @@ import { ModeToggle } from "@/components/Theme/mode-toggle"
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 const MobileSidebar = () => {
     const [userImage, setUserImage] = useState<string | null>(null);
@@ -114,7 +114,7 @@ const MobileSidebar = () => {
                         </a>
 
                         <a
-                            href="/report"
+                            href="/reports"
                             className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                         >
                             <LineChart className="h-5 w-5" />

@@ -46,7 +46,7 @@ def login():
         token = jwt.encode({
             'user_id': user.id,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-        }, Config.SECRET_KEY, algorithm="HS256")
+        }, Config.DB_SECRET_KEY, algorithm="HS256")
         return jsonify({
             "message": "Login successful",
             "token": token,

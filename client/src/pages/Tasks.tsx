@@ -18,7 +18,7 @@ const Tasks = () => {
   const [selectedCategory, setSelectedCategory] = useState("Все");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/tasks")
+    fetch("https://server-1-cxbf.onrender.com/api/tasks")
       .then((res) => res.json())
       .then((data) => {
         if (data.tasks) {
