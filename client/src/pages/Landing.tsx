@@ -1,9 +1,9 @@
-import { NavbarDemo } from '@/components/Navbar/Navbar'
+//import { Navbar } from '@/components/Navbar/Navbar'
 import { Hero } from '@/components/Hero/Hero'
-import { Features } from '@/components/Features/Features'
+//import { Features } from '@/components/Features/Features'
 import { useNavigate } from 'react-router-dom';
-import Video from '@/components/Video/Video';
-import Footer from '@/components/Footer/Footer';
+//import Video from '@/components/Video/Video';
+//import Footer from '@/components/Footer/Footer';
 
 const Landing = () => {
     const navigate = useNavigate(); 
