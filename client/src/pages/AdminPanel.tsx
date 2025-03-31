@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
 const AdminPanel = () => {
-  const [tasks, setTasks] = useState([]);
+  type Task = {
+    id: number;
+    title: string;
+    // можешь добавить description, если используешь
+  };
+  
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
     fetch("https://server-1-cxbf.onrender.com/api/tasks")
