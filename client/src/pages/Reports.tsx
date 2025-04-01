@@ -28,7 +28,7 @@ const Reports = () => {
 
   useEffect(() => {
     // Загрузка задач
-    fetch("http://127.0.0.1:5000/api/tasks")
+    fetch("https://server-1-cxbf.onrender.com/api/tasks")
       .then((res) => res.json())
       .then((data) => {
         setTasks(data.tasks);
@@ -39,7 +39,7 @@ const Reports = () => {
       });
 
     // Загрузка пользователей (если реализован эндпоинт /api/users)
-    fetch("http://127.0.0.1:5000/api/users")
+    fetch("https://server-1-cxbf.onrender.com/api/users")
       .then((res) => res.json())
       .then((data) => {
         setUsers(data.users);
@@ -61,7 +61,7 @@ const Reports = () => {
     };
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/api/reports/pdf", payload, {
+      const response = await axios.post("https://server-1-cxbf.onrender.com/api/reports/pdf", payload, {
         responseType: "blob",
       });
       // Создаем Blob и генерируем URL для него
