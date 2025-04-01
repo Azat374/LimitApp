@@ -2,7 +2,6 @@
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/Theme/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { Navbar } from "@/components/Navbar/Navbar";
 import Home from "./pages/Home";
 import Landing from "./pages/Landing";
 import Plot from "./pages/Plot";
@@ -20,7 +19,7 @@ import Profile from "@/components/Profile/Profile";
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <Navbar />
+      
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/home" element={<Home />} />
