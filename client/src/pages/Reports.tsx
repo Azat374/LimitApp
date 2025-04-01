@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-
+import MobileSidebar from "../components/MobileSidebar/MobileSidebar"
+import Sidebar from "../components/Sidebar/Sidebar"
 interface Task {
   id: string;
   title: string;
@@ -82,6 +83,10 @@ const Reports = () => {
   };
 
   return (
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+          <Sidebar />
+            <div className="flex flex-col">
+                <MobileSidebar />
     <div className="min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
       <Card className="max-w-3xl mx-auto shadow-lg">
         <CardHeader className="bg-purple-600 text-white p-4 rounded-t-lg">
@@ -129,6 +134,9 @@ const Reports = () => {
           </div>
         </CardContent>
       </Card>
+    </div>
+    <div id="test-plot" className="hidden"></div>
+    </div>
     </div>
   );
 };
