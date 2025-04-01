@@ -2,6 +2,10 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from models import db, Task, Solution, Step
 from checker import check_step
+from utils.Auth.auth import signup_handler, signin_handler
+import cloudinary
+import cloudinary.uploader
+from models import User
 
 app = Flask(__name__)
 app.config.from_object("config.Config")
@@ -11,7 +15,7 @@ CORS(app)
 @app.route("/tasks", methods=["GET"])
 def get_tasks():
     tasks = Task.query.all()
-    return jsonify([{"id": t.id, "title": t.title, "description": t.description} for t in tasks])
+    return jsonify([{"id": t.id, "title": t.title, "description": t.description, "category": t.category} for t in tasks])
 
 @app.route("/tasks/<int:task_id>/start", methods=["POST"])
 def start_solution(task_id):
@@ -45,7 +49,9 @@ def finish_solution(solution_id):
     db.session.commit()
     return jsonify({"message": "Решение завершено!"})
 
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+

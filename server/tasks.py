@@ -14,7 +14,8 @@ def get_tasks():
             "description": t.description,
             "expression": t.expression,
             "limitVar": t.limitVar,
-            "expected_limit": t.expected_limit
+            "expected_value": t.expected_value,
+            "category": t.category
         })
     return jsonify({"tasks": tasks_list}), 200
 
@@ -32,13 +33,13 @@ def get_task(task_id):
         "description": task.description,
         "expression": task.expression,
         "limitVar": task.limitVar,
-        "expected_limit": task.expected_limit
+        "expected_value": task.expected_value
     }), 200
 
 @tasks_bp.route('', methods=['POST'])
 def create_task():
     data = request.json
-    required_fields = ['title', 'expression', 'limitVar', 'expected_limit']
+    required_fields = ['title', 'expression', 'limitVar', 'expected_value']
     for field in required_fields:
         if field not in data:
             return jsonify({"message": f"{field} is required"}), 400
@@ -48,7 +49,7 @@ def create_task():
         description=data.get('description', ''),
         expression=data['expression'],
         limitVar=data['limitVar'],
-        expected_limit=data['expected_limit']
+        expected_value=data['expected_value']
     )
     db.session.add(new_task)
     db.session.commit()
@@ -64,7 +65,7 @@ def update_task(task_id):
     task.description = data.get('description', task.description)
     task.expression = data.get('expression', task.expression)
     task.limitVar = data.get('limitVar', task.limitVar)
-    task.expected_limit = data.get('expected_limit', task.expected_limit)
+    task.expected_value = data.get('expected_value', task.expected_value)
     db.session.commit()
     return jsonify({"message": "Task updated successfully"}), 200
 

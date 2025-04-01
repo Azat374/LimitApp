@@ -34,20 +34,20 @@ def check_algebraic_step(prev_expr_str, curr_expr_str, tolerance=1e-6):
     except Exception as e:
         return {"is_correct": False, "error_type": "parse_error", "hint": f"Ошибка парсинга: {str(e)}"}
 
-def check_limit(last_expr_str, expected_limit_str):
+def check_limit(last_expr_str, expected_value_str):
     try:
         x = sp.Symbol('x')
         last_expr = safe_sympify(last_expr_str)
         computed_limit = sp.limit(last_expr, x, sp.oo)
-        expected_limit = safe_sympify(expected_limit_str)
-        if sp.simplify(computed_limit - expected_limit) == 0:
+        expected_value = safe_sympify(expected_value_str)
+        if sp.simplify(computed_limit - expected_value) == 0:
             return {"is_correct": True, "computed_limit": computed_limit, "error_type": None, "hint": ""}
         else:
             return {
                 "is_correct": False,
                 "computed_limit": computed_limit,
                 "error_type": "limit_error",
-                "hint": f"Ожидаемый предел: {expected_limit}"
+                "hint": f"Ожидаемый предел: {expected_value}"
             }
     except Exception as e:
         return {

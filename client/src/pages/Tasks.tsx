@@ -6,6 +6,9 @@ import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import MobileSidebar from "../components/MobileSidebar/MobileSidebar"
 import Sidebar from "../components/Sidebar/Sidebar"
+import TeX from "@matejmazur/react-katex";
+import "katex/dist/katex.min.css";
+
 interface Task {
   id: string;
   title: string;
@@ -15,14 +18,19 @@ interface Task {
 
 const Tasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("Все");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
-    fetch("https://server-1-cxbf.onrender.com/api/tasks")
+    fetch("http://127.0.0.1:5000/api/tasks")
       .then((res) => res.json())
       .then((data) => {
         if (data.tasks) {
-            setTasks(data.tasks);
+            setTasks(data.tasks.map((task: any) => ({
+              id: task.id,
+              title: task.title,
+              description: task.description,
+              category: task.category,
+            })));
           
         }
       })
@@ -32,9 +40,9 @@ const Tasks = () => {
       });
   }, []);
 
-  const categories = ["Все", "Пределы", "Алгебра", "Дифференциалдық теңдеулер"];
+  const categories = {"all":"Все", "limits":"Пределы", "algebra":"Алгебра", "differential_equations":"Дифференциалдық теңдеулер"};
 
-  const filteredTasks = selectedCategory === "Все" 
+  const filteredTasks = selectedCategory === "all" 
     ? tasks 
     : tasks.filter(task => task.category === selectedCategory);
 
@@ -51,8 +59,8 @@ const Tasks = () => {
                       <SelectValue placeholder="Выберите категорию" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat, idx) => (
-                        <SelectItem key={idx} value={cat}>{cat}</SelectItem>
+                      {Object.entries(categories).map(([key, value]) => (
+                        <SelectItem key={key} value={key}>{value}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -64,7 +72,7 @@ const Tasks = () => {
                         <CardTitle>{task.title}</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p>{task.description}</p>
+                        <p><TeX math={task.description} /></p>
                         <Link to={`/solution/${task.id}`} className="text-blue-600">Решить задачу</Link>
                       </CardContent>
                     </Card>

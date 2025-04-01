@@ -25,7 +25,7 @@ class Task(db.Model):
     description = db.Column(db.Text)
     expression = db.Column(db.String(500), nullable=False)  # исходное математическое выражение
     limitVar = db.Column(db.String(50), nullable=False)      # например "x->∞"
-    expected_limit = db.Column(db.String(100), nullable=False)
+    expected_value = db.Column(db.String(100), nullable=False)
 
     solutions = db.relationship('Solution', backref='task', lazy=True)
 

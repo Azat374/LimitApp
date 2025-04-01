@@ -11,3 +11,4 @@ reportlab
 werkzeug
 PyJWT
 sympy
+latex2sympy2

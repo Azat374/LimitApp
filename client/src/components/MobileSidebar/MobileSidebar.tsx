@@ -21,7 +21,7 @@ import { ModeToggle } from "@/components/Theme/mode-toggle"
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 const MobileSidebar = () => {
     const [userImage, setUserImage] = useState<string | null>(null);
@@ -62,7 +62,6 @@ const MobileSidebar = () => {
                 if (!username) {
                     throw new Error('Username not found in localStorage');
                 }
-
                 const response = await fetch(`${BACKEND_URL}/profile/${username}`, {
                     method: 'GET',
                     headers: {

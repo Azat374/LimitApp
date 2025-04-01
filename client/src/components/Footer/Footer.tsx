@@ -24,7 +24,7 @@ const Footer = () => {
                               <ul className="text-gray-500 dark:text-gray-400 font-medium">
                                   <li className="mb-4">
                                       <a
-                                          href="https://github.com/krishnaKanta2008"
+                                          href="https://github.com/Azat374"
                                           className="hover:underline "
                                       >
                                           Github
@@ -87,7 +87,7 @@ const Footer = () => {
                           </a>
                          
                           <a
-                              href="https://github.com/krishnaKanta2008/LimitApp"
+                              href="https://github.com/Azat374/LimitApp"
                               className="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5"
                           >
                               <svg

@@ -1,4 +1,4 @@
-INSERT INTO tasks (title, expression, limitVar, expected_limit)
+INSERT INTO tasks (title, expression, limitVar, expected_value)
 VALUES
   (
     '8.1. lim ((2x+3)/(5x+7))^(x+1)',

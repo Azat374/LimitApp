@@ -1,5 +1,5 @@
 const CALLBACK_URL = "https://LimitApp-v1.vercel.app";  
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 
 export const loginWithGithub = async () => {

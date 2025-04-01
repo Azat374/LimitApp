@@ -68,3 +68,17 @@
       font-style: normal;
   }
 }
+
+/* Стили для MathQuill в темной теме */
+.dark .mq-editable-field {
+  --mq-cursor: white !important;
+}
+
+.dark .mq-cursor {
+  background-color: white !important;
+  border-color: white !important;
+}
+
+.dark .mq-textarea textarea {
+  caret-color: white !important;
+}

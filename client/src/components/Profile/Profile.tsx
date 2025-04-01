@@ -4,7 +4,7 @@ import MobileSidebar from "@/components/MobileSidebar/MobileSidebar";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 interface User {
   image: string;
@@ -25,7 +25,6 @@ export default function Component() {
         if (!username) {
           throw new Error("Username not found in localStorage");
         }
-
         const response = await fetch(`${BACKEND_URL}/profile/${username}`, {
           method: "GET",
           headers: {

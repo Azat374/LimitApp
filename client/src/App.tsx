@@ -34,7 +34,7 @@ const App = () => {
         <Route path="/docs" element={<Docs />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/worldchat" element={<WorldChat />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/:username" element={<Profile />} />
         <Route path="/admin" element={<div>Admin Panel (to be implemented)</div>} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>

@@ -25,8 +25,8 @@ class Task(db.Model):
     description = db.Column(db.Text)
     expression = db.Column(db.String(500), nullable=False)  # исходное математическое выражение
     limitVar = db.Column(db.String(50), nullable=False)      # например "x->∞"
-    expected_limit = db.Column(db.String(100), nullable=False)
-
+    expected_value = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(50), nullable=False)  # например "алгебра", "геометрия"
     solutions = db.relationship('Solution', backref='task', lazy=True)
 
 class Solution(db.Model):
@@ -48,3 +48,4 @@ class Step(db.Model):
     is_correct = db.Column(db.Boolean, default=True)
     error_type = db.Column(db.String(100))
     hint = db.Column(db.String(300))
+
