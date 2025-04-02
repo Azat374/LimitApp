@@ -272,7 +272,7 @@ export default function IntegralSolutionChecker() {
   };
 
   // Timer effect
-  /*
+  
   useEffect(() => {
     if (timeLeft <= 0 && !attempted) {
       handleSubmitSolution();
@@ -285,7 +285,7 @@ export default function IntegralSolutionChecker() {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [timeLeft, attempted]);
-    */
+    
   // Load task and initialize solution
 
   useEffect(() => {

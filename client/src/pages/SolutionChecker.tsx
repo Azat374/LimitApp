@@ -314,7 +314,7 @@ export default function SolutionChecker() {
   };
 
   // Timer effect
-  /*useEffect(() => {
+  useEffect(() => {
     if (timeLeft <= 0 && !attempted) {
       handleSubmitSolution();
       return;
@@ -327,7 +327,7 @@ export default function SolutionChecker() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [timeLeft, attempted]);*/
+  }, [timeLeft, attempted]);
 
   // Load task and initialize solution
   useEffect(() => {
