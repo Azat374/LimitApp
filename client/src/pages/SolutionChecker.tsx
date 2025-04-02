@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 addStyles();
 // API configuration
-const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 // API service functions
 const api = {
@@ -305,8 +305,7 @@ export default function SolutionChecker() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const mathFieldRef = useRef<any>(null);
-
+  const mathFieldRef = useRef<any>(null);  
   // Time formatting helper
   const formatTime = (seconds: number): string => {
     const mm = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -315,7 +314,7 @@ export default function SolutionChecker() {
   };
 
   // Timer effect
-  useEffect(() => {
+  /*useEffect(() => {
     if (timeLeft <= 0 && !attempted) {
       handleSubmitSolution();
       return;
@@ -328,7 +327,7 @@ export default function SolutionChecker() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [timeLeft, attempted]);
+  }, [timeLeft, attempted]);*/
 
   // Load task and initialize solution
   useEffect(() => {
@@ -363,12 +362,16 @@ export default function SolutionChecker() {
       .map(s => s.trim())
       .filter(s => s !== "");
     
-    // Check if LIMIT is already present
-    const hasLimit = steps.some(s => s.toUpperCase() === "LIMIT");
+    // Check if LIMIT is already present as a marker or in any limit expression
+    const hasLimitMarker = steps.some(s => s.toUpperCase() === "LIMIT");
+    const hasLimitExpression = steps.some(s => 
+      s.includes("\\lim") || s.includes("lim") || s.includes("\\to")
+    );
     
-    // Add LIMIT before the final step if it's not already there and we have at least 2 steps
-    if (steps.length >= 2 && !hasLimit) {
-      steps.splice(steps.length - 1, 0, "LIMIT");
+    // Add LIMIT in the middle if there's no limit marker or expression and we have at least 2 steps
+    if (steps.length >= 2 && !hasLimitMarker && !hasLimitExpression) {
+      const middleIndex = Math.floor(steps.length / 2);
+      steps.splice(middleIndex, 0, "LIMIT");
     }
     
     return steps;

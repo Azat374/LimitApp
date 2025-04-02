@@ -10,6 +10,7 @@ import Signin from "./pages/Signin";
 import Signup from "./pages/Signup";
 import Tasks from "./pages/Tasks";
 import SolutionChecker from "./pages/SolutionChecker";
+import IntegralSolutionChecker from "./pages/IntegralSolutionChecker";
 import Reports from "./pages/Reports";
 import Docs from "./pages/Docs";
 import TermsAndConditions from "./pages/TermsAndConditions";
@@ -29,6 +30,7 @@ const App = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/solution/:taskId" element={<SolutionChecker />} />
+        <Route path="//solution_integral/:taskId" element={<IntegralSolutionChecker />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/docs" element={<Docs />} />
         <Route path="/terms" element={<TermsAndConditions />} />

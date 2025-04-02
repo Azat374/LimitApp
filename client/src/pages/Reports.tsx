@@ -7,6 +7,9 @@ import { toast } from "sonner";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import MobileSidebar from "../components/MobileSidebar/MobileSidebar"
 import Sidebar from "../components/Sidebar/Sidebar"
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+
 interface Task {
   id: string;
   title: string;
@@ -29,7 +32,7 @@ const Reports = () => {
 
   useEffect(() => {
     // Загрузка задач
-    fetch("https://server-1-cxbf.onrender.com/api/tasks")
+    fetch(`${BACKEND_URL}/api/tasks`)
       .then((res) => res.json())
       .then((data) => {
         setTasks(data.tasks);
@@ -40,7 +43,7 @@ const Reports = () => {
       });
 
     // Загрузка пользователей (если реализован эндпоинт /api/users)
-    fetch("https://server-1-cxbf.onrender.com/api/users")
+    fetch(`${BACKEND_URL}/api/users`)
       .then((res) => res.json())
       .then((data) => {
         setUsers(data.users);
@@ -62,7 +65,7 @@ const Reports = () => {
     };
 
     try {
-      const response = await axios.post("https://server-1-cxbf.onrender.com/api/reports/pdf", payload, {
+      const response = await axios.post(`${BACKEND_URL}/api/reports/pdf`, payload, {
         responseType: "blob",
       });
       // Создаем Blob и генерируем URL для него

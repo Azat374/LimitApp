@@ -14,7 +14,7 @@ interface ChatMessage {
     message: string;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5000';
 
 export default function Chat() {
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);

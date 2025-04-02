@@ -9,6 +9,8 @@ import Sidebar from "../components/Sidebar/Sidebar"
 import TeX from "@matejmazur/react-katex";
 import "katex/dist/katex.min.css";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+
 interface Task {
   id: string;
   title: string;
@@ -21,7 +23,7 @@ const Tasks = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
-    fetch("https://server-1-cxbf.onrender.com/api/tasks")
+    fetch(`${BACKEND_URL}/api/tasks`)
       .then((res) => res.json())
       .then((data) => {
         if (data.tasks) {
@@ -40,7 +42,7 @@ const Tasks = () => {
       });
   }, []);
 
-  const categories = {"all":"Все", "limits":"Пределы", "algebra":"Алгебра", "differential_equations":"Дифференциалдық теңдеулер"};
+  const categories = {"all":"Все", "limits":"Пределы", "algebra":"Алгебра", "integral":"Интеграл"};
 
   const filteredTasks = selectedCategory === "all" 
     ? tasks 
@@ -73,7 +75,15 @@ const Tasks = () => {
                       </CardHeader>
                       <CardContent>
                         <p><TeX math={task.description} /></p>
-                        <Link to={`/solution/${task.id}`} className="text-blue-600">Решить задачу</Link>
+                        <Link 
+                          to={task.category === "integral" 
+                            ? `/solution_integral/${task.id}` 
+                            : `/solution/${task.id}`
+                          } 
+                          className="text-blue-600"
+                        >
+                          Решить задачу
+                        </Link>
                       </CardContent>
                     </Card>
                   ))}

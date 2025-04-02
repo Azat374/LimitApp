@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+
 const AdminPanel = () => {
   type Task = {
     id: number;
@@ -13,14 +15,14 @@ const AdminPanel = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
-    fetch("https://server-1-cxbf.onrender.com/api/tasks")
+    fetch(`${BACKEND_URL}/api/tasks`)
       .then((res) => res.json())
       .then((data) => setTasks(data.tasks))
       .catch(() => toast.error("Ошибка загрузки задач"));
   }, []);
 
   const deleteTask = (taskId: any) => {
-    fetch(`https://server-1-cxbf.onrender.com/api/tasks/${taskId}`, { method: "DELETE" })
+    fetch(`${BACKEND_URL}/api/tasks/${taskId}`, { method: "DELETE" })
       .then(() => {
         toast.success("Задача удалена");
         setTasks(tasks.filter((task) => task.id !== taskId));
