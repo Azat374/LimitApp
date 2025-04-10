@@ -9,7 +9,7 @@ import Sidebar from "../components/Sidebar/Sidebar"
 import TeX from "@matejmazur/react-katex";
 import "katex/dist/katex.min.css";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 interface Task {
   id: string;
@@ -76,7 +76,7 @@ const Tasks = () => {
                       <CardContent>
                         <p><TeX math={task.description} /></p>
                         <Link 
-                          to={task.category === "integral" 
+                          to={task.category === "integral_volterra_2" 
                             ? `/solution_integral/${task.id}` 
                             : `/solution/${task.id}`
                           } 

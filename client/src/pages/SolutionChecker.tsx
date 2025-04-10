@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 addStyles();
 // API configuration
-const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 // API service functions
 const api = {
@@ -42,15 +42,35 @@ const api = {
     }
   },
 
-  async checkSolution(taskId: string, steps: string[]) {
+  async checkSolution(taskId: string, steps: string[], category:string) {
     try {
-      const res = await fetch(`${API_URL}/api/solutions/check`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId, steps }),
-      });
-      if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
-      return await res.json();
+      if (category === "limits") {
+        const res = await fetch(`${API_URL}/api/solutions/check/limit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ taskId, steps }),
+        });
+        if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
+        return await res.json();
+      }
+      else if (category === "integral") {
+        const res = await fetch(`${API_URL}/api/solutions/check/integral`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ taskId, steps }),
+        });
+        if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
+        return await res.json();
+      }
+      else if (category === "algebra") {
+        const res = await fetch(`${API_URL}/api/solutions/check/algebra`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ taskId, steps }),
+        });
+        if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
+        return await res.json();
+      }
     } catch (error) {
       console.error("Failed to check solution:", error);
       throw error;
@@ -80,6 +100,7 @@ interface Problem {
   expression?: string;
   limitVar?: string;
   expected_value?: string;
+  category:string;
 }
 
 interface StepError {
@@ -306,6 +327,8 @@ export default function SolutionChecker() {
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const mathFieldRef = useRef<any>(null);  
+  const [timerStarted, setTimerStarted] = useState<boolean>(false);
+
   // Time formatting helper
   const formatTime = (seconds: number): string => {
     const mm = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -313,21 +336,54 @@ export default function SolutionChecker() {
     return `${mm}:${ss}`;
   };
 
+
+  useEffect(() => {
+    if (!taskId) return;
+  
+    const initializeTask = async () => {
+      try {
+        console.log("Loading task with ID:", taskId);
+        const data = await api.getTask(Number(taskId));
+        setTask({ ...data });
+  
+        //const solution = await api.startSolution(Number(taskId));
+        //setSolutionId(solution.solution_id);
+        
+        // Загружаем последнее решение
+        const last = await fetch(`${API_URL}/api/solutions/last/${taskId}`);
+        const lastData = await last.json();
+        console.log("Last solution data:", lastData);
+        setAttempted(true)
+        if (lastData.latex) {
+          setSolutionText(lastData.latex);
+        }
+  
+      } catch (error) {
+        toast.error("Ошибка при загрузке задачи или решения");
+      }
+    };
+  
+    initializeTask();
+  }, [taskId]);
+  
   // Timer effect
   useEffect(() => {
-    if (timeLeft <= 0 && !attempted) {
+    if (!timerStarted || attempted) return;
+  
+    if (timeLeft <= 0) {
       handleSubmitSolution();
       return;
     }
-    
+  
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => prev - 1);
     }, 1000);
-    
+  
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [timeLeft, attempted]);
+  }, [timerStarted, timeLeft, attempted]);
+  
 
   // Load task and initialize solution
   useEffect(() => {
@@ -342,11 +398,12 @@ export default function SolutionChecker() {
           description: data.description,
           expression: data.expression,
           limitVar: data.limitVar,
-          expected_value: data.expected_value
+          expected_value: data.expected_value,
+          category:data.category
         });
         
-        const solution = await api.startSolution(Number(taskId));
-        setSolutionId(solution.solution_id);
+        //const solution = await api.startSolution(Number(taskId));
+        //setSolutionId(solution.solution_id);
       } catch (error) {
         toast.error("Failed to load task");
       }
@@ -479,7 +536,7 @@ export default function SolutionChecker() {
     setParsedSteps(steps);
     
     try {
-      const result = await api.checkSolution(task.id, steps);
+      const result = await api.checkSolution(task.id, steps,task.category);
       
       if (result.success) {
         toast.success(result.message);
@@ -564,9 +621,39 @@ export default function SolutionChecker() {
                     <Clock size={18} />
                     <span className="font-mono">{formatTime(timeLeft)}</span>
                   </div>
+
                 </div>
-                
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700"
+                  disabled={!attempted}
+                  onClick={async () => {
+                    setSolutionText("");
+                    setAttempted(false);
+                    setParsedSteps([]);
+                    setErrors([]);
+                    setCheckResult(null);
+                    setShowPreview(false);
+                    setTimeLeft(300);
+                    setTimerStarted(true); // ⬅️ запускаем таймер
+
+                    try {
+                      const sol = await api.startSolution(Number(taskId));
+                      setSolutionId(sol.solution_id);
+                    } catch (e) {
+                      toast.error("Не удалось начать новое решение");
+                    }
+
+                    toast.info("Вы можете ввести новое решение");
+                  }}
+                >
+                  Решить
+                </Button>
+
               </CardHeader>
+
+            
               
               <CardContent className="p-4 md:p-6 space-y-4 bg-white dark:bg-gray-900">
                 {task ? (
@@ -728,6 +815,7 @@ export default function SolutionChecker() {
                 )}
               </CardContent>
               
+
               <CardFooter className="bg-gray-50 dark:bg-gray-800/50 p-4 flex justify-between">
                 <Button
                   variant="outline"
