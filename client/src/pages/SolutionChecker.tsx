@@ -43,8 +43,10 @@ const api = {
   },
 
   async checkSolution(taskId: string, steps: string[], category:string) {
+    console.log("Checking solution for task ID:", taskId, "with steps:", steps, "and category:", category);
     try {
       if (category === "limits") {
+
         const res = await fetch(`${API_URL}/api/solutions/check/limit`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
