@@ -10,7 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { loginWithGithub } from "@/lib/githubOAuth";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 export default function Signup() {
     const navigate = useNavigate();

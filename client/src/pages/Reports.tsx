@@ -8,7 +8,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import MobileSidebar from "../components/MobileSidebar/MobileSidebar"
 import Sidebar from "../components/Sidebar/Sidebar"
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 interface Task {
   id: string;

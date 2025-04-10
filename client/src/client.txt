@@ -1,11 +1,11 @@
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\.env ====
-VITE_BACKEND_URL=http://127.0.0.1:5000/
+VITE_BACKEND_URL=https://server-1-cxbf.onrender.com/
 
 
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\api.js ====
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = "https://server-1-cxbf.onrender.com";
 
 export const getTasks = async () => {
     return axios.get(`${API_URL}/tasks`);
@@ -230,7 +230,7 @@ createRoot(document.getElementById('root')!).render(
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_BACKEND_URL: "http://127.0.0.1:5000";
+  readonly VITE_BACKEND_URL: "https://server-1-cxbf.onrender.com";
   readonly VITE_GITHUB_CLIENTID: string;
 }
 
@@ -256,7 +256,7 @@ interface ChatMessage {
     message: string;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://server-1-cxbf.onrender.com';
 
 export default function Chat() {
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
@@ -1182,7 +1182,7 @@ import { ModeToggle } from "@/components/Theme/mode-toggle"
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 const MobileSidebar = () => {
     const [userImage, setUserImage] = useState<string | null>(null);
@@ -1372,7 +1372,7 @@ import MobileSidebar from "@/components/MobileSidebar/MobileSidebar";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 interface User {
   image: string;
@@ -3820,7 +3820,7 @@ export { useToast, toast }
 
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\lib\githubOAuth.ts ====
 const CALLBACK_URL = "https://LimitApp-v1.vercel.app";  
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 
 export const loginWithGithub = async () => {
@@ -3880,7 +3880,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 const AdminPanel = () => {
   type Task = {
@@ -3994,7 +3994,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 addStyles();
 // API configuration
-const API_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 // API service functions
 const api = {
@@ -4889,7 +4889,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import MobileSidebar from "../components/MobileSidebar/MobileSidebar"
 import Sidebar from "../components/Sidebar/Sidebar"
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 interface Task {
   id: string;
@@ -5050,7 +5050,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 const formSchema = z.object({
     firstname: z.string().min(2, { message: "First name must be at least 2 characters." }),
@@ -5263,7 +5263,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { loginWithGithub } from "@/lib/githubOAuth";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 export default function Signin() {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -5401,7 +5401,7 @@ import {
 } from "@tabler/icons-react";
 import { loginWithGithub } from "@/lib/githubOAuth";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 export default function Signup() {
     const navigate = useNavigate();
@@ -5594,7 +5594,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 addStyles();
 // API configuration
-const API_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 // API service functions
 const api = {
@@ -6350,7 +6350,7 @@ import Sidebar from "../components/Sidebar/Sidebar"
 import TeX from "@matejmazur/react-katex";
 import "katex/dist/katex.min.css";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 interface Task {
   id: string;

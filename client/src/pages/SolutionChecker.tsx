@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 addStyles();
 // API configuration
-const API_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 // API service functions
 const api = {
