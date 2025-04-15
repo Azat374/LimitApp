@@ -70,7 +70,13 @@ const api = {
       console.error("Failed to finish solution:", error);
       throw error;
     }
+  },
+  async loadLastSolution(taskId: number) {
+    const res = await fetch(`${API_URL}/api/solutions/last-integral/${taskId}`);
+    if (!res.ok) return null;
+    return await res.json();  // { phiSteps: [...], final: "..." }
   }
+  
 };
 
 // Type definitions
@@ -313,15 +319,43 @@ export default function IntegralSolutionChecker() {
           equation: data.equation,
           limitVar: data.limitVar
         });
+  
+        const last = await api.loadLastSolution(Number(taskId));
+        if (last) {
+          const grouped: Record<string, string[]> = {};
+          for (const step of last.phiSteps) {
+            const label = step.label;
+            grouped[label] = step.steps.map((encodedStep: string) => {
+              const val = Number(encodedStep);
+              return (val % 1000).toString();
+            });
+          }
+
+          const parsed = Object.entries(grouped).map(([label, steps]) => ({
+            label,
+            steps,
+          }));
+
+          setPhiSteps(parsed);
+          setFinalSolution(last.final);
+          setAttempted(true);
+
+          // ДОБАВЬТЕ ЭТО:
+          setActivePhiTab(0);  // ⬅️ обязательно после загрузки данных
+        
+
+        }
+
+  
         const solution = await api.startSolution(Number(taskId));
         setSolutionId(solution.solution_id);
       } catch (error) {
-        toast.error("Failed to load task");
+        toast.error("Failed to load task or last solution");
       }
     };
     initializeTask();
-    setPhiSteps
   }, [taskId]);
+  
 
   // Handle input from math keyboard for phi steps
   const handleSymbolClick = (insertStr: string) => {
@@ -592,6 +626,36 @@ export default function IntegralSolutionChecker() {
                     <span className="font-mono">{formatTime(timeLeft)}</span>
                   </div>
                 </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 ml-4"
+                  disabled={!attempted}
+                  onClick={async () => {
+                    setAttempted(false);
+                    setErrors([]);
+                    setCheckResult(null);
+                    setTimeLeft(300);
+                    setIsSubmitting(false);
+
+                    setPhiSteps([{ label: "\\varphi_0(x)", steps: [""] }]);
+                    setActivePhiTab(0); // ✅ сброс активного таба
+
+                    setFinalSolution("");
+
+                    try {
+                      const sol = await api.startSolution(Number(taskId));
+                      setSolutionId(sol.solution_id);
+                    } catch (e) {
+                      toast.error("Не удалось начать новое решение");
+                    }
+
+                    toast.info("Вы можете ввести новое решение");
+                  }}
+                >
+                  Решить
+                </Button>
+
               </CardHeader>
               
               <CardContent className="p-4 md:p-6 space-y-4 bg-white dark:bg-gray-900">
@@ -641,7 +705,7 @@ export default function IntegralSolutionChecker() {
                         
                         {/* Active Phi Content */}
                         <div className="p-4">
-                          {phiSteps[activePhiTab].steps.map((step, stepIndex) => (
+                          {phiSteps[activePhiTab].steps?.map((step, stepIndex) => (
                             <div key={stepIndex} className="mb-4">
                               <div className="flex items-center mb-1">
                                 <span className="text-sm text-gray-500 mr-2">Step {stepIndex + 1}:</span>
