@@ -66,6 +66,12 @@ const Tasks = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  <Link 
+                    to={"/generate_task"} 
+                    className="text-blue-600"
+                  >
+                    Сгенерировать задачу
+                  </Link>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
                   {filteredTasks.map(task => (
@@ -85,6 +91,7 @@ const Tasks = () => {
                           Решить задачу
                         </Link>
                       </CardContent>
+                      
                     </Card>
                   ))}
                 </div>

@@ -16,7 +16,7 @@ import Docs from "./pages/Docs";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import WorldChat from "./pages/WorldChat";
 import Profile from "@/components/Profile/Profile";
-
+import GenerateTask from "./pages/GenerateTask";
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -36,6 +36,7 @@ const App = () => {
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/worldchat" element={<WorldChat />} />
         <Route path="/profile/:username" element={<Profile />} />
+        <Route path="/generate_task" element={<div><GenerateTask/></div>} />
         <Route path="/admin" element={<div>Admin Panel (to be implemented)</div>} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
