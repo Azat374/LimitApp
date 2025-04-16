@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 addStyles();
 // API configuration
-const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 // API service functions
 const api = {
@@ -44,11 +44,12 @@ const api = {
   },
 
   async checkIntegralSolution(taskId: string, phiSteps: PhiStep[], finalSolution: string) {
+    const user = localStorage.getItem("username");
     try {
       const res = await fetch(`${API_URL}/api/solutions/check-integral`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId, phiSteps, finalSolution }),
+        body: JSON.stringify({ taskId, phiSteps, finalSolution, user }),
       });
       if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
       return await res.json();
@@ -900,11 +901,14 @@ export default function IntegralSolutionChecker() {
                 <Button variant="outline" size="sm" onClick={() => navigate("/tasks")}>
                   Back to Tasks
                 </Button>
-                {process.env.NODE_ENV === "development" && (
+                {/*{process.env.NODE_ENV === "development" && (
+                  <Button variant="ghost" size="sm" onClick={resetSolution}>
+                    Reset (Debug)
+                  </Button>*/}
                   <Button variant="ghost" size="sm" onClick={resetSolution}>
                     Reset (Debug)
                   </Button>
-                )}
+                
               </CardFooter>
             </Card>
           </div>

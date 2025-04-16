@@ -10,10 +10,11 @@ import MobileSidebar from "../components/MobileSidebar/MobileSidebar";
 import Sidebar from "../components/Sidebar/Sidebar";
 import { AlertCircle, Clock, CheckCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useProctoring from "@/hooks/useProctoring";
 
 addStyles();
 // API configuration
-const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 // API service functions
 const api = {
@@ -44,13 +45,14 @@ const api = {
 
   async checkSolution(taskId: string, steps: string[], category:string) {
     console.log("Checking solution for task ID:", taskId, "with steps:", steps, "and category:", category);
+    const user = localStorage.getItem("username");
     try {
       if (category === "limits") {
 
         const res = await fetch(`${API_URL}/api/solutions/check/limit`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taskId, steps }),
+          body: JSON.stringify({ taskId, steps, user }),
         });
         if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
         return await res.json();
@@ -59,7 +61,7 @@ const api = {
         const res = await fetch(`${API_URL}/api/solutions/check/integral`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taskId, steps }),
+          body: JSON.stringify({ taskId, steps, user }),
         });
         if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
         return await res.json();
@@ -68,7 +70,7 @@ const api = {
         const res = await fetch(`${API_URL}/api/solutions/check/algebra`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taskId, steps }),
+          body: JSON.stringify({ taskId, steps, user }),
         });
         if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
         return await res.json();
@@ -603,6 +605,12 @@ export default function SolutionChecker() {
     }
   };
 
+  useProctoring(() => {
+    toast.error("Вы покидали вкладку/окно более 3 раз. Решение заблокировано.");
+    setAttempted(true); // блокировка интерфейса
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, 5);
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <Sidebar />
@@ -828,7 +836,7 @@ export default function SolutionChecker() {
                   Back to Tasks
                 </Button>
                 
-                {/* Debug button - remove in production */}
+                {/* Debug button - remove in production 
                 {process.env.NODE_ENV === "development" && (
                   <Button
                     variant="ghost"
@@ -837,7 +845,14 @@ export default function SolutionChecker() {
                   >
                     Reset (Debug)
                   </Button>
-                )}
+                )}*/}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetSolution}
+                  >
+                    Reset (Debug)
+                  </Button>
               </CardFooter>
             </Card>
           </div>

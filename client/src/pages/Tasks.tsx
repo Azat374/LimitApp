@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 //import axios from "axios";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import MobileSidebar from "../components/MobileSidebar/MobileSidebar"
 import Sidebar from "../components/Sidebar/Sidebar"
 import TeX from "@matejmazur/react-katex";
 import "katex/dist/katex.min.css";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 interface Task {
   id: string;
@@ -19,6 +20,7 @@ interface Task {
 }
 
 const Tasks = () => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
 
@@ -66,13 +68,16 @@ const Tasks = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Link 
-                    to={"/generate_task"} 
-                    className="text-blue-600"
+                  <Button
+                  variant="destructive"
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => navigate("/generate_task")}
                   >
-                    Сгенерировать задачу
-                  </Link>
+                      Сгенерировать задачу
+                  </Button>
                 </div>
+                
                 <div className="grid grid-cols-1 gap-4">
                   {filteredTasks.map(task => (
                     <Card key={task.id}>
