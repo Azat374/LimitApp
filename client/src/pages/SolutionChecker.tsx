@@ -745,7 +745,7 @@ export default function SolutionChecker() {
                         </Button>
                         
                         <Button 
-                          onClick={handleSubmitSolution}
+                          onClick={() => {handleSubmitSolution;  finishCurrentSolution}}
                           variant="default"
                           disabled={attempted || isSubmitting}
                           className="bg-blue-600 hover:bg-blue-700"

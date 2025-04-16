@@ -888,7 +888,7 @@ export default function IntegralSolutionChecker() {
                     {/* Action Buttons */}
                     <div className="mt-4 flex flex-wrap gap-2">
                       <Button
-                        onClick={handleSubmitSolution}
+                        onClick={() => {handleSubmitSolution;  finishCurrentSolution}}
                         variant="default"
                         disabled={attempted || isSubmitting}
                         className="bg-blue-600 hover:bg-blue-700"
