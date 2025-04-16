@@ -20,6 +20,10 @@ interface Task {
 interface User {
   id: string;
   username: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: string;
 }
 
 const Reports = () => {
@@ -46,7 +50,7 @@ const Reports = () => {
     fetch(`${BACKEND_URL}/api/users`)
       .then((res) => res.json())
       .then((data) => {
-        setUsers(data.users);
+        setUsers(data);
       })
       .catch((err) => {
         console.error("Ошибка загрузки пользователей", err);
@@ -127,7 +131,7 @@ const Reports = () => {
               </SelectTrigger>
               <SelectContent>
                 {users.map(user => (
-                  <SelectItem key={user.id} value={user.id}>{user.username}</SelectItem>
+                  <SelectItem key={user.id} value={user.id}>{user.firstname + ' ' + user.lastname}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
