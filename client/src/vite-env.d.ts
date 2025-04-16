@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_BACKEND_URL: "http://127.0.0.1:5000";
+  readonly VITE_BACKEND_URL: "https://server-1-cxbf.onrender.com";
   readonly VITE_GITHUB_CLIENTID: string;
 }
 
