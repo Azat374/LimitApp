@@ -43,6 +43,18 @@ const api = {
     }
   },
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Sends a request to check the correctness of an integral solution.
+ *
+ * @param {string} taskId - The unique identifier for the task being solved.
+ * @param {PhiStep[]} phiSteps - An array of steps for each φ-function in the solution.
+ * @param {string} finalSolution - The final LaTeX formatted solution string.
+ * @returns {Promise<object>} The server's response indicating the success or failure of the solution check.
+ * @throws Will throw an error if the request fails or the server returns a non-ok status.
+ */
+
+/*******  fab96f7e-d587-42fb-8899-ea1076b0ac37  *******/
   async checkIntegralSolution(taskId: string, phiSteps: PhiStep[], finalSolution: string) {
     const user = localStorage.getItem("username");
     try {
@@ -883,13 +895,13 @@ export default function IntegralSolutionChecker() {
                       >
                         {isSubmitting ? "Checking..." : "Check Solution"}
                       </Button>
-                      <Button
+                      {/*<Button
                         onClick={finishCurrentSolution}
                         variant="secondary"
                         disabled={attempted || isSubmitting}
                       >
                         Finish Solution
-                      </Button>
+                      </Button>*/}
                     </div>
                   </>
                 ) : (

@@ -753,13 +753,13 @@ export default function SolutionChecker() {
                           {isSubmitting ? "Checking..." : "Check Solution"}
                         </Button>
                         
-                        <Button 
+                        {/*<Button 
                           onClick={finishCurrentSolution}
                           variant="secondary"
                           disabled={attempted || isSubmitting}
                         >
                           Finish Solution
-                        </Button>
+                        </Button>*/}
                       </div>
                     </div>
                     
