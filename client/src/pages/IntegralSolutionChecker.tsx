@@ -298,7 +298,7 @@ export default function IntegralSolutionChecker() {
       return;
     }
     timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((prev) => prev);
     }, 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);

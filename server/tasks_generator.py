@@ -75,9 +75,9 @@ TEMPLATES = {
             }
         },
         {
-            "title": "lim (({par_a}x + {par_b})/({par_c}x + {par_d}))^(x*{par_e})",
-            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x + {par_b}}{{par_c}x + {par_d}} \right)^{x*{par_e}}",
-            "expression": "(({par_a}*x + {par_b})/({par_c}*x + {par_d}))**(x*{par_e})",
+            "title": "lim (({par_a}x + {par_b})/({par_c}x + {par_d}))^(2x+{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x + {par_b}}{{par_c}x + {par_d}} \right)^{2x+{par_e}}",
+            "expression": "(({par_a}*x + {par_b})/({par_c}*x + {par_d}))**(2*x+{par_e})",
             "limitVar": "x→oo",
             "expected_value": "{expected_value}",
             "category": "limits",
@@ -91,9 +91,9 @@ TEMPLATES = {
             }
         },
         {
-            "title": "lim (({par_a}x + {par_b})/({par_c}x - {par_d}))^(x*{par_e})",
-            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x + {par_b}}{{par_c}x - {par_d}} \right)^{x*{par_e}}",
-            "expression": "(({par_a}*x + {par_b})/({par_c}*x - {par_d}))**(x*{par_e})",
+            "title": "lim (({par_a}x + {par_b})/({par_c}x - {par_d}))^(2x-{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x + {par_b}}{{par_c}x - {par_d}} \right)^{2x-{par_e}}",
+            "expression": "(({par_a}*x + {par_b})/({par_c}*x - {par_d}))**(2*x-{par_e})",
             "limitVar": "x→oo",
             "expected_value": "{expected_value}",
             "category": "limits",

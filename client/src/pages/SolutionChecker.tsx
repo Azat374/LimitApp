@@ -372,6 +372,7 @@ export default function SolutionChecker() {
   }, [taskId]);
   
   // Timer effect
+
   useEffect(() => {
     if (!timerStarted || attempted) return;
   
@@ -379,9 +380,9 @@ export default function SolutionChecker() {
       handleSubmitSolution();
       return;
     }
-  
+    
     timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((prev) => prev);
     }, 1000);
   
     return () => {
