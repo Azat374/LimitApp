@@ -14,7 +14,7 @@ import useProctoring from "@/hooks/useProctoring";
 
 addStyles();
 // API configuration
-const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 // API service functions
 const api = {
@@ -185,12 +185,12 @@ const MathKeyboard: React.FC<MathKeyboardProps> = ({
   return (
     <Tabs defaultValue="basic" className="w-full">
       <TabsList className="grid grid-cols-6 mb-2">
-        <TabsTrigger value="basic">Основные</TabsTrigger>
-        <TabsTrigger value="vars">Переменные</TabsTrigger>
-        <TabsTrigger value="greek">Греческие</TabsTrigger>
-        <TabsTrigger value="calc">Исчисление</TabsTrigger>
+        <TabsTrigger value="basic">Негізгі</TabsTrigger>
+        <TabsTrigger value="vars">Айнымалылар</TabsTrigger>
+        <TabsTrigger value="greek"> Грек әріптері</TabsTrigger>
+        <TabsTrigger value="calc">Есептеу</TabsTrigger>
         <TabsTrigger value="trig">Тригонометрия</TabsTrigger>
-        <TabsTrigger value="limits">Пределы</TabsTrigger>
+        <TabsTrigger value="limits">Шектер</TabsTrigger>
       </TabsList>
 
       <TabsContent value="basic" className="grid grid-cols-5 gap-1 sm:grid-cols-10">
@@ -271,7 +271,7 @@ const MathKeyboard: React.FC<MathKeyboardProps> = ({
       <TabsContent value="limits" className="space-y-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm">Переменная:</span>
+            <span className="text-sm">Айнымалы:</span>
             <div className="grid grid-cols-4 gap-1">
               {["x", "y", "z", "t", "n"].map((variable) => (
                 <Button
@@ -288,7 +288,7 @@ const MathKeyboard: React.FC<MathKeyboardProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm">Направление:</span>
+            <span className="text-sm">Бағыт:</span>
             <div className="grid grid-cols-3 gap-1">
               {limitDirections.map((direction) => (
                 <Button
@@ -309,7 +309,7 @@ const MathKeyboard: React.FC<MathKeyboardProps> = ({
             className="mt-2 bg-blue-600 hover:bg-blue-700"
             onClick={handleLimitInsert}
           >
-            Вставить предел
+            Шек енгізу
           </Button>
         </div>
       </TabsContent>
@@ -334,6 +334,11 @@ export default function SolutionChecker() {
   const mathFieldRef = useRef<any>(null);  
   const [timerStarted, setTimerStarted] = useState<boolean>(false);
 
+  useProctoring(() => {
+    toast.error("Сіз 3 реттен көп қойындыны/терезені жаптыңыз. Шешім енгізу бұғатталды.");
+    setAttempted(true);
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, 5);
   // Time formatting helper
   const formatTime = (seconds: number): string => {
     const mm = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -364,7 +369,7 @@ export default function SolutionChecker() {
         }
   
       } catch (error) {
-        toast.error("Ошибка при загрузке задачи или решения");
+        toast.error("Тапсырма немесе шешімді жүктеу қатесі");
       }
     };
   
@@ -606,11 +611,11 @@ export default function SolutionChecker() {
     }
   };
 
-  useProctoring(() => {
-    toast.error("Вы покидали вкладку/окно более 3 раз. Решение заблокировано.");
+/*  useProctoring(() => {
+    toast.error("Сіз 3 реттен көп қойындыны/терезені жаптыңыз. Шешім енгізу бұғатталды.");
     setAttempted(true); // блокировка интерфейса
     if (timerRef.current) clearInterval(timerRef.current);
-  }, 5);
+  }, 5);*/
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -626,7 +631,7 @@ export default function SolutionChecker() {
                     {task ? (
                       <TeX math={String(task.description)} />
                     ) : (
-                      "Loading task..."
+                      "Тапсырма жүктелуде..."
                     )}
                   </CardTitle>
                   <div className="flex items-center space-x-2 bg-white/20 px-3 py-1 rounded-full text-white">
@@ -654,13 +659,13 @@ export default function SolutionChecker() {
                       const sol = await api.startSolution(Number(taskId));
                       setSolutionId(sol.solution_id);
                     } catch (e) {
-                      toast.error("Не удалось начать новое решение");
+                      toast.error("Жаңа шешімді бастау сәтсіз аяқталды");
                     }
 
-                    toast.info("Вы можете ввести новое решение");
+                    toast.info("Жаңа шешімді енгізуге болады");
                   }}
                 >
-                  Решить
+                  Шешуді бастау
                 </Button>
 
               </CardHeader>
@@ -672,7 +677,7 @@ export default function SolutionChecker() {
                   <>
                     <div>
                       <label className="block mb-2 font-semibold text-gray-800 dark:text-gray-200">
-                        Enter your solution (LaTeX):
+                        Шешімді енгізіңіз (LaTeX):
                       </label>
                       <div className="relative mb-4">
                         {/* Input wrapper with proper styling */}
@@ -746,12 +751,12 @@ export default function SolutionChecker() {
                         </Button>
                         
                         <Button 
-                          onClick={() => {handleSubmitSolution;  finishCurrentSolution}}
+                          onClick={() => {handleSubmitSolution();  finishCurrentSolution;}}
                           variant="default"
                           disabled={attempted || isSubmitting}
                           className="bg-blue-600 hover:bg-blue-700"
                         >
-                          {isSubmitting ? "Checking..." : "Check Solution"}
+                          {isSubmitting ? "Тексеру..." : "Шешімді тексеру"}
                         </Button>
                         
                         {/*<Button 
@@ -768,7 +773,7 @@ export default function SolutionChecker() {
                     {showPreview && parsedSteps.length > 0 && (
                       <div className="mt-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800">
                         <h3 className="font-semibold mb-2 text-lg text-gray-800 dark:text-gray-200">
-                          Step Preview:
+                          Қадамдарды алдын ала қарау:
                         </h3>
                         <div className="space-y-2">
                           {parsedSteps.map((step, idx) => (
@@ -792,7 +797,7 @@ export default function SolutionChecker() {
                       <div className="mt-4 p-4 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-md flex items-start space-x-2">
                         <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
                         <div>
-                          <h4 className="font-bold">Success!</h4>
+                          <h4 className="font-bold">Сәтті аяқталды!</h4>
                           <p>{checkResult}</p>
                         </div>
                       </div>
@@ -803,11 +808,11 @@ export default function SolutionChecker() {
                       <div className="mt-4 p-4 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-md flex items-start space-x-2">
                         <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
                         <div>
-                          <h4 className="font-bold mb-2">Errors Found:</h4>
+                          <h4 className="font-bold mb-2">Қателер табылды:</h4>
                           <ul className="space-y-2">
                             {errors.map((err, idx) => (
                               <li key={idx} className="pl-2 border-l-2 border-red-400">
-                                <span className="font-semibold">Step {err.step}:</span> {err.error}
+                                <span className="font-semibold">{err.step}-қадам:</span> {err.error}
                                 {err.hint && (
                                   <p className="mt-1 text-sm italic text-gray-700 dark:text-gray-400">
                                     💡 {err.hint}
@@ -822,7 +827,7 @@ export default function SolutionChecker() {
                   </>
                 ) : (
                   <div className="py-8 text-center text-gray-500">
-                    Loading task information...
+                    Тапсырма туралы мәлімет жүктелуде...
                   </div>
                 )}
               </CardContent>
@@ -834,7 +839,7 @@ export default function SolutionChecker() {
                   size="sm"
                   onClick={() => navigate("/tasks")}
                 >
-                  Back to Tasks
+                  Тапсырмалар тізіміне оралу
                 </Button>
                 
                 {/* Debug button - remove in production 
@@ -852,7 +857,7 @@ export default function SolutionChecker() {
                     size="sm"
                     onClick={resetSolution}
                   >
-                    Reset (Debug)
+                    Қалпына келтіру (тестілеу)
                   </Button>
               </CardFooter>
             </Card>

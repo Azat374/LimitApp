@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://server-1-cxbf.onrender.com";
+const API_URL = "http://127.0.0.1:5000";
 
 export const getTasks = async () => {
     return axios.get(`${API_URL}/tasks`);

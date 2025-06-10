@@ -1,11 +1,11 @@
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\.env ====
-VITE_BACKEND_URL=https://server-1-cxbf.onrender.com/
+VITE_BACKEND_URL=http://127.0.0.1:5000/
 
 
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\api.js ====
 import axios from "axios";
 
-const API_URL = "https://server-1-cxbf.onrender.com";
+const API_URL = "http://127.0.0.1:5000";
 
 export const getTasks = async () => {
     return axios.get(`${API_URL}/tasks`);
@@ -92,7 +92,7 @@ import Docs from "./pages/Docs";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import WorldChat from "./pages/WorldChat";
 import Profile from "@/components/Profile/Profile";
-
+import GenerateTask from "./pages/GenerateTask";
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -112,6 +112,7 @@ const App = () => {
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/worldchat" element={<WorldChat />} />
         <Route path="/profile/:username" element={<Profile />} />
+        <Route path="/generate_task" element={<div><GenerateTask/></div>} />
         <Route path="/admin" element={<div>Admin Panel (to be implemented)</div>} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
@@ -230,7 +231,7 @@ createRoot(document.getElementById('root')!).render(
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_BACKEND_URL: "https://server-1-cxbf.onrender.com";
+  readonly VITE_BACKEND_URL: "http://127.0.0.1:5000";
   readonly VITE_GITHUB_CLIENTID: string;
 }
 
@@ -256,7 +257,7 @@ interface ChatMessage {
     message: string;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://server-1-cxbf.onrender.com';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5000';
 
 export default function Chat() {
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
@@ -892,42 +893,50 @@ export default function GraphPlotter() {
 import { TypewriterEffectSmooth } from "../ui/typewriter-effect";
 
 interface HeroProps {
-    onSignupClick: () => void; // Define the prop type
+    onSignupClick: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({ onSignupClick }) => {
-    
     const words = [
         {
-            text: "it",
+            text: "бұл",
         },
         {
-            text: "is",
+            text: "шешімді",
         },
         {
-            text: "about",
+            text: "дұрыс",
         },
-        
         {
-            text: "understanding.",
+            text: "тексеру",
+        },
+        {
+            text: "жүйесі.",
             className: "text-blue-500 dark:text-blue-500",
         },
     ];
+
     return (
-        <div className="flex flex-col items-center justify-center mt-40 ">
+        <div className="flex flex-col items-center justify-center mt-40">
             <p className="text-neutral-600 dark:text-neutral-200 text-xs sm:text-base text-center w-4/5">
-                Mathematics is not about numbers, equations, computations, or algorithms:
+                Бұл жоба жай ғана математикалық жауапты тексермейді — 
+                ол шешу жолының дұрыстығын автоматты түрде анықтайды:
             </p>
             <TypewriterEffectSmooth words={words} />
             <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 space-x-0 md:space-x-4">
-                
-                <button className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50" onClick={onSignupClick}>
+                <button
+                    className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+                    onClick={onSignupClick}
+                >
                     <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                    <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">Check limit Continue</span></button>
+                    <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
+                        Қолдануды бастау
+                    </span>
+                </button>
             </div>
         </div>
     );
-}
+};
 
 
 
@@ -1159,6 +1168,7 @@ export const MathKeyboard: React.FC<MathKeyboardProps> = ({
 
 
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\MobileSidebar\MobileSidebar.tsx ====
+// MobileSidebar.tsx
 import {
     CircleUser,
     Home,
@@ -1182,12 +1192,11 @@ import { ModeToggle } from "@/components/Theme/mode-toggle"
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 const MobileSidebar = () => {
     const [userImage, setUserImage] = useState<string | null>(null);
     const [isFullscreen, setIsFullscreen] = useState(() => {
-        // Parse the value from localStorage as a boolean
         return localStorage.getItem('isFullscreen') === 'true';
     });
     const navigate = useNavigate();
@@ -1199,7 +1208,6 @@ const MobileSidebar = () => {
             document.exitFullscreen();
         }
         setIsFullscreen(!isFullscreen);
-        // Store the fullscreen state as a string ("true"/"false")
         localStorage.setItem('isFullscreen', String(!isFullscreen));
     };
 
@@ -1250,7 +1258,8 @@ const MobileSidebar = () => {
                 <SheetTrigger asChild>
                     <Button variant="outline" size="icon" className="shrink-0 md:hidden">
                         <Menu className="h-5 w-5" />
-                        <span className="sr-only">Toggle navigation menu</span>
+                        {/* Было "Toggle navigation menu" */}
+                        <span className="sr-only">Навигациялық мәзірді ауыстыру</span>
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="flex flex-col">
@@ -1263,22 +1272,24 @@ const MobileSidebar = () => {
                             className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                         >
                             <Home className="h-5 w-5" />
-                            Home
+                            {/* Было "Home" */}
+                            Басты бет
                         </a>
                         <a
                             href="/tasks"
                             className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                         >
                             <LineChart className="h-5 w-5" />
-                            Tasks
+                            {/* Было "Tasks" */}
+                            Тапсырмалар
                         </a>
-
                         <a
                             href="/reports"
                             className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                         >
                             <LineChart className="h-5 w-5" />
-                            Tasks
+                            {/* Было "Tasks" по ошибке, скорее всего нужно "Reports" */}
+                            Есептер
                         </a>
                     </nav>
                 </SheetContent>
@@ -1298,11 +1309,13 @@ const MobileSidebar = () => {
                         ) : (
                             <CircleUser className="h-5 w-5" />
                         )}
-                        <span className="sr-only">Toggle user menu</span>
+                        {/* Было "Toggle user menu" */}
+                        <span className="sr-only">Пайдаланушы мәзірін ауыстыру</span>
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    {/* Было "My Account" */}
+                    <DropdownMenuLabel>Менің есептік жазбам</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                         onClick={() => {
@@ -1314,11 +1327,18 @@ const MobileSidebar = () => {
                             }
                         }}
                     >
-                        Profile
+                        {/* Было "Profile" */}
+                        Профиль
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/settings')}>
+                        {/* Было "Settings" */}
+                        Баптаулар
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                    <DropdownMenuItem onClick={logout}>
+                        {/* Было "Logout" */}
+                        Шығу
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </header>
@@ -1372,7 +1392,7 @@ import MobileSidebar from "@/components/MobileSidebar/MobileSidebar";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 interface User {
   image: string;
@@ -1468,6 +1488,7 @@ export default function Component() {
 
 
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Sidebar\Sidebar.tsx ====
+// Sidebar.tsx
 import {
     Home,
     LineChart,
@@ -1482,7 +1503,6 @@ const Sidebar = () => {
                   <a href="/" className="flex items-center gap-2 font-semibold">
                       <span className="">LimitApp</span>
                   </a>
-
               </div>
               <div className="flex-1">
                   <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
@@ -1491,22 +1511,24 @@ const Sidebar = () => {
                           className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                       >
                           <Home className="h-4 w-4" />
-                          Home
+                          {/* Было "Home" */}
+                          Басты бет
                       </a>
                       <a
                           href="/tasks"
                           className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                       >
                           <LineChart className="h-4 w-4" />
-                          Tasks
+                          {/* Было "Tasks" */}
+                          Тапсырмалар
                       </a>
-
                       <a
                           href="/reports"
                           className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                       >
                           <FileUp className="h-4 w-4" />
-                          Report
+                          {/* Было "Report" */}
+                          Есеп
                       </a>
                   </nav>
               </div>
@@ -1515,7 +1537,8 @@ const Sidebar = () => {
   )
 }
 
-export default Sidebar
+export default Sidebar;
+
 
 
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\components\Theme\mode-toggle.tsx ====
@@ -3818,9 +3841,56 @@ export { useToast, toast }
 
 
 
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\hooks\useProctoring.ts ====
+import { useEffect, useState } from "react";
+import { toast } from "sonner"; // или любая другая библиотека уведомлений
+
+export default function useProctoring(onViolationLimitReached: () => void, maxViolations = 3) {
+  const [violationCount, setViolationCount] = useState(0);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        incrementViolation("Вы переключились с вкладки");
+      }
+    };
+
+    const handleBlur = () => {
+      incrementViolation("Окно потеряло фокус");
+    };
+
+    const incrementViolation = (reason: string) => {
+      setViolationCount((prev) => {
+        const next = prev + 1;
+
+        if (next < maxViolations) {
+          toast.warning(`Прокторинг: ${reason}. Это нарушение ${next} из ${maxViolations}`);
+        } else if (next === maxViolations) {
+          toast.error(`Прокторинг: ${reason}. Это 3-е нарушение — решение заблокировано.`);
+          onViolationLimitReached();
+        }
+
+        return next;
+      });
+    };
+
+    window.addEventListener("blur", handleBlur);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("blur", handleBlur);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [onViolationLimitReached, maxViolations]);
+
+  return violationCount;
+}
+
+
+
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\lib\githubOAuth.ts ====
 const CALLBACK_URL = "https://LimitApp-v1.vercel.app";  
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 
 export const loginWithGithub = async () => {
@@ -3880,7 +3950,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 const AdminPanel = () => {
   type Task = {
@@ -3948,6 +4018,240 @@ const Docs = () => {
 export default Docs
 
 
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\GenerateTask.tsx ====
+// src/pages/GenerateTask.tsx
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
+import TeX from "@matejmazur/react-katex";
+import "katex/dist/katex.min.css";
+import Sidebar from "../components/Sidebar/Sidebar";
+import MobileSidebar from "../components/MobileSidebar/MobileSidebar";
+
+interface TaskCandidate {
+  title: string;
+  description: string;
+  expression: string;
+  limitVar: string;
+  expected_value: string;
+  category: string;
+}
+
+export default function GenerateTask() {
+  const navigate = useNavigate();
+  const [category, setCategory] = useState<string>("limits");
+  const [taskCount, setTaskCount] = useState<number>(1);
+  const [candidates, setCandidates] = useState<TaskCandidate[]>([]);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+
+  const API_URL = "http://127.0.0.1:5000";
+
+  const handleGenerate = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/tasks_generator`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ category, count: taskCount }),
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        toast.error(err.error || "Тапсырмаларды генерациялау қатесі");
+        return;
+      }
+      const data = await response.json();
+      setCandidates(data.generated_tasks);
+      toast.success("Тапсырмалар сәтті генерациядан өтті");
+      setSelectedIndices([]);
+    } catch (error) {
+      console.error(error);
+      toast.error("Тапсырмаларды генерациялау мүмкін болмады");
+    }
+  };
+
+  const toggleCandidateSelection = (index: number) => {
+    setSelectedIndices((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
+
+  const handleConfirmSelected = async () => {
+    if (selectedIndices.length === 0) {
+      toast.error("Қосылатын тапсырмаларды таңдаңыз");
+      return;
+    }
+    try {
+      const selectedTasks = selectedIndices.map((idx) => candidates[idx]);
+      const responses = await Promise.all(
+        selectedTasks.map((task) =>
+          fetch(`${API_URL}/api/tasks_generator/confirm`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(task),
+          })
+        )
+      );
+      const allOk = responses.every((response) => response.ok);
+      if (!allOk) {
+        toast.error("Кейбір тапсырмаларды қосу кезінде қате шықты");
+      } else {
+        toast.success("Таңдалған тапсырмалар дерекқорға сәтті қосылды");
+      }
+      navigate("/tasks");
+    } catch (error) {
+      console.error(error);
+      toast.error("Тапсырмаларды қосу кезінде қате шықты");
+    }
+  };
+
+  const handleConfirmAll = async () => {
+    if (candidates.length === 0) {
+      toast.error("Қосылатын тапсырмалар жоқ");
+      return;
+    }
+    try {
+      const responses = await Promise.all(
+        candidates.map((task) =>
+          fetch(`${API_URL}/api/tasks_generator/confirm`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(task),
+          })
+        )
+      );
+      const allOk = responses.every((response) => response.ok);
+      if (!allOk) {
+        toast.error("Кейбір тапсырмаларды қосу кезінде қате шықты");
+      } else {
+        toast.success("Барлық тапсырма дерекқорға сәтті қосылды");
+      }
+      navigate("/tasks");
+    } catch (error) {
+      console.error(error);
+      toast.error("Тапсырмаларды қосу кезінде қате шықты");
+    }
+  };
+
+  return (
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+      <Sidebar />
+      <div className="flex flex-col">
+        <MobileSidebar />
+        <div className="min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
+          <div className="p-4">
+            <Card className="max-w-xl mx-auto">
+              <CardHeader>
+                <CardTitle>Тапсырманы үлгі арқылы құру</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Выбор категории */}
+                <div className="mb-4">
+                  <label className="block mb-2 font-semibold">
+                    Санатты таңдаңыз:
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                  >
+                    <option value="limits">Шек</option>
+                    <option value="integral_volterra_2">
+                      Вольтерра 2-ші ретті интегралдық теңдеуі
+                    </option>
+                    <option value="integral">Интеграл</option>
+                    <option value="algebra">Алгебра</option>
+                  </select>
+                </div>
+                {/* Ввод количества задач */}
+                <div className="mb-4">
+                  <label className="block mb-2 font-semibold">
+                    Генерация жасау үшін тапсырмалар саны:
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={taskCount}
+                    onChange={(e) => setTaskCount(Number(e.target.value))}
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+                <div className="flex gap-4 mb-4">
+                  <Button onClick={handleGenerate}>Тапсырмаларды генерациялау</Button>
+                </div>
+
+                {/* Сгенерированные задачи */}
+                {candidates.length > 0 && (
+                  <div className="mt-6 p-4 border rounded-md bg-gray-50">
+                    <h3 className="font-bold mb-2">Генерацияланған тапсырмалар</h3>
+                    <ul>
+                      {candidates.map((candidate, index) => (
+                        <li
+                          key={index}
+                          onClick={() => toggleCandidateSelection(index)}
+                          className={`p-4 border rounded-md mb-2 cursor-pointer ${
+                            selectedIndices.includes(index) ? "bg-blue-100" : "bg-gray-50"
+                          }`}
+                        >
+                          <p>
+                            <strong>Тақырыбы:</strong> {candidate.title}
+                          </p>
+                          <p>
+                            <strong>Сипаттамасы:</strong>{" "}
+                            <TeX math={candidate.description} />
+                          </p>
+                          <p>
+                            <strong>Өрнек:</strong> {candidate.expression}
+                          </p>
+                          {candidate.category === "limits" && (
+                            <p>
+                              <strong>Шектік айнымалы:</strong>{" "}
+                              {candidate.limitVar}
+                            </p>
+                          )}
+                          <p>
+                            <strong>Күтілетін мәні:</strong>{" "}
+                            {candidate.expected_value}
+                          </p>
+                          <p>
+                            <strong>Санаты:</strong> {candidate.category}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-4 flex gap-4">
+                      <Button onClick={handleConfirmSelected}>
+                        Таңдалғандарын қосу
+                      </Button>
+                      <Button variant="outline" onClick={handleConfirmAll}>
+                        Барлығын қосу
+                      </Button>
+                      <Button variant="outline" onClick={() => setCandidates([])}>
+                        Тазалау
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            <div className="mt-6 text-center">
+              <Button variant="outline" onClick={() => navigate("/tasks")}>
+                Тапсырмалар тізіміне оралу
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="test-plot" className="hidden"></div>
+    </div>
+  );
+}
+
+
+
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Home.tsx ====
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -3994,7 +4298,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 addStyles();
 // API configuration
-const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 // API service functions
 const api = {
@@ -4023,12 +4327,14 @@ const api = {
     }
   },
 
+
   async checkIntegralSolution(taskId: string, phiSteps: PhiStep[], finalSolution: string) {
+    const user = localStorage.getItem("username");
     try {
       const res = await fetch(`${API_URL}/api/solutions/check-integral`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId, phiSteps, finalSolution }),
+        body: JSON.stringify({ taskId, phiSteps, finalSolution, user }),
       });
       if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
       return await res.json();
@@ -4050,7 +4356,13 @@ const api = {
       console.error("Failed to finish solution:", error);
       throw error;
     }
+  },
+  async loadLastSolution(taskId: number) {
+    const res = await fetch(`${API_URL}/api/solutions/last-integral/${taskId}`);
+    if (!res.ok) return null;
+    return await res.json();  // { phiSteps: [...], final: "..." }
   }
+  
 };
 
 // Type definitions
@@ -4259,7 +4571,7 @@ export default function IntegralSolutionChecker() {
       return;
     }
     timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((prev) => prev);
     }, 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -4293,15 +4605,43 @@ export default function IntegralSolutionChecker() {
           equation: data.equation,
           limitVar: data.limitVar
         });
+  
+        const last = await api.loadLastSolution(Number(taskId));
+        if (last) {
+          const grouped: Record<string, string[]> = {};
+          for (const step of last.phiSteps) {
+            const label = step.label;
+            grouped[label] = step.steps.map((encodedStep: string) => {
+              const val = Number(encodedStep);
+              return (val % 1000).toString();
+            });
+          }
+
+          const parsed = Object.entries(grouped).map(([label, steps]) => ({
+            label,
+            steps,
+          }));
+
+          setPhiSteps(parsed);
+          setFinalSolution(last.final);
+          setAttempted(true);
+
+          // ДОБАВЬТЕ ЭТО:
+          setActivePhiTab(0);  // ⬅️ обязательно после загрузки данных
+        
+
+        }
+
+  
         const solution = await api.startSolution(Number(taskId));
         setSolutionId(solution.solution_id);
       } catch (error) {
-        toast.error("Failed to load task");
+        toast.error("Failed to load task or last solution");
       }
     };
     initializeTask();
-    setPhiSteps
   }, [taskId]);
+  
 
   // Handle input from math keyboard for phi steps
   const handleSymbolClick = (insertStr: string) => {
@@ -4572,6 +4912,36 @@ export default function IntegralSolutionChecker() {
                     <span className="font-mono">{formatTime(timeLeft)}</span>
                   </div>
                 </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 ml-4"
+                  disabled={!attempted}
+                  onClick={async () => {
+                    setAttempted(false);
+                    setErrors([]);
+                    setCheckResult(null);
+                    setTimeLeft(300);
+                    setIsSubmitting(false);
+
+                    setPhiSteps([{ label: "\\varphi_0(x)", steps: [""] }]);
+                    setActivePhiTab(0); // ✅ сброс активного таба
+
+                    setFinalSolution("");
+
+                    try {
+                      const sol = await api.startSolution(Number(taskId));
+                      setSolutionId(sol.solution_id);
+                    } catch (e) {
+                      toast.error("Не удалось начать новое решение");
+                    }
+
+                    toast.info("Вы можете ввести новое решение");
+                  }}
+                >
+                  Решить
+                </Button>
+
               </CardHeader>
               
               <CardContent className="p-4 md:p-6 space-y-4 bg-white dark:bg-gray-900">
@@ -4621,7 +4991,7 @@ export default function IntegralSolutionChecker() {
                         
                         {/* Active Phi Content */}
                         <div className="p-4">
-                          {phiSteps[activePhiTab].steps.map((step, stepIndex) => (
+                          {phiSteps[activePhiTab]?.steps?.map((step, stepIndex) => (
                             <div key={stepIndex} className="mb-4">
                               <div className="flex items-center mb-1">
                                 <span className="text-sm text-gray-500 mr-2">Step {stepIndex + 1}:</span>
@@ -4791,20 +5161,20 @@ export default function IntegralSolutionChecker() {
                     {/* Action Buttons */}
                     <div className="mt-4 flex flex-wrap gap-2">
                       <Button
-                        onClick={handleSubmitSolution}
+                        onClick={() => {handleSubmitSolution();  finishCurrentSolution();}}
                         variant="default"
                         disabled={attempted || isSubmitting}
                         className="bg-blue-600 hover:bg-blue-700"
                       >
                         {isSubmitting ? "Checking..." : "Check Solution"}
                       </Button>
-                      <Button
+                      {/*<Button
                         onClick={finishCurrentSolution}
                         variant="secondary"
                         disabled={attempted || isSubmitting}
                       >
                         Finish Solution
-                      </Button>
+                      </Button>*/}
                     </div>
                   </>
                 ) : (
@@ -4816,11 +5186,14 @@ export default function IntegralSolutionChecker() {
                 <Button variant="outline" size="sm" onClick={() => navigate("/tasks")}>
                   Back to Tasks
                 </Button>
-                {process.env.NODE_ENV === "development" && (
+                {/*{process.env.NODE_ENV === "development" && (
+                  <Button variant="ghost" size="sm" onClick={resetSolution}>
+                    Reset (Debug)
+                  </Button>*/}
                   <Button variant="ghost" size="sm" onClick={resetSolution}>
                     Reset (Debug)
                   </Button>
-                )}
+                
               </CardFooter>
             </Card>
           </div>
@@ -4886,10 +5259,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import MobileSidebar from "../components/MobileSidebar/MobileSidebar"
-import Sidebar from "../components/Sidebar/Sidebar"
+import MobileSidebar from "../components/MobileSidebar/MobileSidebar";
+import Sidebar from "../components/Sidebar/Sidebar";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 interface Task {
   id: string;
@@ -4901,6 +5274,10 @@ interface Task {
 interface User {
   id: string;
   username: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: string;
 }
 
 const Reports = () => {
@@ -4912,31 +5289,31 @@ const Reports = () => {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    // Загрузка задач
+    // Тапсырмаларды жүктеу
     fetch(`${BACKEND_URL}/api/tasks`)
       .then((res) => res.json())
       .then((data) => {
         setTasks(data.tasks);
       })
       .catch((err) => {
-        console.error("Ошибка загрузки задач", err);
-        toast.error("Не удалось загрузить задачи");
+        console.error("Тапсырмаларды жүктеу қатесі", err);
+        toast.error("Тапсырмаларды жүктеу мүмкін болмады");
       });
 
-    // Загрузка пользователей (если реализован эндпоинт /api/users)
+    // Пайдаланушыларды жүктеу (егер /api/users эндпоинті іске қосылған болса)
     fetch(`${BACKEND_URL}/api/users`)
       .then((res) => res.json())
       .then((data) => {
-        setUsers(data.users);
+        setUsers(data);
       })
       .catch((err) => {
-        console.error("Ошибка загрузки пользователей", err);
+        console.error("Пайдаланушыларды жүктеу қатесі", err);
       });
   }, []);
 
   const downloadReport = async () => {
     if (!startDate || !endDate) {
-      toast.error("Выберите период");
+      toast.error("Мерзімді таңдаңыз");
       return;
     }
     const payload = {
@@ -4949,7 +5326,7 @@ const Reports = () => {
       const response = await axios.post(`${BACKEND_URL}/api/reports/pdf`, payload, {
         responseType: "blob",
       });
-      // Создаем Blob и генерируем URL для него
+      // Blob құрамыз және оған URL жасаймыз
       const blob = new Blob([response.data as BlobPart], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -4957,70 +5334,72 @@ const Reports = () => {
       link.download = "report.pdf";
       document.body.appendChild(link);
       link.click();
-      // Убираем созданный элемент и отзываем URL
+      // Жасалған элементті алып тастап, URL-ды босатамыз
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Ошибка генерации отчёта", err);
-      toast.error("Не удалось сгенерировать отчёт");
+      console.error("Есепті генерациялау қатесі", err);
+      toast.error("Есепті генерациялау мүмкін болмады");
     }
   };
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-          <Sidebar />
-            <div className="flex flex-col">
-                <MobileSidebar />
-    <div className="min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
-      <Card className="max-w-3xl mx-auto shadow-lg">
-        <CardHeader className="bg-purple-600 text-white p-4 rounded-t-lg">
-          <CardTitle>Генерация PDF-отчёта</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label>Начало периода</label>
-              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-            </div>
-            <div>
-              <label>Конец периода</label>
-              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-            </div>
-          </div>
-          <div>
-            <label>Задача</label>
-            <Select value={selectedTask} onValueChange={setSelectedTask}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Все задачи" />
-              </SelectTrigger>
-              <SelectContent>
-                {tasks.map(task => (
-                  <SelectItem key={task.id} value={task.id}>{task.title}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label>Студент</label>
-            <Select value={selectedUser} onValueChange={setSelectedUser}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Все студенты" />
-              </SelectTrigger>
-              <SelectContent>
-                {users.map(user => (
-                  <SelectItem key={user.id} value={user.id}>{user.username}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Button onClick={downloadReport}>Скачать PDF-отчёт</Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-    <div id="test-plot" className="hidden"></div>
-    </div>
+      <Sidebar />
+      <div className="flex flex-col">
+        <MobileSidebar />
+        <div className="min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
+          <Card className="max-w-3xl mx-auto shadow-lg">
+            <CardHeader className="bg-purple-600 text-white p-4 rounded-t-lg">
+              <CardTitle>PDF есепті генерациялау</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label>Басталу мерзімі</label>
+                  <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                </div>
+                <div>
+                  <label>Аяқталу мерзімі</label>
+                  <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label>Тапсырма</label>
+                <Select value={selectedTask} onValueChange={setSelectedTask}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Барлық тапсырмалар" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tasks.map(task => (
+                      <SelectItem key={task.id} value={task.id}>{task.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label>Студент</label>
+                <Select value={selectedUser} onValueChange={setSelectedUser}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Барлық студенттер" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map(user => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.firstname + ' ' + user.lastname}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Button onClick={downloadReport}>PDF есепті жүктеу</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <div id="test-plot" className="hidden"></div>
+      </div>
     </div>
   );
 };
@@ -5050,7 +5429,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 const formSchema = z.object({
     firstname: z.string().min(2, { message: "First name must be at least 2 characters." }),
@@ -5263,7 +5642,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { loginWithGithub } from "@/lib/githubOAuth";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 export default function Signin() {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -5283,19 +5662,19 @@ export default function Signin() {
         localStorage.setItem("username", data.user.username);
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.user.role);
-        toast.success("Signin Successful", {
-          description: `Welcome, ${data.user.username}`,
+        toast.success("Кіру сәтті өтті", {
+          description: `Қош келдіңіз, ${data.user.username}`,
         });
         navigate("/home");
       } else {
         const errorData = await response.json();
-        toast.error("Signin failed", {
-          description: errorData.message || "Signin failed.",
+        toast.error("Кіру сәтсіз аяқталды", {
+          description: errorData.message || "Қайталап көріңіз.",
         });
       }
     } catch (error) {
-      toast.error("Signin failed", {
-        description: `Something went wrong. Please try again. ${error}`,
+      toast.error("Кіру сәтсіз аяқталды", {
+        description: `Қате пайда болды. Қайталап көріңіз. ${error}`,
       });
     }
   };
@@ -5304,14 +5683,14 @@ export default function Signin() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
         <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center mb-4">
-          Welcome to LimitApp | Signin
+          LimitApp-қа қош келдіңіз | Жүйеге кіру
         </h2>
         <form className="my-8" onSubmit={handleSubmit}>
           <LabelInputContainer className="mb-4">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">Пайдаланушы есімі</Label>
             <Input
               id="username"
-              placeholder="Your username"
+              placeholder="Сіздің пайдаланушы есіміңіз"
               type="text"
               value={formData.username}
               onChange={(e) =>
@@ -5320,7 +5699,7 @@ export default function Signin() {
             />
           </LabelInputContainer>
           <LabelInputContainer className="mb-4">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Құпия сөз</Label>
             <Input
               id="password"
               placeholder="••••••••"
@@ -5335,16 +5714,16 @@ export default function Signin() {
             className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
             type="submit"
           >
-            Sign in &rarr;
+            Кіру &rarr;
             <BottomGradient />
           </button>
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
-            Don’t have an account?{" "}
+            Аккаунтыңыз жоқ па?{" "}
             <Link
               to="/signup"
               className="text-blue-600 hover:underline dark:text-blue-400"
             >
-              Sign up
+              Тіркелу
             </Link>
           </p>
           <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
@@ -5390,7 +5769,7 @@ const LabelInputContainer = ({
 
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Signup.tsx ====
 "use client";
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -5401,7 +5780,7 @@ import {
 } from "@tabler/icons-react";
 import { loginWithGithub } from "@/lib/githubOAuth";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 export default function Signup() {
     const navigate = useNavigate();
@@ -5438,23 +5817,23 @@ export default function Signup() {
             });
 
             if (response.ok) {
-                toast.success("Signup successful", {
-                    description: "You can now log in with your new account.",
+                toast.success("Тіркелу сәтті өтті", {
+                    description: "Жаңа аккаунтпен кіруге болады.",
                     action: {
-                        label: "Login",
+                        label: "Кіру",
                         onClick: () => navigate('/login'),
                     },
                 });
                 navigate("/signin");
             } else {
                 const errorData = await response.json();
-                toast.error("Signup failed", {
+                toast.error("Тіркелу сәтсіз аяқталды", {
                     description: errorData.message,
                 });
             }
         } catch (error) {
-            toast.error("Signup failed", {
-                description: `Something went wrong. Please try again. ${error}`,
+            toast.error("Тіркелу сәтсіз аяқталды", {
+                description: `Қате пайда болды. Қайталап көріңіз. ${error}`,
             });
         }
     };
@@ -5463,12 +5842,12 @@ export default function Signup() {
         <div className="min-h-screen flex items-center justify-center">
             <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
                 <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center mb-4">
-                    Welcome to LimitApp | Signup
+                    LimitApp-қа қош келдіңіз | Тіркелу
                 </h2>
                 <form className="my-8" onSubmit={handleSubmit}>
                     <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
                         <LabelInputContainer>
-                            <Label htmlFor="firstname">First name</Label>
+                            <Label htmlFor="firstname">Атыңыз</Label>
                             <Input
                                 id="firstname"
                                 value={formData.firstname}
@@ -5478,7 +5857,7 @@ export default function Signup() {
                             />
                         </LabelInputContainer>
                         <LabelInputContainer>
-                            <Label htmlFor="lastname">Last name</Label>
+                            <Label htmlFor="lastname">Тегіңіз</Label>
                             <Input
                                 id="lastname"
                                 value={formData.lastname}
@@ -5489,7 +5868,7 @@ export default function Signup() {
                         </LabelInputContainer>
                     </div>
                     <LabelInputContainer className="mb-4">
-                        <Label htmlFor="username">Username</Label>
+                        <Label htmlFor="username">Пайдаланушы есімі</Label>
                         <Input
                             id="username"
                             value={formData.username}
@@ -5499,7 +5878,7 @@ export default function Signup() {
                         />
                     </LabelInputContainer>
                     <LabelInputContainer className="mb-4">
-                        <Label htmlFor="email">Email Address</Label>
+                        <Label htmlFor="email">Email мекенжайы</Label>
                         <Input
                             id="email"
                             value={formData.email}
@@ -5509,7 +5888,7 @@ export default function Signup() {
                         />
                     </LabelInputContainer>
                     <LabelInputContainer className="mb-4">
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="password">Құпия сөз</Label>
                         <Input
                             id="password"
                             value={formData.password}
@@ -5523,14 +5902,14 @@ export default function Signup() {
                         className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
                         type="submit"
                     >
-                        Sign up &rarr;
+                        Тіркелу &rarr;
                         <BottomGradient />
                     </button>
 
                     <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
-                        Have an account?{" "}
+                        Аккаунтыңыз бар ма?{" "}
                         <Link to="/api/auth/signin" className="text-blue-600 hover:underline dark:text-blue-400">
-                            Sign in
+                            Кіру
                         </Link>
                     </p>
                     <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
@@ -5591,10 +5970,11 @@ import MobileSidebar from "../components/MobileSidebar/MobileSidebar";
 import Sidebar from "../components/Sidebar/Sidebar";
 import { AlertCircle, Clock, CheckCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useProctoring from "@/hooks/useProctoring";
 
 addStyles();
 // API configuration
-const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 // API service functions
 const api = {
@@ -5623,15 +6003,38 @@ const api = {
     }
   },
 
-  async checkSolution(taskId: string, steps: string[]) {
+  async checkSolution(taskId: string, steps: string[], category:string) {
+    console.log("Checking solution for task ID:", taskId, "with steps:", steps, "and category:", category);
+    const user = localStorage.getItem("username");
     try {
-      const res = await fetch(`${API_URL}/api/solutions/check`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId, steps }),
-      });
-      if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
-      return await res.json();
+      if (category === "limits") {
+
+        const res = await fetch(`${API_URL}/api/solutions/check/limit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ taskId, steps, user }),
+        });
+        if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
+        return await res.json();
+      }
+      else if (category === "integral") {
+        const res = await fetch(`${API_URL}/api/solutions/check/integral`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ taskId, steps, user }),
+        });
+        if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
+        return await res.json();
+      }
+      else if (category === "algebra") {
+        const res = await fetch(`${API_URL}/api/solutions/check/algebra`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ taskId, steps, user }),
+        });
+        if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
+        return await res.json();
+      }
     } catch (error) {
       console.error("Failed to check solution:", error);
       throw error;
@@ -5651,6 +6054,7 @@ const api = {
       throw error;
     }
   }
+
 };
 
 // Type definitions
@@ -5661,6 +6065,7 @@ interface Problem {
   expression?: string;
   limitVar?: string;
   expected_value?: string;
+  category:string;
 }
 
 interface StepError {
@@ -5740,12 +6145,12 @@ const MathKeyboard: React.FC<MathKeyboardProps> = ({
   return (
     <Tabs defaultValue="basic" className="w-full">
       <TabsList className="grid grid-cols-6 mb-2">
-        <TabsTrigger value="basic">Основные</TabsTrigger>
-        <TabsTrigger value="vars">Переменные</TabsTrigger>
-        <TabsTrigger value="greek">Греческие</TabsTrigger>
-        <TabsTrigger value="calc">Исчисление</TabsTrigger>
+        <TabsTrigger value="basic">Негізгі</TabsTrigger>
+        <TabsTrigger value="vars">Айнымалылар</TabsTrigger>
+        <TabsTrigger value="greek"> Грек әріптері</TabsTrigger>
+        <TabsTrigger value="calc">Есептеу</TabsTrigger>
         <TabsTrigger value="trig">Тригонометрия</TabsTrigger>
-        <TabsTrigger value="limits">Пределы</TabsTrigger>
+        <TabsTrigger value="limits">Шектер</TabsTrigger>
       </TabsList>
 
       <TabsContent value="basic" className="grid grid-cols-5 gap-1 sm:grid-cols-10">
@@ -5826,7 +6231,7 @@ const MathKeyboard: React.FC<MathKeyboardProps> = ({
       <TabsContent value="limits" className="space-y-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm">Переменная:</span>
+            <span className="text-sm">Айнымалы:</span>
             <div className="grid grid-cols-4 gap-1">
               {["x", "y", "z", "t", "n"].map((variable) => (
                 <Button
@@ -5843,7 +6248,7 @@ const MathKeyboard: React.FC<MathKeyboardProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm">Направление:</span>
+            <span className="text-sm">Бағыт:</span>
             <div className="grid grid-cols-3 gap-1">
               {limitDirections.map((direction) => (
                 <Button
@@ -5864,7 +6269,7 @@ const MathKeyboard: React.FC<MathKeyboardProps> = ({
             className="mt-2 bg-blue-600 hover:bg-blue-700"
             onClick={handleLimitInsert}
           >
-            Вставить предел
+            Шек енгізу
           </Button>
         </div>
       </TabsContent>
@@ -5887,6 +6292,8 @@ export default function SolutionChecker() {
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const mathFieldRef = useRef<any>(null);  
+  const [timerStarted, setTimerStarted] = useState<boolean>(false);
+
   // Time formatting helper
   const formatTime = (seconds: number): string => {
     const mm = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -5894,21 +6301,55 @@ export default function SolutionChecker() {
     return `${mm}:${ss}`;
   };
 
-  // Timer effect
+
   useEffect(() => {
-    if (timeLeft <= 0 && !attempted) {
+    if (!taskId) return;
+  
+    const initializeTask = async () => {
+      try {
+        console.log("Loading task with ID:", taskId);
+        const data = await api.getTask(Number(taskId));
+        setTask({ ...data });
+  
+        //const solution = await api.startSolution(Number(taskId));
+        //setSolutionId(solution.solution_id);
+        
+        // Загружаем последнее решение
+        const last = await fetch(`${API_URL}/api/solutions/last/${taskId}`);
+        const lastData = await last.json();
+        console.log("Last solution data:", lastData);
+        setAttempted(true)
+        if (lastData.latex) {
+          setSolutionText(lastData.latex);
+        }
+  
+      } catch (error) {
+        toast.error("Тапсырма немесе шешімді жүктеу қатесі");
+      }
+    };
+  
+    initializeTask();
+  }, [taskId]);
+  
+  // Timer effect
+
+  useEffect(() => {
+    if (!timerStarted || attempted) return;
+  
+    if (timeLeft <= 0) {
       handleSubmitSolution();
       return;
     }
     
     timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((prev) => prev);
     }, 1000);
-    
+  
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [timeLeft, attempted]);
+  }, [timerStarted, timeLeft, attempted]);
+  
 
   // Load task and initialize solution
   useEffect(() => {
@@ -5923,11 +6364,12 @@ export default function SolutionChecker() {
           description: data.description,
           expression: data.expression,
           limitVar: data.limitVar,
-          expected_value: data.expected_value
+          expected_value: data.expected_value,
+          category:data.category
         });
         
-        const solution = await api.startSolution(Number(taskId));
-        setSolutionId(solution.solution_id);
+        //const solution = await api.startSolution(Number(taskId));
+        //setSolutionId(solution.solution_id);
       } catch (error) {
         toast.error("Failed to load task");
       }
@@ -6060,7 +6502,7 @@ export default function SolutionChecker() {
     setParsedSteps(steps);
     
     try {
-      const result = await api.checkSolution(task.id, steps);
+      const result = await api.checkSolution(task.id, steps,task.category);
       
       if (result.success) {
         toast.success(result.message);
@@ -6124,6 +6566,12 @@ export default function SolutionChecker() {
     }
   };
 
+  useProctoring(() => {
+    toast.error("Сіз 3 реттен көп қойындыны/терезені жаптыңыз. Шешім енгізу бұғатталды.");
+    setAttempted(true); // блокировка интерфейса
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, 5);
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <Sidebar />
@@ -6138,23 +6586,53 @@ export default function SolutionChecker() {
                     {task ? (
                       <TeX math={String(task.description)} />
                     ) : (
-                      "Loading task..."
+                      "Тапсырма жүктелуде..."
                     )}
                   </CardTitle>
                   <div className="flex items-center space-x-2 bg-white/20 px-3 py-1 rounded-full text-white">
                     <Clock size={18} />
                     <span className="font-mono">{formatTime(timeLeft)}</span>
                   </div>
+
                 </div>
-                
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700"
+                  disabled={!attempted}
+                  onClick={async () => {
+                    setSolutionText("");
+                    setAttempted(false);
+                    setParsedSteps([]);
+                    setErrors([]);
+                    setCheckResult(null);
+                    setShowPreview(false);
+                    setTimeLeft(300);
+                    setTimerStarted(true); // ⬅️ запускаем таймер
+
+                    try {
+                      const sol = await api.startSolution(Number(taskId));
+                      setSolutionId(sol.solution_id);
+                    } catch (e) {
+                      toast.error("Жаңа шешімді бастау сәтсіз аяқталды");
+                    }
+
+                    toast.info("Жаңа шешімді енгізуге болады");
+                  }}
+                >
+                  Шешуді бастау
+                </Button>
+
               </CardHeader>
+
+            
               
               <CardContent className="p-4 md:p-6 space-y-4 bg-white dark:bg-gray-900">
                 {task ? (
                   <>
                     <div>
                       <label className="block mb-2 font-semibold text-gray-800 dark:text-gray-200">
-                        Enter your solution (LaTeX):
+                        Шешімді енгізіңіз (LaTeX):
                       </label>
                       <div className="relative mb-4">
                         {/* Input wrapper with proper styling */}
@@ -6228,21 +6706,21 @@ export default function SolutionChecker() {
                         </Button>
                         
                         <Button 
-                          onClick={handleSubmitSolution}
+                          onClick={() => {handleSubmitSolution();  finishCurrentSolution();}}
                           variant="default"
                           disabled={attempted || isSubmitting}
                           className="bg-blue-600 hover:bg-blue-700"
                         >
-                          {isSubmitting ? "Checking..." : "Check Solution"}
+                          {isSubmitting ? "Тексеру..." : "Шешімді тексеру"}
                         </Button>
                         
-                        <Button 
+                        {/*<Button 
                           onClick={finishCurrentSolution}
                           variant="secondary"
                           disabled={attempted || isSubmitting}
                         >
                           Finish Solution
-                        </Button>
+                        </Button>*/}
                       </div>
                     </div>
                     
@@ -6250,7 +6728,7 @@ export default function SolutionChecker() {
                     {showPreview && parsedSteps.length > 0 && (
                       <div className="mt-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-800">
                         <h3 className="font-semibold mb-2 text-lg text-gray-800 dark:text-gray-200">
-                          Step Preview:
+                          Қадамдарды алдын ала қарау:
                         </h3>
                         <div className="space-y-2">
                           {parsedSteps.map((step, idx) => (
@@ -6274,7 +6752,7 @@ export default function SolutionChecker() {
                       <div className="mt-4 p-4 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-md flex items-start space-x-2">
                         <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
                         <div>
-                          <h4 className="font-bold">Success!</h4>
+                          <h4 className="font-bold">Сәтті аяқталды!</h4>
                           <p>{checkResult}</p>
                         </div>
                       </div>
@@ -6285,11 +6763,11 @@ export default function SolutionChecker() {
                       <div className="mt-4 p-4 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-md flex items-start space-x-2">
                         <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
                         <div>
-                          <h4 className="font-bold mb-2">Errors Found:</h4>
+                          <h4 className="font-bold mb-2">Қателер табылды:</h4>
                           <ul className="space-y-2">
                             {errors.map((err, idx) => (
                               <li key={idx} className="pl-2 border-l-2 border-red-400">
-                                <span className="font-semibold">Step {err.step}:</span> {err.error}
+                                <span className="font-semibold">{err.step}-қадам:</span> {err.error}
                                 {err.hint && (
                                   <p className="mt-1 text-sm italic text-gray-700 dark:text-gray-400">
                                     💡 {err.hint}
@@ -6304,21 +6782,22 @@ export default function SolutionChecker() {
                   </>
                 ) : (
                   <div className="py-8 text-center text-gray-500">
-                    Loading task information...
+                    Тапсырма туралы мәлімет жүктелуде...
                   </div>
                 )}
               </CardContent>
               
+
               <CardFooter className="bg-gray-50 dark:bg-gray-800/50 p-4 flex justify-between">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => navigate("/tasks")}
                 >
-                  Back to Tasks
+                  Тапсырмалар тізіміне оралу
                 </Button>
                 
-                {/* Debug button - remove in production */}
+                {/* Debug button - remove in production 
                 {process.env.NODE_ENV === "development" && (
                   <Button
                     variant="ghost"
@@ -6327,7 +6806,14 @@ export default function SolutionChecker() {
                   >
                     Reset (Debug)
                   </Button>
-                )}
+                )}*/}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetSolution}
+                  >
+                    Қалпына келтіру (тестілеу)
+                  </Button>
               </CardFooter>
             </Card>
           </div>
@@ -6340,17 +6826,17 @@ export default function SolutionChecker() {
 
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\client\src\pages\Tasks.tsx ====
 import { useState, useEffect } from "react";
-//import axios from "axios";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
-import MobileSidebar from "../components/MobileSidebar/MobileSidebar"
-import Sidebar from "../components/Sidebar/Sidebar"
+import { Link, useNavigate } from "react-router-dom";
+import MobileSidebar from "../components/MobileSidebar/MobileSidebar";
+import Sidebar from "../components/Sidebar/Sidebar";
 import TeX from "@matejmazur/react-katex";
 import "katex/dist/katex.min.css";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 interface Task {
   id: string;
@@ -6360,6 +6846,7 @@ interface Task {
 }
 
 const Tasks = () => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
 
@@ -6368,71 +6855,96 @@ const Tasks = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.tasks) {
-            setTasks(data.tasks.map((task: any) => ({
+          setTasks(
+            data.tasks.map((task: any) => ({
               id: task.id,
               title: task.title,
               description: task.description,
               category: task.category,
-            })));
-          
+            }))
+          );
         }
       })
       .catch((err) => {
-        console.error("Ошибка загрузки задач:", err);
-        toast.error("Не удалось загрузить задачи");
+        console.error("Тапсырмаларды жүктеу қатесі:", err);
+        toast.error("Тапсырмаларды жүктеу мүмкін болмады");
       });
   }, []);
 
-  const categories = {"all":"Все", "limits":"Пределы", "algebra":"Алгебра", "integral":"Интеграл"};
+  // Меню категорий: ключ в коде не меняем, но видимый текст меняем на казахский
+  const categories = {
+    all: "Барлығы",
+    limits: "Шектер",
+    algebra: "Алгебра",
+    integral: "Интеграл",
+  };
 
-  const filteredTasks = selectedCategory === "all" 
-    ? tasks 
-    : tasks.filter(task => task.category === selectedCategory);
+  const filteredTasks =
+    selectedCategory === "all"
+      ? tasks
+      : tasks.filter((task) => task.category === selectedCategory);
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <Sidebar />
-        <div className="flex flex-col">
-            <MobileSidebar />
-            <div className="min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
-              <div className="max-w-4xl mx-auto">
-                <div className="mb-4">
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Выберите категорию" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(categories).map(([key, value]) => (
-                        <SelectItem key={key} value={key}>{value}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-1 gap-4">
-                  {filteredTasks.map(task => (
-                    <Card key={task.id}>
-                      <CardHeader>
-                        <CardTitle>{task.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p><TeX math={task.description} /></p>
-                        <Link 
-                          to={task.category === "integral" 
-                            ? `/solution_integral/${task.id}` 
-                            : `/solution/${task.id}`
-                          } 
-                          className="text-blue-600"
-                        >
-                          Решить задачу
-                        </Link>
-                      </CardContent>
-                    </Card>
+      <div className="flex flex-col">
+        <MobileSidebar />
+        <div className="min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-4 flex items-center gap-2">
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Санатты таңдаңыз" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(categories).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>
+                      {value}
+                    </SelectItem>
                   ))}
-                </div>
-              </div>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => navigate("/generate_task")}
+              >
+                Жаңа тапсырма құру
+              </Button>
             </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {filteredTasks.map((task) => (
+                <Card key={task.id}>
+                  <CardHeader>
+                    <CardTitle>{task.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p>
+                      <TeX math={task.description} />
+                    </p>
+                    <Link
+                      to={
+                        task.category === "integral_volterra_2"
+                          ? `/solution_integral/${task.id}`
+                          : `/solution/${task.id}`
+                      }
+                      className="text-blue-600"
+                    >
+                      Тапсырманы шешу
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
-        <div id="test-plot" className="hidden"></div>
+      </div>
+      <div id="test-plot" className="hidden"></div>
     </div>
   );
 };

@@ -110,7 +110,7 @@ def check_algebraic_step(prev_expr_str: str, curr_expr_str: str, tolerance=1e-6)
                             return {
                                 "is_correct": False,
                                 "error_type": "algebraic_error",
-                                "hint": f"(внутри предела) при x={val}: было {prev_val:.6f}, стало {curr_val:.6f}"
+                                "hint": f"(шек ішінде) x={val} кезінде: {prev_val:.6f} -> {curr_val:.6f}"
                             }
                     except Exception as e:
                         logging.warning(f"Inner limit eval error: {e}")
@@ -241,9 +241,14 @@ def check_solution():
         if not res["is_correct"]:
             errors.append({
                 "step": i + 2,
-                "error": "Некорректное преобразование",
-                "hint": res["hint"] or "Проверьте алгебраические преобразования"
+                "error": "Дұрыс емес түрлендіру",
+                "hint": res["hint"] or (
+                    f"{i+2}-қадам: «{algebraic_steps[i]}» өрнегінен «{algebraic_steps[i+1]}» өрнегіне өткенде "
+                    "өрнек дұрыс өзгермеген. Мысалы, көбейткішті шығару, бөлшекті ықшамдау немесе ұқсас мүшелерді "
+                    "қосу операцияларын тексеріңіз."
+                )
             })
+
 
     computed_limit = None
     if found_limit and not errors:
@@ -263,8 +268,11 @@ def check_solution():
             if not limit_res["is_correct"]:
                 errors.append({
                     "step": limit_index + 1,
-                    "error": "Ошибка при вычислении предела",
-                    "hint": limit_res["hint"]
+                    "error": "Шекді есептеуде қате",
+                    "hint": (
+                        f"{limit_index+1}-қадамда шек есептегенде шыққан нәтиже {limit_res['computed_limit']}, "
+                        f"күтілгені {task.expected_value}. Пределді есептеу жолын тексеріңіз."
+                    )
                 })
             # Если после вставленного маркера LIMIT указан окончательный ответ – сравниваем его с вычисленным пределом
             if limit_index < len(steps) - 1 and not errors:
@@ -322,7 +330,7 @@ def check_solution():
 
     return jsonify({
         "success": True,
-        "message": f"Решение верное. Предел = {computed_limit}" if computed_limit is not None else "Решение верное",
+        "message": f"Шешім дұрыс. Шек мәні = {computed_limit}" if computed_limit is not None else "Шешім дұрыс",
         "solution_id": solution.id
     }), 200
 
@@ -394,7 +402,7 @@ def check_integral():
     if errors:
         return jsonify({"success": False, "errors": errors, "solution_id": solution.id}), 200
 
-    return jsonify({"success": True, "message": "Решение верное", "solution_id": solution.id}), 200
+    return jsonify({"success": True, "message": "Шешім дұрыс", "solution_id": solution.id}), 200
 
 
 @solutions_bp.route('/check/algebra', methods=['POST'])
@@ -449,4 +457,4 @@ def check_algebra():
     if errors:
         return jsonify({"success": False, "errors": errors, "solution_id": solution.id}), 200
 
-    return jsonify({"success": True, "message": "Решение верное", "solution_id": solution.id}), 200
+    return jsonify({"success": True, "message": "Шешім дұрыс", "solution_id": solution.id}), 200
