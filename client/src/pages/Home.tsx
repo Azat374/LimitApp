@@ -18,6 +18,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Progress } from "@/components/ui/progress";
+import MobileSidebar from "../components/MobileSidebar/MobileSidebar";
+import Sidebar from "../components/Sidebar/Sidebar";
 
 // Temporary mock data - replace with real data from your API
 const mockData = {
@@ -54,6 +56,11 @@ const Home = () => {
   }, [navigate]);
 
   return (
+
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+      <Sidebar />
+      <div className="flex flex-col">
+        <MobileSidebar />
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">
         Сәлем, {username}! 👋
@@ -132,6 +139,8 @@ const Home = () => {
           </CardContent>
         </Card>
       </div>
+    </div>
+     </div>
     </div>
   );
 };
