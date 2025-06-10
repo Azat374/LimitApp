@@ -118,6 +118,73 @@ def check_integral_solution_final(final_solution_str, var_str="x"):
         logging.error(f"Error checking integral solution: {str(e)}")
         return {"is_correct": False, "error_type": "parse_error", "hint": f"Ошибка проверки: {str(e)}"}
 
+def check_phi_sequence(phi_steps):
+    """
+    Проверяет правильность последовательности φ-функций для интегрального уравнения Вольтерры 2-го рода:
+    φ(x) = x - ∫₀ˣ (x-t)φ(t)dt
+    
+    Для φₙ₊₁ должно выполняться:
+    φₙ₊₁(x) = x - ∫₀ˣ (x-t)φₙ(t)dt
+    """
+    errors = []
+    
+    for i in range(len(phi_steps) - 1):
+        current_phi = phi_steps[i]
+        next_phi = phi_steps[i + 1]
+        
+        if not current_phi["steps"] or not next_phi["steps"]:
+            continue
+            
+        # Берем последний шаг текущей φᵢ и первый шаг следующей φᵢ₊₁
+        current_last_step = current_phi["steps"][-1]
+        next_first_step = next_phi["steps"][0]
+        
+        try:
+            # Преобразуем выражения в sympy
+            current_expr = safe_sympify(current_last_step)
+            next_expr = safe_sympify(next_first_step)
+            
+            # Создаем символы для проверки
+            x, t = sp.symbols('x t')
+            
+            # Формируем ожидаемое выражение для следующей φ
+            # φₙ₊₁(x) = x - ∫₀ˣ (x-t)φₙ(t)dt
+            integral = sp.Integral((x-t) * current_expr.subs(x, t), (t, 0, x))
+            expected_next = x - integral
+            
+            # Упрощаем и сравниваем
+            expected_next = sp.simplify(evaluate_integrals(expected_next))
+            next_expr = sp.simplify(next_expr)
+            
+            if not expected_next.equals(next_expr):
+                # Проверяем численно для нескольких точек
+                test_points = [0.5, 1, 2]
+                for point in test_points:
+                    try:
+                        expected_val = float(expected_next.subs(x, point))
+                        actual_val = float(next_expr.subs(x, point))
+                        if abs(expected_val - actual_val) > 1e-6:
+                            errors.append({
+                                "phiIndex": i + 1,
+                                "stepIndex": 0,
+                                "error": f"Некорректная связь между φ{i} и φ{i+1}",
+                                "hint": f"При x={point}: ожидалось {expected_val:.6f}, получено {actual_val:.6f}. " +
+                                       f"Должно выполняться: φ{i+1}(x) = x - ∫₀ˣ (x-t)φ{i}(t)dt"
+                            })
+                            break
+                    except Exception:
+                        continue
+                
+        except Exception as e:
+            errors.append({
+                "phiIndex": i + 1,
+                "stepIndex": 0,
+                "error": f"Ошибка при проверке связи между φ{i} и φ{i+1}",
+                "hint": str(e)
+            })
+    
+    return errors
+
 @solution_integral_bp.route('/check-integral', methods=['POST'])
 @cross_origin()
 def check_integral_solution():
@@ -176,6 +243,10 @@ def check_integral_solution():
                         "hint": result["hint"] or "Проверьте шаги"
                     })
 
+        # Проверка связей между последовательными φ-функциями
+        phi_sequence_errors = check_phi_sequence(phi_steps)
+        errors.extend(phi_sequence_errors)
+
         # Проверка окончательного ответа по интегральной задаче
         if not final_solution.strip():
             errors.append({
@@ -192,6 +263,7 @@ def check_integral_solution():
                     "hint": integral_check["hint"]
                 })
 
+        # Сохранение в базу данных
         try:
             user_id = User.query.filter_by(username=data.get("user")).first()
             if user_id:
@@ -201,7 +273,7 @@ def check_integral_solution():
 
             solution = Solution(task_id=task.id, user_id=user_id, status="in_progress")
             db.session.add(solution)
-            db.session.flush()  # Для получения solution.id без коммита
+            db.session.flush()
 
             step_counter = 1
             for phi_index, phi in enumerate(phi_steps):
@@ -214,10 +286,20 @@ def check_integral_solution():
                             is_error = True
                             error_hint = error.get("hint", "")
                             break
+
+                    # Convert step to string and handle numeric values
+                    try:
+                        step_value = str(step).strip()
+                        if step_value.replace('.', '', 1).isdigit():  # Check if it's a number (including decimals)
+                            step_value = str(int(float(step_value)))  # Convert to int via float to handle decimals
+                        step_expr = str(phi_index * 1000 + int(step_value)) if step_value.isdigit() else step_value
+                    except (ValueError, TypeError):
+                        step_expr = str(step)
+
                     step_record = Step(
                         solution_id=solution.id,
                         step_number=step_counter,
-                        input_expr=str(phi_index*1000+step),
+                        input_expr=step_expr,
                         is_correct=not is_error,
                         error_type="error" if is_error else None,
                         hint=error_hint
@@ -236,8 +318,20 @@ def check_integral_solution():
             )
             db.session.add(final_step_record)
 
-            solution.status = "completed" if not errors else "error"
+            solution.status = "error" if errors else "completed"
             db.session.commit()
+
+            if errors:
+                return jsonify({
+                    "success": False,
+                    "errors": errors,
+                    "message": "Қателер табылды"
+                }), 200
+
+            return jsonify({
+                "success": True,
+                "message": "Шешім дұрыс!"
+            }), 200
 
         except Exception as db_error:
             db.session.rollback()
@@ -245,19 +339,8 @@ def check_integral_solution():
             return jsonify({
                 "success": False,
                 "message": "Database error occurred",
-                "errors": errors
+                "errors": []
             }), 500
-
-        if errors:
-            return jsonify({
-                "success": False,
-                "errors": errors
-            }), 200
-        
-        return jsonify({
-            "success": True,
-            "message": "Решение верное!"
-        }), 200
 
     except Exception as e:
         logging.error(f"Error in check_integral_solution: {str(e)}")
@@ -302,3 +385,30 @@ def get_last_integral_solution(task_id):
     phiSteps = [{"label": label, "steps": steps} for label, steps in phi_dict.items()]
 
     return jsonify({"phiSteps": phiSteps, "final": final})
+
+@solution_integral_bp.route('/<int:solution_id>/finish', methods=['POST', 'OPTIONS'])
+@cross_origin()
+def finish_solution(solution_id):
+    if request.method == 'OPTIONS':
+        return '', 200
+        
+    try:
+        solution = Solution.query.get(solution_id)
+        if not solution:
+            return jsonify({"success": False, "message": "Solution not found"}), 404
+            
+        solution.status = "completed"
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": "Solution marked as completed"
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error finishing solution: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "Failed to finish solution",
+            "error": str(e)
+        }), 500

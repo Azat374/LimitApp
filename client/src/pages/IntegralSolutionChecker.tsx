@@ -49,7 +49,11 @@ const api = {
     try {
       const res = await fetch(`${API_URL}/api/solutions/check-integral`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        credentials: 'include',
         body: JSON.stringify({ taskId, phiSteps, finalSolution, user }),
       });
       if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
@@ -64,7 +68,11 @@ const api = {
     try {
       const res = await fetch(`${API_URL}/api/solutions/${solutionId}/finish`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        credentials: 'include',
       });
       if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
       return await res.json();
@@ -271,6 +279,7 @@ export default function IntegralSolutionChecker() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const mathFieldRef = useRef<any>(null);
   const finalSolutionFieldRef = useRef<any>(null);
+  const [score, setScore] = useState<number | null>(null);
 
   // Time formatting helper
   const formatTime = (seconds: number): string => {
@@ -557,8 +566,14 @@ export default function IntegralSolutionChecker() {
         toast.success(result.message);
         setCheckResult(result.message);
         setErrors([]);
+        setScore(100); // Set perfect score for correct solution
       } else {
         setErrors(result.errors || []);
+        // Calculate score based on number of errors and total steps
+        const totalSteps = phiSteps.reduce((acc, phi) => acc + phi.steps.length, 0) + 1; // +1 for final solution
+        const numErrors = result.errors?.length || 0;
+        const calculatedScore = Math.max(0, Math.round((totalSteps - numErrors) / totalSteps * 100));
+        setScore(calculatedScore);
         toast.error("Errors found in your solution");
       }
     } catch (error) {
@@ -582,9 +597,10 @@ export default function IntegralSolutionChecker() {
     setAttempted(true);
     setIsSubmitting(true);
     try {
+      /*
       const result = await api.finishSolution(solutionId);
       toast.success(result.message);
-      setCheckResult(result.message);
+      setCheckResult(result.message);*/
     } catch (error) {
       toast.error("Failed to finish solution");
     } finally {
@@ -655,7 +671,7 @@ export default function IntegralSolutionChecker() {
                     toast.info("Вы можете ввести новое решение");
                   }}
                 >
-                  Решить
+                  Шешуді бастау
                 </Button>
 
               </CardHeader>
@@ -839,12 +855,38 @@ export default function IntegralSolutionChecker() {
                       </div>
                     </div>
                     
+                    {/* Score Display */}
+                    {score !== null && (
+                      <div className={`mt-4 p-4 rounded-md flex items-start space-x-2 ${
+                        score === 100 
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                          : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                      }`}>
+                        <div className="w-full">
+                          <div className="flex justify-between items-center mb-2">
+                            <h4 className="font-bold">Бағалау:</h4>
+                            <span className="text-lg font-bold">{score}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                            <div 
+                              className={`h-2.5 rounded-full ${
+                                score === 100 
+                                  ? 'bg-green-600 dark:bg-green-500' 
+                                  : 'bg-yellow-500 dark:bg-yellow-400'
+                              }`}
+                              style={{ width: `${score}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     {/* Results and Errors */}
                     {checkResult && (
                       <div className="mt-4 p-4 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-md flex items-start space-x-2">
                         <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
                         <div>
-                          <h4 className="font-bold">Сәтті!</h4>
+                          <h4 className="font-bold">Сәтті аяқталды!</h4>
                           <p>{checkResult}</p>
                         </div>
                       </div>

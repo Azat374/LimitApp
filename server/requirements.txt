@@ -12,3 +12,4 @@ werkzeug
 PyJWT
 sympy
 latex2sympy2
+matplotlib

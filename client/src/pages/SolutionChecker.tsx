@@ -33,9 +33,16 @@ const api = {
     try {
       const res = await fetch(`${API_URL}/api/tasks/${taskId}/start`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        credentials: 'include' as RequestCredentials
       });
-      if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`HTTP error! status: ${res.status}, message: ${errorText}`);
+      }
       return await res.json();
     } catch (error) {
       console.error("Failed to start solution:", error);
@@ -47,34 +54,34 @@ const api = {
     console.log("Checking solution for task ID:", taskId, "with steps:", steps, "and category:", category);
     const user = localStorage.getItem("username");
     try {
-      if (category === "limits") {
+      const requestOptions = {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        credentials: 'include' as RequestCredentials,
+        body: JSON.stringify({ taskId, steps, user })
+      };
 
-        const res = await fetch(`${API_URL}/api/solutions/check/limit`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taskId, steps, user }),
-        });
-        if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
-        return await res.json();
+      let response;
+      if (category === "limits") {
+        response = await fetch(`${API_URL}/api/solutions/check/limit`, requestOptions);
+      } else if (category === "integral") {
+        response = await fetch(`${API_URL}/api/solutions/check/integral`, requestOptions);
+      } else if (category === "algebra") {
+        response = await fetch(`${API_URL}/api/solutions/check/algebra`, requestOptions);
+      } else {
+        throw new Error("Unknown category");
       }
-      else if (category === "integral") {
-        const res = await fetch(`${API_URL}/api/solutions/check/integral`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taskId, steps, user }),
-        });
-        if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
-        return await res.json();
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
-      else if (category === "algebra") {
-        const res = await fetch(`${API_URL}/api/solutions/check/algebra`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taskId, steps, user }),
-        });
-        if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
-        return await res.json();
-      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error("Failed to check solution:", error);
       throw error;
@@ -85,9 +92,16 @@ const api = {
     try {
       const res = await fetch(`${API_URL}/api/solutions/${solutionId}/finish`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        credentials: 'include' as RequestCredentials
       });
-      if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`HTTP error! status: ${res.status}, message: ${errorText}`);
+      }
       return await res.json();
     } catch (error) {
       console.error("Failed to finish solution:", error);
@@ -333,6 +347,7 @@ export default function SolutionChecker() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const mathFieldRef = useRef<any>(null);  
   const [timerStarted, setTimerStarted] = useState<boolean>(false);
+  const [score, setScore] = useState<number | null>(null);
 
   useProctoring(() => {
     toast.error("Сіз 3 реттен көп қойындыны/терезені жаптыңыз. Шешім енгізу бұғатталды.");
@@ -547,14 +562,20 @@ export default function SolutionChecker() {
     setParsedSteps(steps);
     
     try {
-      const result = await api.checkSolution(task.id, steps,task.category);
+      const result = await api.checkSolution(task.id, steps, task.category);
       
       if (result.success) {
         toast.success(result.message);
         setCheckResult(result.message);
         setErrors([]);
+        setScore(100); // Set perfect score for correct solution
       } else {
         setErrors(result.errors || []);
+        // Calculate score based on number of errors
+        const totalSteps = steps.length;
+        const numErrors = result.errors?.length || 0;
+        const calculatedScore = Math.max(0, Math.round((totalSteps - numErrors) / totalSteps * 100));
+        setScore(calculatedScore);
         toast.error("Errors found in your solution");
       }
     } catch (error) {
@@ -788,6 +809,32 @@ export default function SolutionChecker() {
                               )}
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Score Display */}
+                    {score !== null && (
+                      <div className={`mt-4 p-4 rounded-md flex items-start space-x-2 ${
+                        score === 100 
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                          : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                      }`}>
+                        <div className="w-full">
+                          <div className="flex justify-between items-center mb-2">
+                            <h4 className="font-bold">Бағалау:</h4>
+                            <span className="text-lg font-bold">{score}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                            <div 
+                              className={`h-2.5 rounded-full ${
+                                score === 100 
+                                  ? 'bg-green-600 dark:bg-green-500' 
+                                  : 'bg-yellow-500 dark:bg-yellow-400'
+                              }`}
+                              style={{ width: `${score}%` }}
+                            ></div>
+                          </div>
                         </div>
                       </div>
                     )}

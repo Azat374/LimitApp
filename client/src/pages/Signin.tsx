@@ -3,10 +3,10 @@ import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { IconBrandGithub } from "@tabler/icons-react";
+//import { IconBrandGithub } from "@tabler/icons-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { loginWithGithub } from "@/lib/githubOAuth";
+//import { loginWithGithub } from "@/lib/githubOAuth";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 

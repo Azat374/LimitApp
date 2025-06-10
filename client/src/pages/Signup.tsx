@@ -5,10 +5,8 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
-import {
-    IconBrandGithub
-} from "@tabler/icons-react";
-import { loginWithGithub } from "@/lib/githubOAuth";
+//import { IconBrandGithub } from "@tabler/icons-react";
+//import { loginWithGithub } from "@/lib/githubOAuth";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
