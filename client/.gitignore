@@ -22,6 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# ignore compiled Python files and local DB
 __pycache__/
 *.pyc
+server/database/math_checker.db
 
