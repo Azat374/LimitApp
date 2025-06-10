@@ -1,3 +1,4 @@
+// MobileSidebar.tsx
 import {
     CircleUser,
     Home,
@@ -21,12 +22,11 @@ import { ModeToggle } from "@/components/Theme/mode-toggle"
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 const MobileSidebar = () => {
     const [userImage, setUserImage] = useState<string | null>(null);
     const [isFullscreen, setIsFullscreen] = useState(() => {
-        // Parse the value from localStorage as a boolean
         return localStorage.getItem('isFullscreen') === 'true';
     });
     const navigate = useNavigate();
@@ -38,7 +38,6 @@ const MobileSidebar = () => {
             document.exitFullscreen();
         }
         setIsFullscreen(!isFullscreen);
-        // Store the fullscreen state as a string ("true"/"false")
         localStorage.setItem('isFullscreen', String(!isFullscreen));
     };
 
@@ -89,7 +88,8 @@ const MobileSidebar = () => {
                 <SheetTrigger asChild>
                     <Button variant="outline" size="icon" className="shrink-0 md:hidden">
                         <Menu className="h-5 w-5" />
-                        <span className="sr-only">Toggle navigation menu</span>
+                        {/* Было "Toggle navigation menu" */}
+                        <span className="sr-only">Навигациялық мәзірді ауыстыру</span>
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="flex flex-col">
@@ -102,22 +102,24 @@ const MobileSidebar = () => {
                             className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                         >
                             <Home className="h-5 w-5" />
-                            Home
+                            {/* Было "Home" */}
+                            Басты бет
                         </a>
                         <a
                             href="/tasks"
                             className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                         >
                             <LineChart className="h-5 w-5" />
-                            Tasks
+                            {/* Было "Tasks" */}
+                            Тапсырмалар
                         </a>
-
                         <a
                             href="/reports"
                             className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                         >
                             <LineChart className="h-5 w-5" />
-                            Tasks
+                            {/* Было "Tasks" по ошибке, скорее всего нужно "Reports" */}
+                            Есептер
                         </a>
                     </nav>
                 </SheetContent>
@@ -137,11 +139,13 @@ const MobileSidebar = () => {
                         ) : (
                             <CircleUser className="h-5 w-5" />
                         )}
-                        <span className="sr-only">Toggle user menu</span>
+                        {/* Было "Toggle user menu" */}
+                        <span className="sr-only">Пайдаланушы мәзірін ауыстыру</span>
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    {/* Было "My Account" */}
+                    <DropdownMenuLabel>Менің есептік жазбам</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                         onClick={() => {
@@ -153,11 +157,18 @@ const MobileSidebar = () => {
                             }
                         }}
                     >
-                        Profile
+                        {/* Было "Profile" */}
+                        Профиль
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/settings')}>
+                        {/* Было "Settings" */}
+                        Баптаулар
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                    <DropdownMenuItem onClick={logout}>
+                        {/* Было "Logout" */}
+                        Шығу
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </header>

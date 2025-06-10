@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 addStyles();
 // API configuration
-const API_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 // API service functions
 const api = {
@@ -43,18 +43,7 @@ const api = {
     }
   },
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Sends a request to check the correctness of an integral solution.
- *
- * @param {string} taskId - The unique identifier for the task being solved.
- * @param {PhiStep[]} phiSteps - An array of steps for each φ-function in the solution.
- * @param {string} finalSolution - The final LaTeX formatted solution string.
- * @returns {Promise<object>} The server's response indicating the success or failure of the solution check.
- * @throws Will throw an error if the request fails or the server returns a non-ok status.
- */
 
-/*******  fab96f7e-d587-42fb-8899-ea1076b0ac37  *******/
   async checkIntegralSolution(taskId: string, phiSteps: PhiStep[], finalSolution: string) {
     const user = localStorage.getItem("username");
     try {
@@ -161,11 +150,11 @@ const MathKeyboard: React.FC<MathKeyboardProps> = ({ onSymbolClick}) => {
   return (
     <Tabs defaultValue="basic" className="w-full">
       <TabsList className="grid grid-cols-6 mb-2">
-        <TabsTrigger value="basic">Основные</TabsTrigger>
-        <TabsTrigger value="vars">Переменные</TabsTrigger>
-        <TabsTrigger value="greek">Греческие</TabsTrigger>
-        <TabsTrigger value="calc">Исчисление</TabsTrigger>
-        <TabsTrigger value="integral">Интегралы</TabsTrigger>
+        <TabsTrigger value="basic">Негізгі</TabsTrigger>
+        <TabsTrigger value="vars">Айнымалылар</TabsTrigger>
+        <TabsTrigger value="greek">Грек</TabsTrigger>
+        <TabsTrigger value="calc">Есептеу</TabsTrigger>
+        <TabsTrigger value="integral">Интегралдар</TabsTrigger>
         <TabsTrigger value="trig">Тригонометрия</TabsTrigger>
       </TabsList>
 
@@ -676,7 +665,7 @@ export default function IntegralSolutionChecker() {
                   <>
                     {task.equation && (
                       <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                        <h3 className="text-lg font-medium mb-2 text-blue-800 dark:text-blue-300">Equation:</h3>
+                        <h3 className="text-lg font-medium mb-2 text-blue-800 dark:text-blue-300">Теңдеу:</h3>
                         <div className="flex justify-center">
                           <TeX math={task.equation} />
                         </div>
@@ -686,7 +675,7 @@ export default function IntegralSolutionChecker() {
                     {/* Phi Steps Tabs */}
                     <div className="mb-4">
                       <div className="flex items-center mb-2">
-                        <h3 className="text-lg font-medium">Phi Functions:</h3>
+                        <h3 className="text-lg font-medium">Фи функциялары:</h3>
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -694,7 +683,7 @@ export default function IntegralSolutionChecker() {
                           onClick={addPhiStep}
                           disabled={attempted}
                         >
-                          <Plus size={16} className="mr-1" /> Add φ
+                          <Plus size={16} className="mr-1" /> φ қосу
                         </Button>
                       </div>
                       
@@ -718,10 +707,10 @@ export default function IntegralSolutionChecker() {
                         
                         {/* Active Phi Content */}
                         <div className="p-4">
-                          {phiSteps[activePhiTab].steps?.map((step, stepIndex) => (
+                          {phiSteps[activePhiTab]?.steps?.map((step, stepIndex) => (
                             <div key={stepIndex} className="mb-4">
                               <div className="flex items-center mb-1">
-                                <span className="text-sm text-gray-500 mr-2">Step {stepIndex + 1}:</span>
+                                <span className="text-sm text-gray-500 mr-2">Қадам {stepIndex + 1}:</span>
                                 {phiSteps[activePhiTab].steps.length > 1 && (
                                   <Button
                                     variant="ghost"
@@ -791,7 +780,7 @@ export default function IntegralSolutionChecker() {
                             disabled={attempted}
                             className="mt-2"
                           >
-                            <Plus size={16} className="mr-1" /> Add Step
+                            <Plus size={16} className="mr-1" /> Қадам қосу
                           </Button>
                         </div>
                       </div>
@@ -802,7 +791,7 @@ export default function IntegralSolutionChecker() {
                     
                     {/* Final Solution */}
                     <div className="mt-6">
-                      <h3 className="text-lg font-medium mb-2">Final Solution φ(x):</h3>
+                      <h3 className="text-lg font-medium mb-2">Соңғы шешім φ(x):</h3>
                       <div className={`w-full border rounded-md overflow-hidden ${attempted ? 'bg-gray-100 dark:bg-gray-800' : 'bg-white dark:bg-gray-950'}`}>
                         <EditableMathField
                           latex={finalSolution}
@@ -855,7 +844,7 @@ export default function IntegralSolutionChecker() {
                       <div className="mt-4 p-4 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-md flex items-start space-x-2">
                         <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
                         <div>
-                          <h4 className="font-bold">Success!</h4>
+                          <h4 className="font-bold">Сәтті!</h4>
                           <p>{checkResult}</p>
                         </div>
                       </div>
@@ -864,7 +853,7 @@ export default function IntegralSolutionChecker() {
                       <div className="mt-4 p-4 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-md flex items-start space-x-2">
                         <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
                         <div>
-                          <h4 className="font-bold mb-2">Errors Found:</h4>
+                          <h4 className="font-bold mb-2">Қателер табылды:</h4>
                           <ul className="space-y-2">
                             {errors.map((err, idx) => (
                               <li key={idx} className="pl-2 border-l-2 border-red-400">
@@ -888,12 +877,12 @@ export default function IntegralSolutionChecker() {
                     {/* Action Buttons */}
                     <div className="mt-4 flex flex-wrap gap-2">
                       <Button
-                        onClick={() => {handleSubmitSolution;  finishCurrentSolution}}
+                        onClick={() => {handleSubmitSolution();  finishCurrentSolution();}}
                         variant="default"
                         disabled={attempted || isSubmitting}
                         className="bg-blue-600 hover:bg-blue-700"
                       >
-                        {isSubmitting ? "Checking..." : "Check Solution"}
+                        {isSubmitting ? "Тексерілуде..." : "Шешімді тексеру"}
                       </Button>
                       {/*<Button
                         onClick={finishCurrentSolution}
@@ -911,14 +900,14 @@ export default function IntegralSolutionChecker() {
               
               <CardFooter className="bg-gray-50 dark:bg-gray-800/50 p-4 flex justify-between">
                 <Button variant="outline" size="sm" onClick={() => navigate("/tasks")}>
-                  Back to Tasks
+                  Тапсырмаларға оралу
                 </Button>
                 {/*{process.env.NODE_ENV === "development" && (
                   <Button variant="ghost" size="sm" onClick={resetSolution}>
                     Reset (Debug)
                   </Button>*/}
                   <Button variant="ghost" size="sm" onClick={resetSolution}>
-                    Reset (Debug)
+                    Қайта бастау (Debug)
                   </Button>
                 
               </CardFooter>

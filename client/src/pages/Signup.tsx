@@ -1,5 +1,5 @@
 "use client";
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { loginWithGithub } from "@/lib/githubOAuth";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 export default function Signup() {
     const navigate = useNavigate();
@@ -47,23 +47,23 @@ export default function Signup() {
             });
 
             if (response.ok) {
-                toast.success("Signup successful", {
-                    description: "You can now log in with your new account.",
+                toast.success("Тіркелу сәтті өтті", {
+                    description: "Жаңа аккаунтпен кіруге болады.",
                     action: {
-                        label: "Login",
+                        label: "Кіру",
                         onClick: () => navigate('/login'),
                     },
                 });
                 navigate("/signin");
             } else {
                 const errorData = await response.json();
-                toast.error("Signup failed", {
+                toast.error("Тіркелу сәтсіз аяқталды", {
                     description: errorData.message,
                 });
             }
         } catch (error) {
-            toast.error("Signup failed", {
-                description: `Something went wrong. Please try again. ${error}`,
+            toast.error("Тіркелу сәтсіз аяқталды", {
+                description: `Қате пайда болды. Қайталап көріңіз. ${error}`,
             });
         }
     };
@@ -72,12 +72,12 @@ export default function Signup() {
         <div className="min-h-screen flex items-center justify-center">
             <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
                 <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center mb-4">
-                    Welcome to LimitApp | Signup
+                    LimitApp-қа қош келдіңіз | Тіркелу
                 </h2>
                 <form className="my-8" onSubmit={handleSubmit}>
                     <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
                         <LabelInputContainer>
-                            <Label htmlFor="firstname">First name</Label>
+                            <Label htmlFor="firstname">Атыңыз</Label>
                             <Input
                                 id="firstname"
                                 value={formData.firstname}
@@ -87,7 +87,7 @@ export default function Signup() {
                             />
                         </LabelInputContainer>
                         <LabelInputContainer>
-                            <Label htmlFor="lastname">Last name</Label>
+                            <Label htmlFor="lastname">Тегіңіз</Label>
                             <Input
                                 id="lastname"
                                 value={formData.lastname}
@@ -98,7 +98,7 @@ export default function Signup() {
                         </LabelInputContainer>
                     </div>
                     <LabelInputContainer className="mb-4">
-                        <Label htmlFor="username">Username</Label>
+                        <Label htmlFor="username">Пайдаланушы есімі</Label>
                         <Input
                             id="username"
                             value={formData.username}
@@ -108,7 +108,7 @@ export default function Signup() {
                         />
                     </LabelInputContainer>
                     <LabelInputContainer className="mb-4">
-                        <Label htmlFor="email">Email Address</Label>
+                        <Label htmlFor="email">Email мекенжайы</Label>
                         <Input
                             id="email"
                             value={formData.email}
@@ -118,7 +118,7 @@ export default function Signup() {
                         />
                     </LabelInputContainer>
                     <LabelInputContainer className="mb-4">
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="password">Құпия сөз</Label>
                         <Input
                             id="password"
                             value={formData.password}
@@ -132,18 +132,18 @@ export default function Signup() {
                         className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
                         type="submit"
                     >
-                        Sign up &rarr;
+                        Тіркелу &rarr;
                         <BottomGradient />
                     </button>
 
                     <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
-                        Have an account?{" "}
-                        <Link to="/api/auth/signin" className="text-blue-600 hover:underline dark:text-blue-400">
-                            Sign in
+                        Аккаунтыңыз бар ма?{" "}
+                        <Link to="/signin" className="text-blue-600 hover:underline dark:text-blue-400">
+                            Кіру
                         </Link>
                     </p>
                     <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
-
+                    {/*
                     <div className="flex flex-col space-y-4">
                         <button
                             className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
@@ -155,7 +155,7 @@ export default function Signup() {
                             </span>
                             <BottomGradient />
                         </button>
-                    </div>
+                    </div>*/}
                 </form>
             </div>
         </div>

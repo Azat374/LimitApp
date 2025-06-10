@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { loginWithGithub } from "@/lib/githubOAuth";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
 
 export default function Signin() {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -28,19 +28,19 @@ export default function Signin() {
         localStorage.setItem("username", data.user.username);
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.user.role);
-        toast.success("Signin Successful", {
-          description: `Welcome, ${data.user.username}`,
+        toast.success("Кіру сәтті өтті", {
+          description: `Қош келдіңіз, ${data.user.username}`,
         });
         navigate("/home");
       } else {
         const errorData = await response.json();
-        toast.error("Signin failed", {
-          description: errorData.message || "Signin failed.",
+        toast.error("Кіру сәтсіз аяқталды", {
+          description: errorData.message || "Қайталап көріңіз.",
         });
       }
     } catch (error) {
-      toast.error("Signin failed", {
-        description: `Something went wrong. Please try again. ${error}`,
+      toast.error("Кіру сәтсіз аяқталды", {
+        description: `Қате пайда болды. Қайталап көріңіз. ${error}`,
       });
     }
   };
@@ -49,14 +49,14 @@ export default function Signin() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
         <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center mb-4">
-          Welcome to LimitApp | Signin
+          LimitApp-қа қош келдіңіз | Жүйеге кіру
         </h2>
         <form className="my-8" onSubmit={handleSubmit}>
           <LabelInputContainer className="mb-4">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">Пайдаланушы есімі</Label>
             <Input
               id="username"
-              placeholder="Your username"
+              placeholder="Сіздің пайдаланушы есіміңіз"
               type="text"
               value={formData.username}
               onChange={(e) =>
@@ -65,7 +65,7 @@ export default function Signin() {
             />
           </LabelInputContainer>
           <LabelInputContainer className="mb-4">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Құпия сөз</Label>
             <Input
               id="password"
               placeholder="••••••••"
@@ -80,19 +80,20 @@ export default function Signin() {
             className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
             type="submit"
           >
-            Sign in &rarr;
+            Кіру &rarr;
             <BottomGradient />
           </button>
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
-            Don’t have an account?{" "}
+            Аккаунтыңыз жоқ па?{" "}
             <Link
               to="/signup"
               className="text-blue-600 hover:underline dark:text-blue-400"
             >
-              Sign up
+              Тіркелу
             </Link>
           </p>
           <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
+          {/*
           <div className="flex flex-col space-y-4">
             <button
               className="relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
@@ -105,7 +106,7 @@ export default function Signin() {
               </span>
               <BottomGradient />
             </button>
-          </div>
+          </div>*/}
         </form>
       </div>
     </div>

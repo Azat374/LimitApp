@@ -6,6 +6,10 @@ SQLALCHEMY_DATABASE_URI = "sqlite:///" + DATABASE_PATH
 
 
 
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\server\ai_check.py ====
+
+
+
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\server\app.py ====
 from flask import Flask
 from flask_cors import CORS
@@ -17,6 +21,8 @@ from solutions import solutions_bp
 from reports import reports_bp
 from profile import profile_bp
 from solution_integral import solution_integral_bp
+from tasks_generator import tasks_generator_bp
+from users import users_bp
 app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
@@ -30,6 +36,8 @@ app.register_blueprint(solutions_bp)
 app.register_blueprint(reports_bp)
 app.register_blueprint(profile_bp)
 app.register_blueprint(solution_integral_bp)
+app.register_blueprint(tasks_generator_bp)
+app.register_blueprint(users_bp)
 # Создание таблиц, если их ещё нет
 with app.app_context():
     db.create_all()
@@ -470,338 +478,465 @@ if __name__ == "__main__":
 
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\server\solutions.py ====
 import logging
-import sympy as sp
-from flask import Blueprint, request, jsonify
-from models import db, Task, Solution, Step
-from flask_cors import cross_origin
-from latex2sympy2 import latex2sympy  # Импортируем функцию для преобразования LaTeX в Sympy
-from typing import List
 import re
+import sympy as sp
+from flask import Blueprint, request, jsonify, send_file
+from flask_cors import cross_origin
+from latex2sympy2 import latex2sympy  # Преобразование LaTeX в sympy-выражения
+from models import db, Task, Solution, Step, User
+from typing import List
+
 solutions_bp = Blueprint('solutions', __name__, url_prefix='/api/solutions')
 
 def normalize_steps_with_limit(steps: List[str]) -> List[str]:
+    # Если хотя бы один шаг содержит "\lim", возвращаем шаги без изменений
+    if any("\\lim" in step for step in steps):
+        logging.info("Обнаружен шаг с '\\lim', не добавляем маркер LIMIT.")
+        return steps
+    else:
+        # Если отсутствуют лимитные шаги и шагов >= 2, вставляем маркер "LIMIT" (например, в середину)
+        if len(steps) >= 2:
+            mid = len(steps) // 2
+            steps.insert(mid, "LIMIT")
+        return steps
+
+def safe_sympify(expr: str):
     """
-    Обрабатывает список шагов, удаляет \\lim_{...} из LaTeX выражений и добавляет маркер LIMIT перед шагом,
-    в котором лимит больше не указан.
+    Преобразует LaTeX-выражение в символьное выражение sympy.
+    Если выражение начинается с '\\lim', то выделяет компоненты и вычисляет предел явно.
+    Теперь не удаляет фрагменты, а пытается корректно разобрать выражение даже если в конце есть комментарий.
     """
-    normalized = []
-    inserted_limit = False
-
-    lim_pattern = re.compile(r"\\lim_\{[^\}]+\}")
-
-    for i, step in enumerate(steps):
-        has_limit = bool(lim_pattern.search(step))
-
-        if has_limit:
-            # Удаляем саму конструкцию \lim_{x\to ...}
-            cleaned_step = lim_pattern.sub("", step).strip()
-            normalized.append(cleaned_step)
-        else:
-            if not inserted_limit:
-                normalized.append("LIMIT")
-                inserted_limit = True
-            normalized.append(step)
-
-    return normalized
-
-
-
-def safe_sympify(expr):
-    """Безопасно преобразует LaTeX-выражение в формат sympy с обработкой ошибок,
-    используя библиотеку latex2sympy2."""
     try:
-        if expr.strip().upper() == "LIMIT":
-            # Если получено значение LIMIT, возвращаем плейсхолдер (значение не вычисляем здесь)
+        expr_strip = expr.strip()
+        if expr_strip.upper() == "LIMIT":
             return sp.Integer(0)
-        
-        # Преобразуем LaTeX-выражение в sympy с помощью latex2sympy2
-        sympy_expr = latex2sympy(expr)
-        return sympy_expr
+        # Если выражение начинается с \lim, пытаемся его разобрать
+        if expr_strip.startswith("\\lim"):
+            # Используем регулярное выражение, которое берёт всё от \lim_{...} до первой закрывающей пары скобок после \right)
+            pattern = re.compile(r"\\lim_\{([^}]+)\\to\s*([^}]+)\}(.*)")
+            m = pattern.search(expr_strip)
+            if m:
+                var_str = m.group(1).strip()
+                limit_val_str = m.group(2).strip()
+                rest = m.group(3).strip()
+                # Если во второй части есть лишние символы (например, комментарий),
+                # попробуем выделить содержимое от \left( до \right)
+                start = rest.find("\\left(")
+                end = rest.rfind("\\right)")
+                if start != -1 and end != -1 and end > start:
+                    inner_expr_str = rest[start:end+len("\\right)")]
+                else:
+                    # Если нет обрамляющих конструкций, берем весь оставшийся текст
+                    inner_expr_str = rest
+                var = sp.Symbol(var_str)
+                # Определяем точку предела
+                if limit_val_str in ["∞", "infty", "infinity"]:
+                    limit_val = sp.oo
+                elif limit_val_str in ["-∞", "-infty", "-infinity"]:
+                    limit_val = -sp.oo
+                else:
+                    # Пробуем вычислить как число/выражение
+                    limit_val = safe_sympify(limit_val_str)
+                # Преобразуем внутреннее выражение
+                inner_expr = latex2sympy(inner_expr_str)
+                computed_limit = sp.limit(inner_expr, var, limit_val)
+                logging.info(f"Вычислен предел для {expr_strip}: {computed_limit}")
+                return computed_limit
+            else:
+                # Если шаблон не подошёл, пытаемся обычное преобразование
+                return latex2sympy(expr_strip)
+        # Для остальных выражений – обычное преобразование
+        return latex2sympy(expr_strip)
     except Exception as e:
         logging.error(f"Expression parsing error: '{expr}' - {str(e)}")
         raise ValueError(f"Cannot parse expression '{expr}': {str(e)}")
 
-def check_algebraic_step(prev_expr_str, curr_expr_str, tolerance=1e-10):
-    """Проверяет, корректно ли выполнено алгебраическое преобразование между двумя шагами."""
+def check_algebraic_step(prev_expr_str: str, curr_expr_str: str, tolerance=1e-6):
+    """
+    Проверяет корректность алгебраического преобразования между двумя шагами.
+    Если оба шага начинаются с \lim — сначала сравниваются внутренние части лимита.
+    Затем выполняется обычная символьная и численная проверка.
+    """
     try:
-        # Пропускаем проверку для маркера LIMIT
         if prev_expr_str.strip().upper() == "LIMIT" or curr_expr_str.strip().upper() == "LIMIT":
             return {"is_correct": True, "error_type": None, "hint": None}
 
-        # Преобразуем выражения через safe_sympify и упрощаем их
+        # Проверка: оба шага — лимитные выражения
+        if prev_expr_str.strip().startswith("\\lim") and curr_expr_str.strip().startswith("\\lim"):
+            lim_pattern = re.compile(r"\\lim_\{[^}]+\}(.*)")
+
+            prev_match = lim_pattern.search(prev_expr_str)
+            curr_match = lim_pattern.search(curr_expr_str)
+
+            if prev_match and curr_match:
+                prev_inner = prev_match.group(1).strip()
+                curr_inner = curr_match.group(1).strip()
+
+                prev_inner_expr = sp.simplify(safe_sympify(prev_inner))
+                curr_inner_expr = sp.simplify(safe_sympify(curr_inner))
+
+                if sp.simplify(prev_inner_expr - curr_inner_expr) == 0:
+                    return {"is_correct": True, "error_type": None, "hint": None}
+
+                # Проверка по точкам
+                x = sp.Symbol("x")
+                test_values = [2, 5, 10, 50, 100]
+                for val in test_values:
+                    try:
+                        prev_val = float(prev_inner_expr.evalf(subs={x: val}))
+                        curr_val = float(curr_inner_expr.evalf(subs={x: val}))
+                        if abs(prev_val - curr_val) > tolerance:
+                            return {
+                                "is_correct": False,
+                                "error_type": "algebraic_error",
+                                "hint": f"(внутри предела) при x={val}: было {prev_val:.6f}, стало {curr_val:.6f}"
+                            }
+                    except Exception as e:
+                        logging.warning(f"Inner limit eval error: {e}")
+                        continue
+
+        # Обычная проверка всего выражения
         prev_expr = sp.simplify(safe_sympify(prev_expr_str))
         curr_expr = sp.simplify(safe_sympify(curr_expr_str))
-        
-        # Если выражения эквивалентны, шаг корректен
-        if prev_expr.equals(curr_expr):
+
+        if sp.simplify(prev_expr - curr_expr) == 0:
             return {"is_correct": True, "error_type": None, "hint": None}
-        
-        # Если не эквивалентны – проверяем численно с подстановкой
+
+        # Проверка по численным значениям
         x = sp.Symbol('x')
-        test_values = [1, 2, 3, 5, 10, 100]
-        
+        test_values = [2, 5, 10, 50, 100]
         for val in test_values:
             try:
-                prev_val = float(prev_expr.subs({x: val}))
-                curr_val = float(curr_expr.subs({x: val}))
-                
-                if not (sp.isinf(prev_val) or sp.isinf(curr_val) or sp.isnan(prev_val) or sp.isnan(curr_val)):
-                    if abs(prev_val - curr_val) > tolerance:
-                        return {
-                            "is_correct": False,
-                            "error_type": "algebraic_error",
-                            "hint": f"Ваш шаг неверен. Для x={val}, предыдущее выражение = {prev_val:.6f}, текущее выражение = {curr_val:.6f}"
-                        }
-            except Exception:
+                prev_val = float(prev_expr.evalf(subs={x: val}))
+                curr_val = float(curr_expr.evalf(subs={x: val}))
+                if abs(prev_val - curr_val) > tolerance:
+                    return {
+                        "is_correct": False,
+                        "error_type": "algebraic_error",
+                        "hint": f"Ошибка внутри предела: при x={val}: было {prev_val:.6f}, стало {curr_val:.6f}"
+                    }
+            except Exception as e:
+                logging.warning(f"Outer eval error: {e}")
                 continue
-                
-        return {"is_correct": True, "error_type": None, "hint": None}
-    except Exception as e:
-        logging.error(f"Error checking step: {str(e)}")
-        return {
-            "is_correct": False, 
-            "error_type": "parse_error", 
-            "hint": f"Ошибка в выражении: {str(e)}"
-        }
 
-def check_limit(expr_str, var_str, limit_point):
-    """Вычисляет предел выражения."""
+        return {"is_correct": True, "error_type": None, "hint": None}
+
+    except Exception as e:
+        logging.error(f"Ошибка при проверке шага: {str(e)}")
+        return {"is_correct": False, "error_type": "parse_error", "hint": str(e)}
+
+def check_limit(expr_str: str, var_str: str, limit_point: str):
+    """
+    Вычисляет предел выражения expr_str для переменной var_str при стремлении к limit_point.
+    """
     try:
-        # Преобразуем выражение и определяем переменную
         expr = safe_sympify(expr_str)
         var = sp.Symbol(var_str)
-        print(f"Предел для выражения: {expr}, переменная: {var}, точка предела: {limit_point}")
-
-        
-
-        if limit_point == "oo" or limit_point == "∞" or limit_point == "infinity":
+        if limit_point in ["oo", "∞", "infty", "infinity"]:
             limit_result = sp.limit(expr, var, sp.oo)
-        elif limit_point == "-oo" or limit_point == "-∞" or limit_point == "-infinity":
+        elif limit_point in ["-oo", "-∞", "-infty", "-infinity"]:
             limit_result = sp.limit(expr, var, -sp.oo)
         else:
             limit_result = sp.limit(expr, var, limit_point)
-        print(expr, var, limit_point)
-
-        return {
-            "is_correct": True,
-            "computed_limit": limit_result,
-            "error_type": None,
-            "hint": None
-        }
+        logging.info(f"Computed limit for '{expr_str}': {limit_result}")
+        return {"is_correct": True, "computed_limit": limit_result, "error_type": None, "hint": None}
     except Exception as e:
         logging.error(f"Error computing limit: {str(e)}")
-        return {
-            "is_correct": False,
-            "computed_limit": None,
-            "error_type": "limit_error",
-            "hint": f"Ошибка при вычислении предела: {str(e)}"
-        }
+        return {"is_correct": False, "computed_limit": None, "error_type": "limit_error", "hint": f"Ошибка при вычислении предела: {str(e)}"}
 
 def compare_limit_values(student_result, expected_result):
-    """Сравнивает результат предела студента с вычисленным значением, обрабатывая особые случаи."""
+    """
+    Сравнивает результат предела, полученный студентом, с вычисленным значением.
+    Возвращает True, если значения совпадают (учитывая бесконечности), иначе False.
+    """
     try:
-        # Проверка на бесконечность
-        if (sp.oo == student_result and sp.oo == expected_result) or \
-           (-sp.oo == student_result and -sp.oo == expected_result):
+        if (student_result == sp.oo and expected_result == sp.oo) or (student_result == -sp.oo and expected_result == -sp.oo):
             return True
-            
-        # Проверка для обычных чисел
         diff = sp.simplify(student_result - expected_result)
-        return diff.is_zero
+        return diff == 0
     except Exception:
-        # Если сравнение не удалось, проверяем текстовое представление
         return str(student_result) == str(expected_result)
 
-@solutions_bp.route('/check', methods=['POST'])
+@solutions_bp.route('/check/limit', methods=['POST'])
 @cross_origin()
 def check_solution():
     """
-    Проверяет полное решение, разбитое на шаги.
-    Ожидаемый формат JSON:
+    Принимает JSON:
     {
-        "taskId": <task_id>,
+        "taskId": <номер задачи>,
         "steps": [
             "шаг 1", "шаг 2", ..., "LIMIT", "окончательный ответ"
         ]
     }
+    Выполняет пошаговую проверку: 
+    - Последовательность алгебраических преобразований.
+    - Вычисление лимита на основе последнего алгебраического шага.
+    - Сравнение окончательного ответа со значением лимита.
     """
     data = request.json
     logging.info(f"Received solution check request: {data}")
-    
-    # Валидация запроса
+
     if not data or "taskId" not in data or "steps" not in data:
         return jsonify({"error": "Invalid request format"}), 400
-        
+
     task_id = data["taskId"]
-    steps_bad = data["steps"]
-    
-    if not isinstance(steps_bad, list) or len(steps_bad) < 2:
+    steps_raw = data["steps"]
+    logging.info(f"Received steps: {steps_raw}")
+
+    if not isinstance(steps_raw, list) or len(steps_raw) < 2:
         return jsonify({
             "success": False,
             "errors": [{"step": 1, "error": "Решение должно состоять как минимум из двух шагов"}]
         }), 400
-        
-    steps = normalize_steps_with_limit(steps_bad)
-    # Получаем задачу из базы данных
+
+    # Если среди поступивших шагов нет ни одного содержащего "\lim", вставляем маркер "LIMIT"
+    steps = normalize_steps_with_limit(steps_raw)
     task = Task.query.get(task_id)
     if not task:
         return jsonify({"error": "Task not found"}), 404
-        
-    # Инициализация переменных
+
     errors = []
     algebraic_steps = []
-    limit_index = -1
     found_limit = False
-    
-    # Поиск маркера LIMIT и сбор алгебраических шагов
+    limit_index = -1
+
+    # Определяем алгебраические шаги (до маркера "LIMIT", если он вставлен)
     for i, step in enumerate(steps):
         if step.strip().upper() == "LIMIT":
             found_limit = True
             limit_index = i
             break
         algebraic_steps.append(step)
-        
-    # Если LIMIT не найден, а шагов не меньше двух, предполагаем, что последний шаг – предел
-    if not found_limit and len(steps) >= 2:
-        algebraic_steps = steps[:-1]
-        steps.insert(len(steps)-1, "LIMIT")
-        limit_index = len(steps) - 2
-        found_limit = True
-        
+
     if not algebraic_steps:
         return jsonify({
             "success": False,
             "errors": [{"step": 1, "error": "Алгебраические шаги отсутствуют", "hint": "Добавьте хотя бы один шаг перед LIMIT"}]
-        }), 400
-        
-    # Проверка последовательных алгебраических шагов
+        }), 200
+
+    # Проверка последовательности алгебраических шагов
     for i in range(len(algebraic_steps) - 1):
-        prev_expr = algebraic_steps[i]
-        curr_expr = algebraic_steps[i + 1]
-        
-        try:
-            result = check_algebraic_step(prev_expr, curr_expr)
-            if not result["is_correct"]:
-                errors.append({
-                    "step": i + 2,
-                    "error": "Некорректное преобразование",
-                    "hint": result["hint"] or "Проверьте алгебру"
-                })
-        except Exception as e:
+        res = check_algebraic_step(algebraic_steps[i], algebraic_steps[i + 1])
+        if not res["is_correct"]:
             errors.append({
                 "step": i + 2,
-                "error": "Ошибка в выражении",
-                "hint": f"Проверьте синтаксис: {str(e)}"
+                "error": "Некорректное преобразование",
+                "hint": res["hint"] or "Проверьте алгебраические преобразования"
             })
-            
-    # Создаем запись решения
-    user_id = 1  # Заглушка для идентификатора пользователя
-    solution = Solution(task_id=task.id, user_id=user_id, status="in_progress")
-    db.session.add(solution)
-    db.session.flush()  # Получаем ID без коммита
-    
-    # Вычисляем предел, если ошибок не обнаружено
+
     computed_limit = None
     if found_limit and not errors:
         try:
-            last_algebraic_expr = algebraic_steps[-1]
-            
-            # Определяем переменную и точку предела из данных задачи
-            limit_var = "x"  # По умолчанию
-            limit_point = "oo"  # По умолчанию (бесконечность)
-            
+            # Для вычисления предела используем последний алгебраический шаг
+            last_expr = algebraic_steps[-1]
+            # Определяем переменную и точку предела на основе task.limitVar (например, "x→oo")
+            limit_var = "x"  # значение по умолчанию
+            limit_point = "oo"
             if task.limitVar:
                 parts = task.limitVar.split("→")
                 if len(parts) == 2:
                     limit_var = parts[0].strip()
                     limit_point = parts[1].strip()
-            
-            limit_result = check_limit(last_algebraic_expr, limit_var, limit_point)
-            computed_limit = limit_result["computed_limit"]
-            
-            if not limit_result["is_correct"]:
+            limit_res = check_limit(last_expr, limit_var, limit_point)
+            computed_limit = limit_res.get("computed_limit")
+            if not limit_res["is_correct"]:
                 errors.append({
                     "step": limit_index + 1,
                     "error": "Ошибка при вычислении предела",
-                    "hint": limit_result["hint"]
+                    "hint": limit_res["hint"]
                 })
-                
-            # Если после LIMIT указан окончательный ответ – сравниваем его с вычисленным пределом
+            # Если после вставленного маркера LIMIT указан окончательный ответ – сравниваем его с вычисленным пределом
             if limit_index < len(steps) - 1 and not errors:
                 student_answer = steps[-1]
                 try:
-                    # Спецобработка ответов бесконечность
                     if student_answer.strip() in ["\\infty", "\\infinity", "∞"]:
                         student_result = sp.oo
                     elif student_answer.strip() in ["-\\infty", "-\\infinity", "-∞"]:
                         student_result = -sp.oo
                     else:
                         student_result = sp.simplify(safe_sympify(student_answer))
-                    
-                    expected_result = computed_limit
-                    
-                    # Используем улучшенное сравнение
-                    if not compare_limit_values(student_result, expected_result):
+                    if not compare_limit_values(student_result, computed_limit):
                         errors.append({
                             "step": len(steps),
-                            "error": "Неверный окончательный ответ",
-                            "hint": f"Ваш ответ не совпадает с вычисленным пределом. Правильный ответ: {expected_result}"
+                            "error": "Некорректный окончательный ответ",
+                            "hint": f"Итоговое выражение должно равняться {computed_limit}"
                         })
                 except Exception as e:
                     errors.append({
                         "step": len(steps),
-                        "error": "Некорректный окончательный ответ",
-                        "hint": f"Ошибка в окончательном ответе: {str(e)}"
+                        "error": "Ошибка в анализе окончательного ответа",
+                        "hint": f"Ошибка: {str(e)}"
                     })
         except Exception as e:
             logging.error(f"Limit calculation error: {str(e)}")
             errors.append({
                 "step": limit_index + 1,
                 "error": "Ошибка при обработке предела",
-                "hint": f"Ошибка: {str(e)}"
+                "hint": str(e)
             })
-            
-    # Сохранение шагов решения
-    for i, step in enumerate(steps):
-        is_correct = len(errors) == 0
+
+    # Сохраняем решение и шаги в базу
+    user_id = User.query.filter_by(username=data["user"]).first().id if User.query.filter_by(username=data["user"]).first() else 1
+    solution = Solution(task_id=task.id, user_id=user_id, status="in_progress")
+    db.session.add(solution)
+    db.session.flush()
+
+    for i, step in enumerate(steps, start=1):
+        is_correct = (len(errors) == 0)
         step_record = Step(
             solution_id=solution.id,
-            step_number=i + 1,
+            step_number=i,
             input_expr=step,
             is_correct=is_correct,
             error_type=None if is_correct else "error",
             hint=""
         )
         db.session.add(step_record)
-        
-    # Обновление статуса решения
-    if errors:
-        solution.status = "error"
-    else:
-        solution.status = "completed"
-        
+
+    solution.status = "completed" if not errors else "error"
     db.session.commit()
-    
-    # Формирование ответа
+
     if errors:
-        return jsonify({
-            "success": False,
-            "errors": errors,
-            "solution_id": solution.id
-        })
-        
+        return jsonify({"success": False, "errors": errors, "solution_id": solution.id}), 200
+
     return jsonify({
         "success": True,
-        "message": "Решение верное.",
+        "message": f"Решение верное. Предел = {computed_limit}" if computed_limit is not None else "Решение верное",
         "solution_id": solution.id
-    })
+    }), 200
+
+
+
+@solutions_bp.route('/last/<int:task_id>', methods=['GET'])
+@cross_origin()
+def get_last_solution(task_id):
+    solution = Solution.query.filter_by(task_id=task_id).order_by(Solution.created_at.desc()).first()
+    
+    if not solution:
+        return jsonify({"latex": ""})
+
+    steps = Step.query.filter_by(solution_id=solution.id).order_by(Step.step_number).all()
+    latex_expr = " = ".join(step.input_expr for step in steps)
+    return jsonify({"latex": latex_expr})
+
+
+@solutions_bp.route('/check/integral', methods=['POST'])
+@cross_origin()
+def check_integral():
+    data = request.json
+    if not data or "taskId" not in data or "steps" not in data:
+        return jsonify({"error": "Invalid request format"}), 400
+
+    task = Task.query.get(data["taskId"])
+    if not task:
+        return jsonify({"error": "Task not found"}), 404
+
+    steps = data["steps"]
+    errors = []
+
+    try:
+        # Предполагаем, что последний шаг — результат интегрирования
+        expected = sp.simplify(latex2sympy(task.expected_value))
+        student = sp.simplify(latex2sympy(steps[-1]))
+
+        if not sp.simplify(expected - student) == 0:
+            errors.append({
+                "step": len(steps),
+                "error": "Неверный результат интегрирования",
+                "hint": f"Ожидается: {task.expected_value}"
+            })
+
+    except Exception as e:
+        errors.append({
+            "step": len(steps),
+            "error": "Ошибка разбора",
+            "hint": str(e)
+        })
+    user_id = User.query.filter_by(username=data["user"]).first().id if User.query.filter_by(username=data["user"]).first() else 1
+
+    solution = Solution(task_id=task.id, user_id=user_id, status="completed" if not errors else "error")
+    db.session.add(solution)
+    db.session.flush()
+
+    for i, step in enumerate(steps):
+        db.session.add(Step(
+            solution_id=solution.id,
+            step_number=i + 1,
+            input_expr=step,
+            is_correct=(len(errors) == 0),
+            error_type=None if len(errors) == 0 else "error",
+            hint=""
+        ))
+
+    db.session.commit()
+
+    if errors:
+        return jsonify({"success": False, "errors": errors, "solution_id": solution.id}), 200
+
+    return jsonify({"success": True, "message": "Решение верное", "solution_id": solution.id}), 200
+
+
+@solutions_bp.route('/check/algebra', methods=['POST'])
+@cross_origin()
+def check_algebra():
+    data = request.json
+    if not data or "taskId" not in data or "steps" not in data:
+        return jsonify({"error": "Invalid request format"}), 400
+
+    task = Task.query.get(data["taskId"])
+    if not task:
+        return jsonify({"error": "Task not found"}), 404
+
+    steps = data["steps"]
+    errors = []
+
+    try:
+        for i in range(len(steps) - 1):
+            lhs = sp.simplify(latex2sympy(steps[i]))
+            rhs = sp.simplify(latex2sympy(steps[i + 1]))
+
+            if not sp.simplify(lhs - rhs) == 0:
+                errors.append({
+                    "step": i + 2,
+                    "error": "Неверное преобразование",
+                    "hint": f"Шаг {i + 2} отличается от предыдущего"
+                })
+    except Exception as e:
+        errors.append({
+            "step": len(steps),
+            "error": "Ошибка разбора выражения",
+            "hint": str(e)
+        })
+
+    user_id = User.query.filter_by(username=data["user"]).first().id if User.query.filter_by(username=data["user"]).first() else 1
+    solution = Solution(task_id=task.id, user_id=user_id, status="completed" if not errors else "error")
+    db.session.add(solution)
+    db.session.flush()
+
+    for i, step in enumerate(steps):
+        db.session.add(Step(
+            solution_id=solution.id,
+            step_number=i + 1,
+            input_expr=step,
+            is_correct=(len(errors) == 0),
+            error_type=None if len(errors) == 0 else "error",
+            hint=""
+        ))
+
+    db.session.commit()
+
+    if errors:
+        return jsonify({"success": False, "errors": errors, "solution_id": solution.id}), 200
+
+    return jsonify({"success": True, "message": "Решение верное", "solution_id": solution.id}), 200
+
 
 
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\server\solution_integral.py ====
 import logging
 import sympy as sp
 from flask import Blueprint, request, jsonify
-from models import db, Task, Solution, Step
+from models import db, Task, Solution, Step, User
 from flask_cors import cross_origin
 from latex2sympy2 import latex2sympy  # Преобразование LaTeX в Sympy
 from typing import List
@@ -813,39 +948,63 @@ def safe_sympify(expr):
     """Безопасно преобразует LaTeX-выражение в объект sympy, используя latex2sympy2."""
     print(f"Parsed expression: {expr}")
     try:
-        
         sympy_expr = latex2sympy(expr)
-        
         return sympy_expr
     except Exception as e:
         logging.error(f"Expression parsing error: '{expr}' - {str(e)}")
         raise ValueError(f"Cannot parse expression '{expr}': {str(e)}")
 
+def evaluate_integrals(expr):
+    """
+    Рекурсивно ищет в выражении все объекты Integral и вычисляет их,
+    подставляя вычисленные значения вместо неопределённых интегралов.
+    """
+    integrals = list(expr.atoms(sp.Integral))
+    for integral in integrals:
+        try:
+            evaluated = sp.integrate(integral.function, *integral.limits)
+            expr = expr.subs(integral, evaluated)
+        except Exception as e:
+            logging.error(f"Ошибка при вычислении интеграла {integral}: {e}")
+    return expr
+
 def check_algebraic_step(prev_expr_str, curr_expr_str, tolerance=1e-10):
     """
-    Проверяет, корректно ли выполнено алгебраическое преобразование между двумя шагами.
+    Проверяет корректность алгебраического преобразования между двумя шагами.
     Если один из шагов равен "LIMIT", проверка пропускается.
+    
+    1. Преобразует строки LaTeX в sympy-выражения.
+    2. Вычисляет интегралы внутри выражений (через evaluate_integrals) и упрощает результат.
+    3. Сначала выполняется символическая проверка (equals), а при необходимости – численная,
+       подставляя тестовые значения переменной \( x \).
     """
     try:
         if prev_expr_str.strip().upper() == "LIMIT" or curr_expr_str.strip().upper() == "LIMIT":
             return {"is_correct": True, "error_type": None, "hint": None}
-        prev_expr = sp.simplify(safe_sympify(prev_expr_str))
-        curr_expr = sp.simplify(safe_sympify(curr_expr_str))
+        
+        # Преобразование в символьное представление и вычисление интегралов
+        prev_expr_raw = safe_sympify(prev_expr_str)
+        curr_expr_raw = safe_sympify(curr_expr_str)
+        prev_expr = sp.simplify(evaluate_integrals(prev_expr_raw))
+        curr_expr = sp.simplify(evaluate_integrals(curr_expr_raw))
+        
+        # Символическая проверка
         if prev_expr.equals(curr_expr):
             return {"is_correct": True, "error_type": None, "hint": None}
+        
+        # Если символическое сравнение не дало результата, выполняется численная проверка
         x = sp.Symbol('x')
         test_values = [1, 2, 3, 5, 10, 100]
         for val in test_values:
             try:
                 prev_val = float(prev_expr.subs({x: val}))
                 curr_val = float(curr_expr.subs({x: val}))
-                if not (sp.isinf(prev_val) or sp.isinf(curr_val) or sp.isnan(prev_val) or sp.isnan(curr_val)):
-                    if abs(prev_val - curr_val) > tolerance:
-                        return {
-                            "is_correct": False,
-                            "error_type": "algebraic_error",
-                            "hint": f"Для x={val}: предыдущее = {prev_val:.6f}, текущее = {curr_val:.6f}"
-                        }
+                if abs(prev_val - curr_val) > tolerance:
+                    return {
+                        "is_correct": False,
+                        "error_type": "algebraic_error",
+                        "hint": f"При x={val}: предыдущее значение = {prev_val:.6f}, текущее значение = {curr_val:.6f}"
+                    }
             except Exception:
                 continue
         return {"is_correct": True, "error_type": None, "hint": None}
@@ -853,26 +1012,43 @@ def check_algebraic_step(prev_expr_str, curr_expr_str, tolerance=1e-10):
         logging.error(f"Error checking step: {str(e)}")
         return {"is_correct": False, "error_type": "parse_error", "hint": f"Ошибка: {str(e)}"}
 
-def check_integral_solution_final(final_solution_str, integrand_str, var_str="x"):
+def check_integral_solution_final(final_solution_str, var_str="x"):
     """
-    Проверяет окончательный ответ по интегралу.
-    Дифференцирует конечное выражение и сравнивает его с интегрантом.
+    Проверяет окончательный ответ по интегральной задаче Вольтерры второго рода:
+        φ(x) = x - ∫₀ˣ (x-t) φ(t) dt.
+    
+    Для данного примера верное решение должно удовлетворять следующему:
+    
+        1. Начальное условие: φ(0) = 0.
+        2. Производная в точке 0: φ'(0) = 1.
+        3. Дифференциальное уравнение: φ''(x) + φ(x) = 0.
+    
+    Если все условия выполнены, решение считается корректным (как для sin x).
     """
     try:
-        final_expr = sp.simplify(safe_sympify(final_solution_str))
-        integrand_expr = sp.simplify(safe_sympify(integrand_str))
-        var = sp.Symbol(var_str)
-        
-        diff_expr = sp.simplify(final_expr - integrand_expr)
-        # Если разность равна нулю или является числом (возможно, константой), считаем шаг корректным
-        if diff_expr == 0 or diff_expr.is_number:
-            return {"is_correct": True, "error_type": None, "hint": None}
-        else:
-            return {
-                "is_correct": False,
-                "error_type": "integral_error",
-                "hint": f"Производная вашего ответа равна {sp.pretty(final_expr)}, а интегрант — {sp.pretty(integrand_expr)}"
-            }
+        x = sp.Symbol(var_str)
+        F_expr = sp.simplify(safe_sympify(final_solution_str))
+        # Проверка начального условия: φ(0)=0
+        if not sp.Eq(F_expr.subs(x, 0), 0):
+            return {"is_correct": False, "error_type": "integral_error", 
+                    "hint": f"Начальное условие неверно: φ(0) должно быть 0, получено {F_expr.subs(x, 0)}"}
+        # Проверка производной в нуле: φ'(0)=1
+        F_prime = sp.diff(F_expr, x)
+        if not sp.Eq(F_prime.subs(x, 0), 1):
+            return {"is_correct": False, "error_type": "integral_error", 
+                    "hint": f"Производная в точке 0 неверна: φ'(0) должно быть 1, получено {F_prime.subs(x, 0)}"}
+        # Проверка дифференциального уравнения: φ''(x)+φ(x)=0
+        F_double = sp.diff(F_expr, x, 2)
+        residual = sp.simplify(F_double + F_expr)
+        if not residual.equals(0):
+            # Проверим остаток для нескольких значений x
+            test_values = [0.5, 1, 2]
+            for val in test_values:
+                res_val = residual.subs(x, val)
+                if abs(float(res_val)) > 1e-6:
+                    return {"is_correct": False, "error_type": "integral_error", 
+                            "hint": f"Функция не удовлетворяет дифференциальному уравнению: φ''(x) + φ(x) ≠ 0 при x={val}, получено {res_val}"}
+        return {"is_correct": True, "error_type": None, "hint": None}
     except Exception as e:
         logging.error(f"Error checking integral solution: {str(e)}")
         return {"is_correct": False, "error_type": "parse_error", "hint": f"Ошибка проверки: {str(e)}"}
@@ -884,21 +1060,20 @@ def check_integral_solution():
     Проверяет решение интегральной задачи.
     Ожидаемый формат JSON:
     {
-        "taskId": <task_id>,
-        "phiSteps": [
-            {
-                "label": "\\varphi_0(x)",
-                "steps": ["шаг 1", "шаг 2", ...]
-            },
-            { ... }  // возможно, несколько φ-функций
-        ],
-        "finalSolution": "LaTeX строки с окончательным ответом"
+      "taskId": <task_id>,
+      "phiSteps": [
+         { "label": "\\varphi_0(x)", "steps": ["шаг 1", "шаг 2", ...] },
+         { ... }  // возможно, несколько φ-функций
+      ],
+      "finalSolution": "LaTeX строки с окончательным ответом"
     }
+    
+    Для интегральных задач Вольтерры второго рода уравнение имеет вид:
+         φ(x) = x - ∫₀ˣ (x-t) φ(t) dt.
     """
     data = request.json
     logging.info(f"Received integral solution check request: {data}")
-
-    # Валидация входных данных
+    
     if not data or "taskId" not in data or "phiSteps" not in data or "finalSolution" not in data:
         return jsonify({"error": "Invalid request format"}), 400
 
@@ -912,7 +1087,6 @@ def check_integral_solution():
             "errors": [{"phiIndex": 0, "error": "Должна быть хотя бы одна φ-функция с шагами"}]
         }), 400
 
-    # Получаем задачу из БД (ожидается, что для интегральных задач в модели поле integrand хранится, например, в task.equation)
     task = Task.query.get(task_id)
     if not task:
         return jsonify({"error": "Task not found"}), 404
@@ -921,28 +1095,37 @@ def check_integral_solution():
 
     # Проверка последовательности шагов для каждой φ-функции
     for phi_index, phi in enumerate(phi_steps):
-        steps = phi.get("steps")
-        if not isinstance(steps, list) or len(steps) < 1:
+        if "steps" not in phi or not isinstance(phi["steps"], list):
+            errors.append({
+                "phiIndex": phi_index,
+                "error": "Отсутствуют шаги для φ-функции",
+                "hint": "Добавьте хотя бы один шаг для этой φ-функции"
+            })
+            continue
+
+        steps = phi["steps"]
+        if len(steps) < 1:
             errors.append({
                 "phiIndex": phi_index,
                 "error": "Функция должна содержать хотя бы один шаг",
                 "hint": "Заполните шаги для данной φ-функции"
             })
             continue
-        # Если больше одного шага – проверяем корректность последовательных преобразований
-        if len(steps) > 1:
-            for i in range(len(steps) - 1):
-                result = check_algebraic_step(steps[i], steps[i + 1])
-                if not result["is_correct"]:
-                    errors.append({
-                        "phiIndex": phi_index,
-                        "stepIndex": i + 1,
-                        "error": "Некорректное преобразование",
-                        "hint": result["hint"] or "Проверьте шаги"
-                    })
 
-    # Проверка окончательного ответа по интегралу.
-    # Предполагается, что в задаче для интегральных задач хранится интегрант в поле task.equation
+        if len(steps) == 1:
+            continue
+
+        for i in range(len(steps) - 1):
+            result = check_algebraic_step(steps[i], steps[i + 1])
+            if not result["is_correct"]:
+                errors.append({
+                    "phiIndex": phi_index,
+                    "stepIndex": i + 1,
+                    "error": "Некорректное преобразование",
+                    "hint": result["hint"] or "Проверьте шаги"
+                })
+
+    # Проверка окончательного ответа по интегральной задаче
     if not final_solution.strip():
         errors.append({
             "phiIndex": -1,
@@ -950,7 +1133,7 @@ def check_integral_solution():
             "hint": "Введите окончательный ответ по интегралу"
         })
     else:
-        integral_check = check_integral_solution_final(final_solution, task.expected_value, var_str="x")
+        integral_check = check_integral_solution_final(final_solution, var_str="x")
         if not integral_check["is_correct"]:
             errors.append({
                 "phiIndex": -1,
@@ -958,39 +1141,44 @@ def check_integral_solution():
                 "hint": integral_check["hint"]
             })
 
-    # Создаем запись решения (user_id — заглушка)
-    user_id = 1
+    user_id = User.query.filter_by(username=data["user"]).first().id if User.query.filter_by(username=data["user"]).first() else 1
     solution = Solution(task_id=task.id, user_id=user_id, status="in_progress")
     db.session.add(solution)
     db.session.flush()  # Для получения solution.id без коммита
 
-    # Сохраняем шаги решения: сохраняем каждый шаг каждой φ-функции, затем окончательный ответ
     step_counter = 1
-    for phi in phi_steps:
+    for phi_index, phi in enumerate(phi_steps):
         steps = phi.get("steps", [])
-        for step in steps:
+        for step_index, step in enumerate(steps):
+            is_error = False
+            error_hint = ""
+            for error in errors:
+                if error.get("phiIndex") == phi_index and error.get("stepIndex") == step_index:
+                    is_error = True
+                    error_hint = error.get("hint", "")
+                    break
             step_record = Step(
                 solution_id=solution.id,
                 step_number=step_counter,
-                input_expr=step,
-                is_correct=(len(errors) == 0),
-                error_type=None if len(errors) == 0 else "error",
-                hint=""
+                input_expr=phi_index*1000+step,
+                is_correct=not is_error,
+                error_type="error" if is_error else None,
+                hint=error_hint
             )
             db.session.add(step_record)
             step_counter += 1
-    # Сохраняем окончательный ответ как последний шаг
+
+    final_error = next((error for error in errors if error.get("phiIndex") == -1), None)
     final_step_record = Step(
         solution_id=solution.id,
         step_number=step_counter,
         input_expr=final_solution,
-        is_correct=(len(errors) == 0),
-        error_type=None if len(errors) == 0 else "error",
-        hint=""
+        is_correct=not final_error,
+        error_type="error" if final_error else None,
+        hint=final_error.get("hint", "") if final_error else ""
     )
     db.session.add(final_step_record)
 
-    # Обновляем статус решения
     solution.status = "completed" if not errors else "error"
     db.session.commit()
 
@@ -1008,10 +1196,49 @@ def check_integral_solution():
 
 
 
+
+@solution_integral_bp.route('/last-integral/<int:task_id>', methods=['GET'])
+def get_last_integral_solution(task_id):
+    solution = Solution.query.filter_by(task_id=task_id).order_by(Solution.created_at.desc()).first()
+    if not solution:
+        return jsonify({"phiSteps": [], "final": ""})
+
+    steps = Step.query.filter_by(solution_id=solution.id).order_by(Step.step_number).all()
+
+    phi_dict = {}
+    final = ""
+
+    for step in steps:
+        try:
+            if step == steps[-1]:
+                final = step.input_expr
+                continue
+
+            # Парсим phi_index и шаг
+            val = step.input_expr
+            if isinstance(val, str) and val.isdigit():
+                val = int(val)
+
+            phi_index = val // 1000
+            step_latex = val % 1000
+
+            label = f"\\varphi_{phi_index}(x)"
+            if label not in phi_dict:
+                phi_dict[label] = []
+            phi_dict[label].append(str(step_latex))
+        except Exception as e:
+            logging.warning(f"Ошибка парсинга шага: {e}")
+
+    phiSteps = [{"label": label, "steps": steps} for label, steps in phi_dict.items()]
+
+    return jsonify({"phiSteps": phiSteps, "final": final})
+
+
+
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\server\tasks.py ====
 from flask import Blueprint, request, jsonify
-from models import db, Task
-
+from models import db, Task, Solution
+from datetime import datetime
 tasks_bp = Blueprint('tasks', __name__, url_prefix='/api/tasks')
 
 @tasks_bp.route('', methods=['GET'])
@@ -1044,7 +1271,8 @@ def get_task(task_id):
         "description": task.description,
         "expression": task.expression,
         "limitVar": task.limitVar,
-        "expected_value": task.expected_value
+        "expected_value": task.expected_value,
+        "category": task.category
     }), 200
 
 @tasks_bp.route('', methods=['POST'])
@@ -1060,7 +1288,8 @@ def create_task():
         description=data.get('description', ''),
         expression=data['expression'],
         limitVar=data['limitVar'],
-        expected_value=data['expected_value']
+        expected_value=data['expected_value'],
+        category=data['category']  
     )
     db.session.add(new_task)
     db.session.commit()
@@ -1077,6 +1306,7 @@ def update_task(task_id):
     task.expression = data.get('expression', task.expression)
     task.limitVar = data.get('limitVar', task.limitVar)
     task.expected_value = data.get('expected_value', task.expected_value)
+    task.category = data.get('category', task.category)
     db.session.commit()
     return jsonify({"message": "Task updated successfully"}), 200
 
@@ -1089,6 +1319,1247 @@ def delete_task(task_id):
     db.session.commit()
     return jsonify({"message": "Task deleted successfully"}), 200
 
+@tasks_bp.route('/<int:task_id>/start', methods=['POST'])
+def start_solution(task_id):
+    """
+    Создает новое пустое решение (Solution) для указанной задачи.
+    Возвращает ID решения.
+    """
+    task = Task.query.get(task_id)
+    if not task:
+        return jsonify({"message": "Task not found"}), 404
+
+    # Предполагаем, что пользователь с ID = 1 (заглушка)
+    user_id = 1
+    new_solution = Solution(task_id=task_id, user_id=user_id, status="in_progress", created_at=datetime.utcnow())
+    db.session.add(new_solution)
+    db.session.commit()
+
+    return jsonify({"solution_id": new_solution.id}), 201
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\server\tasks_generator.py ====
+import random
+import re
+import logging
+import sympy as sp
+from flask import Blueprint, request, jsonify
+from models import db, Task
+
+tasks_generator_bp = Blueprint("tasks_generator", __name__, url_prefix="/api/tasks_generator")
+
+# Пример шаблона задачи для категории "limits"
+TEMPLATES = {
+    "limits": [
+        {
+            "title": "lim (({par_a}x + {par_b})/({par_c}x + {par_d}))^(x+{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x + {par_b}}{{par_c}x + {par_d}} \right)^{x+{par_e}}",
+            "expression": "(({par_a}*x + {par_b})/({par_c}*x + {par_d}))**(x+{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x + {par_b})/({par_c}x - {par_d}))^(x+{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x + {par_b}}{{par_c}x - {par_d}} \right)^{x+{par_e}}",
+            "expression": "(({par_a}*x + {par_b})/({par_c}*x - {par_d}))**(x+{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x - {par_b})/({par_c}x + {par_d}))^(x+{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x - {par_b}}{{par_c}x + {par_d}} \right)^{x+{par_e}}",
+            "expression": "(({par_a}*x - {par_b})/({par_c}*x + {par_d}))**(x+{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x - {par_b})/({par_c}x - {par_d}))^(x-{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x - {par_b}}{{par_c}x - {par_d}} \right)^{x-{par_e}}",
+            "expression": "(({par_a}*x - {par_b})/({par_c}*x - {par_d}))**(x-{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x + {par_b})/({par_c}x + {par_d}))^(2x+{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x + {par_b}}{{par_c}x + {par_d}} \right)^{2x+{par_e}}",
+            "expression": "(({par_a}*x + {par_b})/({par_c}*x + {par_d}))**(2*x+{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x + {par_b})/({par_c}x - {par_d}))^(2x-{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x + {par_b}}{{par_c}x - {par_d}} \right)^{2x-{par_e}}",
+            "expression": "(({par_a}*x + {par_b})/({par_c}*x - {par_d}))**(2*x-{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x - {par_b})/({par_c}x + {par_d}))^(x*{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x - {par_b}}{{par_c}x + {par_d}} \right)^{x*{par_e}}",
+            "expression": "(({par_a}*x - {par_b})/({par_c}*x + {par_d}))**(x*{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x - {par_b})/({par_c}x - {par_d}))^(x*{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x - {par_b}}{{par_c}x - {par_d}} \right)^{x*{par_e}}",
+            "expression": "(({par_a}*x - {par_b})/({par_c}*x - {par_d}))**(x*{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x + {par_b})/({par_c}x + {par_d}))^(x-{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x + {par_b}}{{par_c}x + {par_d}} \right)^{x-{par_e}}",
+            "expression": "(({par_a}*x + {par_b})/({par_c}*x + {par_d}))**(x-{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        # Дополнительные 10 вариантов со сложными операциями
+        {
+            "title": "lim (({par_a}x + {par_b})*({par_c}x + {par_d}))^(1/(x+{par_e}))",
+            "description": r"\lim_{x\to\infty} \left( ({par_a}x + {par_b})({par_c}x + {par_d}) \right)^{\frac{1}{x+{par_e}}}",
+            "expression": "(({par_a}*x + {par_b})*({par_c}*x + {par_d}))**(1/(x+{par_e}))",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (sqrt({par_a}x + {par_b})/({par_c}x + {par_d}))^(x+{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{\sqrt{{par_a}x + {par_b}}}{{par_c}x + {par_d}} \right)^{x+{par_e}}",
+            "expression": "((({par_a}*x + {par_b})**0.5)/({par_c}*x + {par_d}))**(x+{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x + {par_b})/sqrt({par_c}x + {par_d}))^(x+{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x + {par_b}}{\sqrt{{par_c}x + {par_d}}} \right)^{x+{par_e}}",
+            "expression": "(({par_a}*x + {par_b})/(({par_c}*x + {par_d})**0.5))**(x+{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x - {par_b})/({par_c}x + {par_d}))^(x**{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x - {par_b}}{{par_c}x + {par_d}} \right)^{x^{ {par_e} }}",
+            "expression": "(({par_a}*x - {par_b})/({par_c}*x + {par_d}))**(x**{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x + {par_b})/({par_c}x - {par_d}))^(x**{par_e})",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x + {par_b}}{{par_c}x - {par_d}} \right)^{x^{ {par_e} }}",
+            "expression": "(({par_a}*x + {par_b})/({par_c}*x - {par_d}))**(x**{par_e})",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x - {par_b})/({par_c}x + {par_d}))^(1/(x+{par_e}))",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x - {par_b}}{{par_c}x + {par_d}} \right)^{\frac{1}{x+{par_e}}}",
+            "expression": "(({par_a}*x - {par_b})/({par_c}*x + {par_d}))**(1/(x+{par_e}))",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "lim (({par_a}x - {par_b})/({par_c}x - {par_d}))^(1/(x+{par_e}))",
+            "description": r"\lim_{x\to\infty} \left( \frac{{par_a}x - {par_b}}{{par_c}x - {par_d}} \right)^{\frac{1}{x+{par_e}}}",
+            "expression": "(({par_a}*x - {par_b})/({par_c}*x - {par_d}))**(1/(x+{par_e}))",
+            "limitVar": "x→oo",
+            "expected_value": "{expected_value}",
+            "category": "limits",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (1, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 10),
+                "par_e": (0, 3),
+                "expected_value": "0"
+            }
+        }
+    ],
+    "integral_volterra_2": [
+        {
+            "title": "Вольтерра задача 1: {par_a}x - ∫₀ˣ (x-t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x - \int_{0}^{x} (x-t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x - integrate((x-t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "Вольтерра задача 2: {par_a}x + ∫₀ˣ (x-t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x + \int_{0}^{x} (x-t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x + integrate((x-t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "Вольтерра задача 3: {par_a}x - ∫₀ˣ (x+t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x - \int_{0}^{x} (x+t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x - integrate((x+t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "Вольтерра задача 4: {par_a}x + ∫₀ˣ (x+t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x + \int_{0}^{x} (x+t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x + integrate((x+t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {
+                "par_a": (1, 5),
+                "par_b": (0, 3),
+                "expected_value": "0"
+            }
+        },
+        # Повторяем с незначительными вариациями для задач 5-20:
+        {
+            "title": "Вольтерра задача 5: {par_a}x - ∫₀ˣ (x-t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x - \int_{0}^{x} (x-t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x - integrate((x-t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 6: {par_a}x + ∫₀ˣ (x-t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x + \int_{0}^{x} (x-t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x + integrate((x-t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 7: {par_a}x - ∫₀ˣ (x+t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x - \int_{0}^{x} (x+t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x - integrate((x+t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 8: {par_a}x + ∫₀ˣ (x+t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x + \int_{0}^{x} (x+t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x + integrate((x+t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 9: {par_a}x - ∫₀ˣ (x-t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x - \int_{0}^{x} (x-t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x - integrate((x-t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 10: {par_a}x + ∫₀ˣ (x-t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x + \int_{0}^{x} (x-t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x + integrate((x-t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 11: {par_a}x - ∫₀ˣ (x+t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x - \int_{0}^{x} (x+t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x - integrate((x+t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 12: {par_a}x + ∫₀ˣ (x+t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x + \int_{0}^{x} (x+t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x + integrate((x+t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 13: {par_a}x - ∫₀ˣ (x-t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x - \int_{0}^{x} (x-t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x - integrate((x-t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 14: {par_a}x + ∫₀ˣ (x-t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x + \int_{0}^{x} (x-t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x + integrate((x-t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 15: {par_a}x - ∫₀ˣ (x+t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x - \int_{0}^{x} (x+t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x - integrate((x+t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 16: {par_a}x + ∫₀ˣ (x+t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x + \int_{0}^{x} (x+t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x + integrate((x+t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 17: {par_a}x - ∫₀ˣ (x-t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x - \int_{0}^{x} (x-t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x - integrate((x-t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 18: {par_a}x + ∫₀ˣ (x-t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x + \int_{0}^{x} (x-t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x + integrate((x-t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 19: {par_a}x - ∫₀ˣ (x+t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x - \int_{0}^{x} (x+t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x - integrate((x+t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        },
+        {
+            "title": "Вольтерра задача 20: {par_a}x + ∫₀ˣ (x+t)φ(t) dt, φ(0)={par_b}",
+            "description": r"\varphi(x) = {par_a}x + \int_{0}^{x} (x+t)\varphi(t) dt, \quad \varphi(0) = {par_b}",
+            "expression": "{par_a}*x + integrate((x+t)*varphi(t), (t,0,x))",
+            "limitVar": "0",
+            "expected_value": "{expected_value}",
+            "category": "integral_volterra_2",
+            "params": {"par_a": (1, 5), "par_b": (0, 3), "expected_value": "0"}
+        }
+    ],
+    "integral": [
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } {par_c}x^{ {par_d} } dx",
+            "description": r"\int_{{par_a}}^{{par_b}} {par_c}x^{ {par_d} } dx",
+            "expression": "integrate({par_c}*x**{par_d}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } {par_c}x^{ {par_d} } dx",
+            "description": r"\int_{{par_a}}^{{par_b}} {par_c}x^{ {par_d} } dx",
+            "expression": "integrate({par_c}*x**{par_d}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } {par_c}x^{ {par_d} } dx",
+            "description": r"\int_{{par_a}}^{{par_b}} {par_c}x^{ {par_d} } dx",
+            "expression": "integrate({par_c}*x**{par_d}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } {par_c}x^{ {par_d} } dx",
+            "description": r"\int_{{par_a}}^{{par_b}} {par_c}x^{ {par_d} } dx",
+            "expression": "integrate({par_c}*x**{par_d}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } {par_c}x^{ {par_d} } dx",
+            "description": r"\int_{{par_a}}^{{par_b}} {par_c}x^{ {par_d} } dx",
+            "expression": "integrate({par_c}*x**{par_d}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } {par_c}x^{ {par_d} } dx",
+            "description": r"\int_{{par_a}}^{{par_b}} {par_c}x^{ {par_d} } dx",
+            "expression": "integrate({par_c}*x**{par_d}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } {par_c}x^{ {par_d} } dx",
+            "description": r"\int_{{par_a}}^{{par_b}} {par_c}x^{ {par_d} } dx",
+            "expression": "integrate({par_c}*x**{par_d}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } {par_c}x^{ {par_d} } dx",
+            "description": r"\int_{{par_a}}^{{par_b}} {par_c}x^{ {par_d} } dx",
+            "expression": "integrate({par_c}*x**{par_d}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } {par_c}x^{ {par_d} } dx",
+            "description": r"\int_{{par_a}}^{{par_b}} {par_c}x^{ {par_d} } dx",
+            "expression": "integrate({par_c}*x**{par_d}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } {par_c}x^{ {par_d} } dx",
+            "description": r"\int_{{par_a}}^{{par_b}} {par_c}x^{ {par_d} } dx",
+            "expression": "integrate({par_c}*x**{par_d}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } ({par_c}x^{ {par_d} } + {par_e}) dx",
+            "description": r"\int_{{par_a}}^{{par_b}} ({par_c}x^{ {par_d} } + {par_e}) dx",
+            "expression": "integrate({par_c}*x**{par_d} + {par_e}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "par_e": (1, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } ({par_c}x^{ {par_d} } + {par_e}) dx",
+            "description": r"\int_{{par_a}}^{{par_b}} ({par_c}x^{ {par_d} } + {par_e}) dx",
+            "expression": "integrate({par_c}*x**{par_d} + {par_e}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "par_e": (1, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } ({par_c}x^{ {par_d} } + {par_e}) dx",
+            "description": r"\int_{{par_a}}^{{par_b}} ({par_c}x^{ {par_d} } + {par_e}) dx",
+            "expression": "integrate({par_c}*x**{par_d} + {par_e}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "par_e": (1, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } ({par_c}x^{ {par_d} } + {par_e}) dx",
+            "description": r"\int_{{par_a}}^{{par_b}} ({par_c}x^{ {par_d} } + {par_e}) dx",
+            "expression": "integrate({par_c}*x**{par_d} + {par_e}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "par_e": (1, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } ({par_c}x^{ {par_d} } + {par_e}) dx",
+            "description": r"\int_{{par_a}}^{{par_b}} ({par_c}x^{ {par_d} } + {par_e}) dx",
+            "expression": "integrate({par_c}*x**{par_d} + {par_e}, (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 3),
+                "par_b": (4, 10),
+                "par_c": (1, 5),
+                "par_d": (1, 4),
+                "par_e": (1, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } e^{{par_c}x} dx",
+            "description": r"\int_{{par_a}}^{{par_b}} e^{{par_c}x} dx",
+            "expression": "integrate(exp({par_c}*x), (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 2),
+                "par_b": (3, 8),
+                "par_c": (1, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } e^{{par_c}x} dx",
+            "description": r"\int_{{par_a}}^{{par_b}} e^{{par_c}x} dx",
+            "expression": "integrate(exp({par_c}*x), (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 2),
+                "par_b": (3, 8),
+                "par_c": (1, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } e^{{par_c}x} dx",
+            "description": r"\int_{{par_a}}^{{par_b}} e^{{par_c}x} dx",
+            "expression": "integrate(exp({par_c}*x), (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 2),
+                "par_b": (3, 8),
+                "par_c": (1, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } e^{{par_c}x} dx",
+            "description": r"\int_{{par_a}}^{{par_b}} e^{{par_c}x} dx",
+            "expression": "integrate(exp({par_c}*x), (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 2),
+                "par_b": (3, 8),
+                "par_c": (1, 3),
+                "expected_value": "0"
+            }
+        },
+        {
+            "title": "∫_{ {par_a} }^{ {par_b} } e^{{par_c}x} dx",
+            "description": r"\int_{{par_a}}^{{par_b}} e^{{par_c}x} dx",
+            "expression": "integrate(exp({par_c}*x), (x, {par_a}, {par_b}))",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "integral",
+            "params": {
+                "par_a": (0, 2),
+                "par_b": (3, 8),
+                "par_c": (1, 3),
+                "expected_value": "0"
+            }
+        }
+    ],
+    "algebra": [
+        {
+            "title": "Решите уравнение: {par_a}x^2 - {par_b}x + {par_c} = 0",
+            "description": "{par_a}x^2 - {par_b}x + {par_c} = 0",
+            "expression": "{par_a}*x**2 - {par_b}*x + {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: {par_a}x^2 + {par_b}x - {par_c} = 0",
+            "description": "{par_a}x^2 + {par_b}x - {par_c} = 0",
+            "expression": "{par_a}*x**2 + {par_b}*x - {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: -{par_a}x^2 + {par_b}x + {par_c} = 0",
+            "description": "-{par_a}x^2 + {par_b}x + {par_c} = 0",
+            "expression": "-{par_a}*x**2 + {par_b}*x + {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: -{par_a}x^2 - {par_b}x + {par_c} = 0",
+            "description": "-{par_a}x^2 - {par_b}x + {par_c} = 0",
+            "expression": "-{par_a}*x**2 - {par_b}*x + {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: {par_a}x^2 + {par_b}x + {par_c} = 0",
+            "description": "{par_a}x^2 + {par_b}x + {par_c} = 0",
+            "expression": "{par_a}*x**2 + {par_b}*x + {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: -{par_a}x^2 + {par_b}x - {par_c} = 0",
+            "description": "-{par_a}x^2 + {par_b}x - {par_c} = 0",
+            "expression": "-{par_a}*x**2 + {par_b}*x - {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: {par_a}x^2 - {par_b}x - {par_c} = 0",
+            "description": "{par_a}x^2 - {par_b}x - {par_c} = 0",
+            "expression": "{par_a}*x**2 - {par_b}*x - {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: -{par_a}x^2 - {par_b}x - {par_c} = 0",
+            "description": "-{par_a}x^2 - {par_b}x - {par_c} = 0",
+            "expression": "-{par_a}*x**2 - {par_b}*x - {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: {par_a}x^2 - {par_b}x + {par_c} = 0 (вариант 9)",
+            "description": "{par_a}x^2 - {par_b}x + {par_c} = 0",
+            "expression": "{par_a}*x**2 - {par_b}*x + {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: {par_a}x^2 + {par_b}x - {par_c} = 0 (вариант 10)",
+            "description": "{par_a}x^2 + {par_b}x - {par_c} = 0",
+            "expression": "{par_a}*x**2 + {par_b}*x - {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: -{par_a}x^2 + {par_b}x + {par_c} = 0 (вариант 11)",
+            "description": "-{par_a}x^2 + {par_b}x + {par_c} = 0",
+            "expression": "-{par_a}*x**2 + {par_b}*x + {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: -{par_a}x^2 - {par_b}x + {par_c} = 0 (вариант 12)",
+            "description": "-{par_a}x^2 - {par_b}x + {par_c} = 0",
+            "expression": "-{par_a}*x**2 - {par_b}*x + {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: {par_a}x^2 + {par_b}x + {par_c} = 0 (вариант 13)",
+            "description": "{par_a}x^2 + {par_b}x + {par_c} = 0",
+            "expression": "{par_a}*x**2 + {par_b}*x + {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: -{par_a}x^2 + {par_b}x - {par_c} = 0 (вариант 14)",
+            "description": "-{par_a}x^2 + {par_b}x - {par_c} = 0",
+            "expression": "-{par_a}*x**2 + {par_b}*x - {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: {par_a}x^2 - {par_b}x - {par_c} = 0 (вариант 15)",
+            "description": "{par_a}x^2 - {par_b}x - {par_c} = 0",
+            "expression": "{par_a}*x**2 - {par_b}*x - {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Решите уравнение: -{par_a}x^2 - {par_b}x - {par_c} = 0 (вариант 16)",
+            "description": "-{par_a}x^2 - {par_b}x - {par_c} = 0",
+            "expression": "-{par_a}*x**2 - {par_b}*x - {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Найдите корни уравнения: {par_a}x^2 - {par_b}x + {par_c} = 0 (вариант 17)",
+            "description": "{par_a}x^2 - {par_b}x + {par_c} = 0",
+            "expression": "{par_a}*x**2 - {par_b}*x + {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Найдите корни уравнения: {par_a}x^2 + {par_b}x - {par_c} = 0 (вариант 18)",
+            "description": "{par_a}x^2 + {par_b}x - {par_c} = 0",
+            "expression": "{par_a}*x**2 + {par_b}*x - {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Найдите корни уравнения: -{par_a}x^2 + {par_b}x + {par_c} = 0 (вариант 19)",
+            "description": "-{par_a}x^2 + {par_b}x + {par_c} = 0",
+            "expression": "-{par_a}*x**2 + {par_b}*x + {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        },
+        {
+            "title": "Найдите корни уравнения: {par_a}x^2 + {par_b}x + {par_c} = 0 (вариант 20)",
+            "description": "{par_a}x^2 + {par_b}x + {par_c} = 0",
+            "expression": "{par_a}*x**2 + {par_b}*x + {par_c}",
+            "limitVar": "-",
+            "expected_value": "{expected_value}",
+            "category": "algebra",
+            "params": {
+            "par_a": (1, 5 ),
+            "par_b": (1, 10),
+            "par_c": (1, 10),
+            "expected_value": "0"
+            }
+        }
+    ]
+}
+
+def substitute_placeholders(text: str, substitutions: dict) -> str:
+    """
+    Заменяет все вхождения плейсхолдеров вида {par_...} в строке text на соответствующие значения из substitutions.
+    
+    Функция с помощью re.sub находит все шаблонные конструкции и заменяет их на строковое представление подстановки.
+    """
+    def repl(match):
+        key = match.group(1)
+        return str(substitutions.get(key, match.group(0)))
+    return re.sub(r"\{(par_\w+)\}", repl, text)
+
+def generate_random_task(template: dict) -> dict:
+    """
+    Создает задачу по шаблону:
+      1. Из поля "params" генерирует подстановочные значения – для диапазонов (tuple) выбирается случайное число.
+      2. Производится замена всех плейсхолдеров {par_...} в полях title, description, expression, limitVar и expected_value.
+         Даже в description замена происходит внутри литеральных фигурных скобок для LaTeX.
+      3. В зависимости от категории вычисляется expected_value:
+         - Если категория "limits": вычисляется \(\lim_{x\to\infty} \text{expression}\).
+         - Если категория "integral": вычисляется значение определённого интеграла.
+         - Если категория "algebra": решается уравнение и возвращаются найденные корни.
+         - Если категория "integral_volterra_2": вычисление не производится и expected_value остаётся заданным.
+      4. Поле "params" удаляется из результата.
+    """
+    # Копируем шаблон, чтобы не изменять оригинал.
+    task = dict(template)
+    
+    # Генерируем подстановки из params.
+    substitutions = {}
+    params = task.get("params", {})
+    for key, value in params.items():
+        if isinstance(value, tuple) and len(value) == 2:
+            substitutions[key] = random.randint(value[0], value[1])
+        else:
+            substitutions[key] = value
+
+    # Заменяем плейсхолдеры во всех требуемых строковых полях.
+    for field in ["title", "description", "expression", "limitVar", "expected_value"]:
+        if field in task and isinstance(task[field], str):
+            task[field] = substitute_placeholders(task[field], substitutions)
+
+    # Вычисляем expected_value в зависимости от категории.
+    category = task.get("category")
+    if category == "limits":
+        try:
+            x = sp.symbols('x')
+            expr_str = task["expression"]
+            expr = sp.sympify(expr_str)
+            lim_val = sp.limit(expr, x, sp.oo)
+            task["expected_value"] = str(lim_val)
+        except Exception as e:
+            logging.error(f"Ошибка вычисления expected_value для limits: {e}")
+    elif category == "integral":
+        try:
+            x = sp.symbols('x')
+            expr_str = task["expression"]
+            expr = sp.sympify(expr_str)
+            # Если выражение вычисляет определённый интеграл, то оно должно быть числовым.
+            integral_val = expr.evalf()
+            task["expected_value"] = str(integral_val)
+        except Exception as e:
+            logging.error(f"Ошибка вычисления expected_value для integral: {e}")
+    elif category == "algebra":
+        try:
+            x = sp.symbols('x')
+            expr_str = task["expression"]
+            expr = sp.sympify(expr_str)
+            # Решаем уравнение: ищем корни
+            solutions = sp.solve(expr, x)
+            task["expected_value"] = str(solutions)
+        except Exception as e:
+            logging.error(f"Ошибка вычисления expected_value для algebra: {e}")
+    elif category == "integral_volterra_2":
+        # Для этой категории вычисление не производится – оставляем expected_value таким, какое задано.
+        pass
+
+    # Удаляем служебное поле "params"
+    if "params" in task:
+        task.pop("params")
+    return task
+
+@tasks_generator_bp.route("", methods=["POST"])
+def generate_tasks():
+    """
+    API-эндпоинт для генерации задач.
+    
+    Ожидает JSON вида:
+      { "category": <категория>, "count": <количество задач> }
+      
+    Для выбранной категории случайным образом выбирается шаблон, подставляются случайные числа согласно диапазонам в "params",
+    вычисляется expected_value через sympy и возвращается сформированный список задач.
+    """
+    try:
+        data = request.get_json()
+        category = data.get("category")
+        count = int(data.get("count", 1))
+        if category not in TEMPLATES:
+            return jsonify({"error": "Неверная категория"}), 400
+        templates = TEMPLATES[category]
+        if not templates:
+            return jsonify({"error": "Нет шаблонов для данной категории"}), 400
+
+        generated_tasks = []
+        for _ in range(count):
+            random_template = random.choice(templates)
+            task_generated = generate_random_task(random_template)
+            generated_tasks.append(task_generated)
+        return jsonify({"generated_tasks": generated_tasks}), 200
+    except Exception as e:
+        logging.error(f"Ошибка генерации задач: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@tasks_generator_bp.route("/confirm", methods=["POST"])
+def confirm_task():
+    """
+    API-эндпоинт для подтверждения (сохранения) задачи.
+    
+    Ожидает JSON с данными задачи, сохраняет её в базе и возвращает идентификатор сохранённой задачи.
+    """
+    try:
+        task_data = request.get_json()
+        new_task = Task(
+            title=task_data.get("title"),
+            description=task_data.get("description"),
+            expression=task_data.get("expression"),
+            limitVar=task_data.get("limitVar"),
+            expected_value=task_data.get("expected_value"),
+            category=task_data.get("category"),
+        )
+        db.session.add(new_task)
+        db.session.commit()
+        return jsonify({"message": "Задача успешно добавлена", "task_id": new_task.id}), 200
+    except Exception as e:
+        logging.error(f"Ошибка сохранения задачи: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\server\users.py ====
+from flask import Blueprint, request, jsonify
+from models import db, User
+from datetime import datetime
+users_bp = Blueprint('users', __name__, url_prefix='/api/users')
+
+@users_bp.route('', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    users_list = []
+    for user in users:
+        user_data = {
+            'id': user.id,
+            'firstname': user.firstname,
+            'lastname': user.lastname,
+            'username': user.username,
+            'email': user.email,
+            'bio': user.bio,
+            'role': user.role,
+        }
+        users_list.append(user_data)
+    return jsonify(users_list), 200
+
+
+==== C:\Users\Admin\Downloads\LimitApp\LimitApp\server\database\-- SQLite.sql ====
+SELECT * from steps
+WHERE solution_id > 160
 
 ==== C:\Users\Admin\Downloads\LimitApp\LimitApp\server\utils\Auth\auth.py ====
 from flask import Blueprint, request, jsonify

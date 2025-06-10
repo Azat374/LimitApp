@@ -9,7 +9,6 @@ import "katex/dist/katex.min.css";
 import Sidebar from "../components/Sidebar/Sidebar";
 import MobileSidebar from "../components/MobileSidebar/MobileSidebar";
 
-// Интерфейс сгенерированной задачи, получаемой от сервера
 interface TaskCandidate {
   title: string;
   description: string;
@@ -26,7 +25,7 @@ export default function GenerateTask() {
   const [candidates, setCandidates] = useState<TaskCandidate[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
-  const API_URL = "https://server-1-cxbf.onrender.com";
+  const API_URL = "http://127.0.0.1:5000";
 
   const handleGenerate = async () => {
     try {
@@ -39,40 +38,34 @@ export default function GenerateTask() {
       });
       if (!response.ok) {
         const err = await response.json();
-        toast.error(err.error || "Ошибка генерации задач");
+        toast.error(err.error || "Тапсырмаларды генерациялау қатесі");
         return;
       }
       const data = await response.json();
       setCandidates(data.generated_tasks);
-      toast.success("Задачи сгенерированы");
+      toast.success("Тапсырмалар сәтті генерациядан өтті");
       setSelectedIndices([]);
     } catch (error) {
       console.error(error);
-      toast.error("Не удалось сгенерировать задачи");
+      toast.error("Тапсырмаларды генерациялау мүмкін болмады");
     }
   };
 
-  // Функция для переключения выделения задачи по её индексу
   const toggleCandidateSelection = (index: number) => {
-    setSelectedIndices(prev => {
-      if (prev.includes(index)) {
-        return prev.filter(i => i !== index);
-      } else {
-        return [...prev, index];
-      }
-    });
+    setSelectedIndices((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
   };
 
-  // Отправка выбранных задач на сервер
   const handleConfirmSelected = async () => {
     if (selectedIndices.length === 0) {
-      toast.error("Выберите хотя бы одну задачу для добавления");
+      toast.error("Қосылатын тапсырмаларды таңдаңыз");
       return;
     }
     try {
-      const selectedTasks = selectedIndices.map(idx => candidates[idx]);
+      const selectedTasks = selectedIndices.map((idx) => candidates[idx]);
       const responses = await Promise.all(
-        selectedTasks.map(task =>
+        selectedTasks.map((task) =>
           fetch(`${API_URL}/api/tasks_generator/confirm`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -80,28 +73,27 @@ export default function GenerateTask() {
           })
         )
       );
-      const allOk = responses.every(response => response.ok);
+      const allOk = responses.every((response) => response.ok);
       if (!allOk) {
-        toast.error("Ошибка при добавлении некоторых задач");
+        toast.error("Кейбір тапсырмаларды қосу кезінде қате шықты");
       } else {
-        toast.success("Выбранные задачи успешно добавлены в базу данных");
+        toast.success("Таңдалған тапсырмалар дерекқорға сәтті қосылды");
       }
       navigate("/tasks");
     } catch (error) {
       console.error(error);
-      toast.error("Ошибка при добавлении задач");
+      toast.error("Тапсырмаларды қосу кезінде қате шықты");
     }
   };
 
-  // Отправка всех сгенерированных задач на сервер
   const handleConfirmAll = async () => {
     if (candidates.length === 0) {
-      toast.error("Нет задач для добавления");
+      toast.error("Қосылатын тапсырмалар жоқ");
       return;
     }
     try {
       const responses = await Promise.all(
-        candidates.map(task =>
+        candidates.map((task) =>
           fetch(`${API_URL}/api/tasks_generator/confirm`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -109,16 +101,16 @@ export default function GenerateTask() {
           })
         )
       );
-      const allOk = responses.every(response => response.ok);
+      const allOk = responses.every((response) => response.ok);
       if (!allOk) {
-        toast.error("Ошибка при добавлении некоторых задач");
+        toast.error("Кейбір тапсырмаларды қосу кезінде қате шықты");
       } else {
-        toast.success("Все задачи успешно добавлены в базу данных");
+        toast.success("Барлық тапсырма дерекқорға сәтті қосылды");
       }
       navigate("/tasks");
     } catch (error) {
       console.error(error);
-      toast.error("Ошибка при добавлении задач");
+      toast.error("Тапсырмаларды қосу кезінде қате шықты");
     }
   };
 
@@ -131,29 +123,31 @@ export default function GenerateTask() {
           <div className="p-4">
             <Card className="max-w-xl mx-auto">
               <CardHeader>
-                <CardTitle>Генерация задачи по шаблону</CardTitle>
+                <CardTitle>Тапсырманы үлгі арқылы құру</CardTitle>
               </CardHeader>
               <CardContent>
                 {/* Выбор категории */}
                 <div className="mb-4">
-                  <label className="block mb-2 font-semibold">Выберите категорию:</label>
+                  <label className="block mb-2 font-semibold">
+                    Санатты таңдаңыз:
+                  </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full p-2 border rounded-md"
                   >
-                    <option value="limits">Лимит</option>
+                    <option value="limits">Шек</option>
                     <option value="integral_volterra_2">
-                      Интегральное уравнение Вольтерры 2-го рода
+                      Вольтерра 2-ші ретті интегралдық теңдеуі
                     </option>
                     <option value="integral">Интеграл</option>
-                    <option value="algebra">Алгебраическая задача</option>
+                    <option value="algebra">Алгебра</option>
                   </select>
                 </div>
-                {/* Ввод количества генерируемых задач */}
+                {/* Ввод количества задач */}
                 <div className="mb-4">
                   <label className="block mb-2 font-semibold">
-                    Количество задач для генерации:
+                    Генерация жасау үшін тапсырмалар саны:
                   </label>
                   <input
                     type="number"
@@ -165,12 +159,13 @@ export default function GenerateTask() {
                   />
                 </div>
                 <div className="flex gap-4 mb-4">
-                  <Button onClick={handleGenerate}>Генерировать задачи</Button>
+                  <Button onClick={handleGenerate}>Тапсырмаларды генерациялау</Button>
                 </div>
-                {/* Отображение сгенерированных вариантов */}
+
+                {/* Сгенерированные задачи */}
                 {candidates.length > 0 && (
                   <div className="mt-6 p-4 border rounded-md bg-gray-50">
-                    <h3 className="font-bold mb-2">Сгенерированные задачи</h3>
+                    <h3 className="font-bold mb-2">Генерацияланған тапсырмалар</h3>
                     <ul>
                       {candidates.map((candidate, index) => (
                         <li
@@ -181,46 +176,49 @@ export default function GenerateTask() {
                           }`}
                         >
                           <p>
-                            <strong>Название:</strong> {candidate.title}
+                            <strong>Тақырыбы:</strong> {candidate.title}
                           </p>
                           <p>
-                            <strong>Описание:</strong>{" "}
+                            <strong>Сипаттамасы:</strong>{" "}
                             <TeX math={candidate.description} />
                           </p>
                           <p>
-                            <strong>Выражение:</strong> {candidate.expression}
+                            <strong>Өрнек:</strong> {candidate.expression}
                           </p>
                           {candidate.category === "limits" && (
                             <p>
-                              <strong>Лимитная переменная:</strong> {candidate.limitVar}
+                              <strong>Шектік айнымалы:</strong>{" "}
+                              {candidate.limitVar}
                             </p>
                           )}
                           <p>
-                            <strong>Ожидаемое значение:</strong> {candidate.expected_value}
+                            <strong>Күтілетін мәні:</strong>{" "}
+                            {candidate.expected_value}
                           </p>
                           <p>
-                            <strong>Категория:</strong> {candidate.category}
+                            <strong>Санаты:</strong> {candidate.category}
                           </p>
                         </li>
                       ))}
                     </ul>
                     <div className="mt-4 flex gap-4">
-                      <Button onClick={handleConfirmSelected}>Добавить выбранные</Button>
+                      <Button onClick={handleConfirmSelected}>
+                        Таңдалғандарын қосу
+                      </Button>
                       <Button variant="outline" onClick={handleConfirmAll}>
-                        Добавить все
+                        Барлығын қосу
                       </Button>
                       <Button variant="outline" onClick={() => setCandidates([])}>
-                        Сбросить
+                        Тазалау
                       </Button>
                     </div>
                   </div>
                 )}
-
               </CardContent>
             </Card>
             <div className="mt-6 text-center">
               <Button variant="outline" onClick={() => navigate("/tasks")}>
-                Вернуться к списку задач
+                Тапсырмалар тізіміне оралу
               </Button>
             </div>
           </div>

@@ -121,146 +121,151 @@ def check_integral_solution_final(final_solution_str, var_str="x"):
 @solution_integral_bp.route('/check-integral', methods=['POST'])
 @cross_origin()
 def check_integral_solution():
-    """
-    Проверяет решение интегральной задачи.
-    Ожидаемый формат JSON:
-    {
-      "taskId": <task_id>,
-      "phiSteps": [
-         { "label": "\\varphi_0(x)", "steps": ["шаг 1", "шаг 2", ...] },
-         { ... }  // возможно, несколько φ-функций
-      ],
-      "finalSolution": "LaTeX строки с окончательным ответом"
-    }
-    
-    Для интегральных задач Вольтерры второго рода уравнение имеет вид:
-         φ(x) = x - ∫₀ˣ (x-t) φ(t) dt.
-    """
-    data = request.json
-    logging.info(f"Received integral solution check request: {data}")
-    
-    if not data or "taskId" not in data or "phiSteps" not in data or "finalSolution" not in data:
-        return jsonify({"error": "Invalid request format"}), 400
+    try:
+        data = request.json
+        logging.info(f"Received integral solution check request: {data}")
+        
+        if not data or "taskId" not in data or "phiSteps" not in data or "finalSolution" not in data:
+            return jsonify({"success": False, "message": "Invalid request format"}), 400
 
-    task_id = data["taskId"]
-    phi_steps = data["phiSteps"]
-    final_solution = data["finalSolution"]
+        task_id = data["taskId"]
+        phi_steps = data["phiSteps"]
+        final_solution = data["finalSolution"]
 
-    if not isinstance(phi_steps, list) or len(phi_steps) < 1:
-        return jsonify({
-            "success": False,
-            "errors": [{"phiIndex": 0, "error": "Должна быть хотя бы одна φ-функция с шагами"}]
-        }), 400
+        if not isinstance(phi_steps, list) or len(phi_steps) < 1:
+            return jsonify({
+                "success": False,
+                "errors": [{"phiIndex": 0, "error": "Должна быть хотя бы одна φ-функция с шагами"}]
+            }), 400
 
-    task = Task.query.get(task_id)
-    if not task:
-        return jsonify({"error": "Task not found"}), 404
+        task = Task.query.get(task_id)
+        if not task:
+            return jsonify({"success": False, "message": "Task not found"}), 404
 
-    errors = []  # Список ошибок для φ-функций и окончательного ответа
+        errors = []  # Список ошибок для φ-функций и окончательного ответа
 
-    # Проверка последовательности шагов для каждой φ-функции
-    for phi_index, phi in enumerate(phi_steps):
-        if "steps" not in phi or not isinstance(phi["steps"], list):
-            errors.append({
-                "phiIndex": phi_index,
-                "error": "Отсутствуют шаги для φ-функции",
-                "hint": "Добавьте хотя бы один шаг для этой φ-функции"
-            })
-            continue
-
-        steps = phi["steps"]
-        if len(steps) < 1:
-            errors.append({
-                "phiIndex": phi_index,
-                "error": "Функция должна содержать хотя бы один шаг",
-                "hint": "Заполните шаги для данной φ-функции"
-            })
-            continue
-
-        if len(steps) == 1:
-            continue
-
-        for i in range(len(steps) - 1):
-            result = check_algebraic_step(steps[i], steps[i + 1])
-            if not result["is_correct"]:
+        # Проверка последовательности шагов для каждой φ-функции
+        for phi_index, phi in enumerate(phi_steps):
+            if "steps" not in phi or not isinstance(phi["steps"], list):
                 errors.append({
                     "phiIndex": phi_index,
-                    "stepIndex": i + 1,
-                    "error": "Некорректное преобразование",
-                    "hint": result["hint"] or "Проверьте шаги"
+                    "error": "Отсутствуют шаги для φ-функции",
+                    "hint": "Добавьте хотя бы один шаг для этой φ-функции"
                 })
+                continue
 
-    # Проверка окончательного ответа по интегральной задаче
-    if not final_solution.strip():
-        errors.append({
-            "phiIndex": -1,
-            "error": "Окончательный ответ отсутствует",
-            "hint": "Введите окончательный ответ по интегралу"
-        })
-    else:
-        integral_check = check_integral_solution_final(final_solution, var_str="x")
-        if not integral_check["is_correct"]:
+            steps = phi["steps"]
+            if len(steps) < 1:
+                errors.append({
+                    "phiIndex": phi_index,
+                    "error": "Функция должна содержать хотя бы один шаг",
+                    "hint": "Заполните шаги для данной φ-функции"
+                })
+                continue
+
+            if len(steps) == 1:
+                continue
+
+            for i in range(len(steps) - 1):
+                result = check_algebraic_step(steps[i], steps[i + 1])
+                if not result["is_correct"]:
+                    errors.append({
+                        "phiIndex": phi_index,
+                        "stepIndex": i + 1,
+                        "error": "Некорректное преобразование",
+                        "hint": result["hint"] or "Проверьте шаги"
+                    })
+
+        # Проверка окончательного ответа по интегральной задаче
+        if not final_solution.strip():
             errors.append({
                 "phiIndex": -1,
-                "error": "Неверный окончательный ответ",
-                "hint": integral_check["hint"]
+                "error": "Окончательный ответ отсутствует",
+                "hint": "Введите окончательный ответ по интегралу"
             })
+        else:
+            integral_check = check_integral_solution_final(final_solution, var_str="x")
+            if not integral_check["is_correct"]:
+                errors.append({
+                    "phiIndex": -1,
+                    "error": "Неверный окончательный ответ",
+                    "hint": integral_check["hint"]
+                })
 
-    user_id = User.query.filter_by(username=data["user"]).first().id if User.query.filter_by(username=data["user"]).first() else 1
-    solution = Solution(task_id=task.id, user_id=user_id, status="in_progress")
-    db.session.add(solution)
-    db.session.flush()  # Для получения solution.id без коммита
+        try:
+            user_id = User.query.filter_by(username=data.get("user")).first()
+            if user_id:
+                user_id = user_id.id
+            else:
+                user_id = 1
 
-    step_counter = 1
-    for phi_index, phi in enumerate(phi_steps):
-        steps = phi.get("steps", [])
-        for step_index, step in enumerate(steps):
-            is_error = False
-            error_hint = ""
-            for error in errors:
-                if error.get("phiIndex") == phi_index and error.get("stepIndex") == step_index:
-                    is_error = True
-                    error_hint = error.get("hint", "")
-                    break
-            step_record = Step(
+            solution = Solution(task_id=task.id, user_id=user_id, status="in_progress")
+            db.session.add(solution)
+            db.session.flush()  # Для получения solution.id без коммита
+
+            step_counter = 1
+            for phi_index, phi in enumerate(phi_steps):
+                steps = phi.get("steps", [])
+                for step_index, step in enumerate(steps):
+                    is_error = False
+                    error_hint = ""
+                    for error in errors:
+                        if error.get("phiIndex") == phi_index and error.get("stepIndex") == step_index:
+                            is_error = True
+                            error_hint = error.get("hint", "")
+                            break
+                    step_record = Step(
+                        solution_id=solution.id,
+                        step_number=step_counter,
+                        input_expr=str(phi_index*1000+step),
+                        is_correct=not is_error,
+                        error_type="error" if is_error else None,
+                        hint=error_hint
+                    )
+                    db.session.add(step_record)
+                    step_counter += 1
+
+            final_error = next((error for error in errors if error.get("phiIndex") == -1), None)
+            final_step_record = Step(
                 solution_id=solution.id,
                 step_number=step_counter,
-                input_expr=phi_index*1000+step,
-                is_correct=not is_error,
-                error_type="error" if is_error else None,
-                hint=error_hint
+                input_expr=final_solution,
+                is_correct=not final_error,
+                error_type="error" if final_error else None,
+                hint=final_error.get("hint", "") if final_error else ""
             )
-            db.session.add(step_record)
-            step_counter += 1
+            db.session.add(final_step_record)
 
-    final_error = next((error for error in errors if error.get("phiIndex") == -1), None)
-    final_step_record = Step(
-        solution_id=solution.id,
-        step_number=step_counter,
-        input_expr=final_solution,
-        is_correct=not final_error,
-        error_type="error" if final_error else None,
-        hint=final_error.get("hint", "") if final_error else ""
-    )
-    db.session.add(final_step_record)
+            solution.status = "completed" if not errors else "error"
+            db.session.commit()
 
-    solution.status = "completed" if not errors else "error"
-    db.session.commit()
+        except Exception as db_error:
+            db.session.rollback()
+            logging.error(f"Database error: {str(db_error)}")
+            return jsonify({
+                "success": False,
+                "message": "Database error occurred",
+                "errors": errors
+            }), 500
 
-    if errors:
+        if errors:
+            return jsonify({
+                "success": False,
+                "errors": errors
+            }), 200
+        
+        return jsonify({
+            "success": True,
+            "message": "Решение верное!"
+        }), 200
+
+    except Exception as e:
+        logging.error(f"Error in check_integral_solution: {str(e)}")
         return jsonify({
             "success": False,
-            "errors": errors,
-            "solution_id": solution.id
-        })
-    return jsonify({
-        "success": True,
-        "message": "Решение верное.",
-        "solution_id": solution.id
-    })
-
-
-
+            "message": "Internal server error",
+            "error": str(e)
+        }), 500
 
 @solution_integral_bp.route('/last-integral/<int:task_id>', methods=['GET'])
 def get_last_integral_solution(task_id):
