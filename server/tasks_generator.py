@@ -22,7 +22,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 5),
                 "expected_value": "0"
             }
         },
@@ -38,7 +38,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -54,7 +54,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -70,7 +70,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -86,7 +86,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -102,7 +102,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -118,7 +118,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -134,7 +134,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -150,7 +150,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -167,7 +167,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -183,7 +183,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -199,7 +199,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -215,7 +215,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -231,7 +231,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -247,7 +247,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         },
@@ -263,7 +263,7 @@ TEMPLATES = {
                 "par_b": (1, 10),
                 "par_c": (1, 5),
                 "par_d": (1, 10),
-                "par_e": (0, 3),
+                "par_e": (1, 3),
                 "expected_value": "0"
             }
         }
