@@ -9,7 +9,7 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import TeX from "@matejmazur/react-katex";
 import "katex/dist/katex.min.css";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://server-1-cxbf.onrender.com";
 
 interface Task {
   id: string;

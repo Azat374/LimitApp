@@ -25,7 +25,7 @@ export default function GenerateTask() {
   const [candidates, setCandidates] = useState<TaskCandidate[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
-  const API_URL = "http://127.0.0.1:5000";
+  const API_URL = "https://server-1-cxbf.onrender.com";
 
   const handleGenerate = async () => {
     try {
